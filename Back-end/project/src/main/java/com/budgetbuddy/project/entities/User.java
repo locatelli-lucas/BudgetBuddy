@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -15,21 +16,45 @@ public class User implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column
     private String name;
+
+    @Column(nullable = false, unique = true)
     private String username;
+
+    @Column(nullable = false, unique = true)
     private String email;
+
+    @Column(nullable = false)
     private String password;
+
+    private String profilePicture;
+
+    @Column
+    private double monthlyIncome;
+
+    @OneToOne
+    private Portfolio portfolio;
 
     public User() {
 
     }
 
-    public User(Long id, String name, String username, String email, String password) {
+    public User(Long id,
+                String name,
+                String username,
+                String email,
+                String password,
+                String profilePicture,
+                double monthlyIncome) {
         this.id = id;
         this.name = name;
         this.username = username;
         this.email = email;
         this.password = password;
+        this.profilePicture = profilePicture;
+        this.monthlyIncome = monthlyIncome;
     }
 
     public Long getId() {
@@ -72,6 +97,30 @@ public class User implements Serializable {
         this.password = password;
     }
 
+    public String getProfilePicture() {
+        return profilePicture;
+    }
+
+    public void setProfilePicture(String profilePicture) {
+        this.profilePicture = profilePicture;
+    }
+
+    public double getMonthlyIncome() {
+        return monthlyIncome;
+    }
+
+    public void setMonthlyIncome(double monthlyIncome) {
+        this.monthlyIncome = monthlyIncome;
+    }
+
+    public Portfolio getPortfolio() {
+        return portfolio;
+    }
+
+    public void setPortfolio(Portfolio portfolio) {
+        this.portfolio = portfolio;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -92,6 +141,9 @@ public class User implements Serializable {
                 ", username='" + username + '\'' +
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
+                ", profilePicture='" + profilePicture + '\'' +
+                ", monthlyIncome=" + monthlyIncome +
+                ", portfolio=" + portfolio +
                 '}';
     }
 }

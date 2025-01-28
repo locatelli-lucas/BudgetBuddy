@@ -1,12 +1,16 @@
 package com.budgetbuddy.project.entities;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Objects;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "tb_direct_treasure")
 public class DirectTreasure implements Serializable {
@@ -35,6 +39,10 @@ public class DirectTreasure implements Serializable {
     @Column
     private double amountInvested;
 
+    @ManyToOne
+    @JoinColumn(name = "porfolio_id")
+    private Portfolio portfolio;
+
     public DirectTreasure() {
 
     }
@@ -46,62 +54,6 @@ public class DirectTreasure implements Serializable {
         this.minInvestment = minInvestment;
         this.unitPrice = unitPrice;
         this.dueDate = dueDate;
-        this.amountInvested = amountInvested;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public double getProfitability() {
-        return profitability;
-    }
-
-    public void setProfitability(double profitability) {
-        this.profitability = profitability;
-    }
-
-    public double getMinInvestment() {
-        return minInvestment;
-    }
-
-    public void setMinInvestment(double minInvestment) {
-        this.minInvestment = minInvestment;
-    }
-
-    public double getUnitPrice() {
-        return unitPrice;
-    }
-
-    public void setUnitPrice(double unitPrice) {
-        this.unitPrice = unitPrice;
-    }
-
-    public Date getDueDate() {
-        return dueDate;
-    }
-
-    public void setDueDate(Date dueDate) {
-        this.dueDate = dueDate;
-    }
-
-    public double getAmountInvested() {
-        return amountInvested;
-    }
-
-    public void setAmountInvested(double amountInvested) {
         this.amountInvested = amountInvested;
     }
 

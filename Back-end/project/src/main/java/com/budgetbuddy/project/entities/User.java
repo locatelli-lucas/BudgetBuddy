@@ -1,15 +1,25 @@
 package com.budgetbuddy.project.entities;
 
+import com.budgetbuddy.project.domain.Role;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "tb_users")
-public class User implements Serializable {
+public class User implements Serializable, UserDetails {
     @Serial
     private static final long serialVersionUID = 1L;
 
@@ -19,9 +29,6 @@ public class User implements Serializable {
 
     @Column
     private String name;
-
-    @Column(nullable = false, unique = true)
-    private String username;
 
     @Column(nullable = false, unique = true)
     private String email;
@@ -37,88 +44,45 @@ public class User implements Serializable {
     @OneToOne
     private Portfolio portfolio;
 
+    @ElementCollection(fetch = FetchType.EAGER, targetClass = Role.class)
+    @Enumerated(EnumType.STRING)
+    @JoinTable(name = "tb_roles", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "role_name")
+    private List<Role> roles = new ArrayList<>();
+
     public User() {
 
     }
 
+    public User(
+            String name,
+            String email,
+            String password,
+            String profilePicture,
+            double monthlyIncome,
+            List<Role> roles) {
+        this.name = name;
+        this.email = email;
+        this.password = password;
+        this.profilePicture = profilePicture;
+        this.monthlyIncome = monthlyIncome;
+        this.roles = roles;
+    }
+
     public User(Long id,
                 String name,
-                String username,
                 String email,
                 String password,
                 String profilePicture,
-                double monthlyIncome) {
+                double monthlyIncome,
+                List<Role> roles) {
         this.id = id;
         this.name = name;
-        this.username = username;
         this.email = email;
         this.password = password;
         this.profilePicture = profilePicture;
         this.monthlyIncome = monthlyIncome;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getProfilePicture() {
-        return profilePicture;
-    }
-
-    public void setProfilePicture(String profilePicture) {
-        this.profilePicture = profilePicture;
-    }
-
-    public double getMonthlyIncome() {
-        return monthlyIncome;
-    }
-
-    public void setMonthlyIncome(double monthlyIncome) {
-        this.monthlyIncome = monthlyIncome;
-    }
-
-    public Portfolio getPortfolio() {
-        return portfolio;
-    }
-
-    public void setPortfolio(Portfolio portfolio) {
-        this.portfolio = portfolio;
+        this.roles = roles;
     }
 
     @Override
@@ -138,7 +102,6 @@ public class User implements Serializable {
         return "User{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-                ", username='" + username + '\'' +
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
                 ", profilePicture='" + profilePicture + '\'' +
@@ -146,4 +109,17 @@ public class User implements Serializable {
                 ", portfolio=" + portfolio +
                 '}';
     }
+
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
+        for(Role role : roles) grantedAuthorities.add(new SimpleGrantedAuthority(role.name()));
+
+        return grantedAuthorities;
+    }
+
+    @Override
+    public String getUsername() {
+        return "";
+    }
+
 }

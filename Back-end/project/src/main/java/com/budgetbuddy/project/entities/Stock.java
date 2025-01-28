@@ -2,12 +2,16 @@ package com.budgetbuddy.project.entities;
 
 import com.budgetbuddy.project.types.IncomeTypes;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Objects;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "tb_stocks")
 public class Stock implements Serializable {
@@ -65,70 +69,6 @@ public class Stock implements Serializable {
         this.acquisitionDate = acquisitionDate;
         this.quantity = quantity;
         this.portfolio = portfolio;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public IncomeTypes getType() {
-        return type;
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public double getCurrentPrice() {
-        return currentPrice;
-    }
-
-    public void setCurrentPrice(double currentPrice) {
-        this.currentPrice = currentPrice;
-    }
-
-    public double getAcquisitionPrice() {
-        return acquisitionPrice;
-    }
-
-    public void setAcquisitionPrice(double acquisitionPrice) {
-        this.acquisitionPrice = acquisitionPrice;
-    }
-
-    public Date getAcquisitionDate() {
-        return acquisitionDate;
-    }
-
-    public void setAcquisitionDate(Date acquisitionDate) {
-        this.acquisitionDate = acquisitionDate;
-    }
-
-    public int getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
-    }
-
-    public Portfolio getPortfolio() {
-        return portfolio;
     }
 
     @Override

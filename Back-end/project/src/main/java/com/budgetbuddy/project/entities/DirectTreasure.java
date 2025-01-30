@@ -1,6 +1,8 @@
 package com.budgetbuddy.project.entities;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -21,6 +23,8 @@ public class DirectTreasure implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotNull
+    @NotBlank
     @Column(nullable = false)
     private String name;
 
@@ -47,6 +51,16 @@ public class DirectTreasure implements Serializable {
 
     }
 
+    public DirectTreasure(String name, double profitability, double minInvestment, double unitPrice, Date dueDate, double amountInvested, Portfolio portfolio) {
+        this.name = name;
+        this.profitability = profitability;
+        this.minInvestment = minInvestment;
+        this.unitPrice = unitPrice;
+        this.dueDate = dueDate;
+        this.amountInvested = amountInvested;
+        this.portfolio = portfolio;
+    }
+
     public DirectTreasure(Long id, String name, double profitability, double minInvestment, double unitPrice, Date dueDate, double amountInvested) {
         this.id = id;
         this.name = name;
@@ -56,6 +70,10 @@ public class DirectTreasure implements Serializable {
         this.dueDate = dueDate;
         this.amountInvested = amountInvested;
     }
+
+//    public DirectTreasure(@NotNull @NotBlank String name, double profitability, double minInvestment, double unitPrice, com.google.type.Date dueDate, double amountInvestment, Portfolio portfolio) {
+//    }
+
 
     @Override
     public boolean equals(Object o) {

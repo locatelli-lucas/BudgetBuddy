@@ -2,9 +2,19 @@
 <project version="4">
   <component name="RemoteRepositoriesConfiguration">
     <remote-repository>
+      <option name="id" value="ariba-libs" />
+      <option name="name" value="ariba-libs" />
+      <option name="url" value="https://int.repositories.cloud.sap/artifactory/build-ariba/" />
+    </remote-repository>
+    <remote-repository>
       <option name="id" value="central" />
       <option name="name" value="Central Repository" />
       <option name="url" value="https://repo.maven.apache.org/maven2" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="central" />
+      <option name="name" value="Central Repository" />
+      <option name="url" value="https://int.repositories.cloud.sap/artifactory/build-milestones/" />
     </remote-repository>
     <remote-repository>
       <option name="id" value="central" />
@@ -15,6 +25,11 @@
       <option name="id" value="jboss.community" />
       <option name="name" value="JBoss Community repository" />
       <option name="url" value="https://repository.jboss.org/nexus/content/repositories/public/" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="artifactory" />
+      <option name="name" value="artifactory" />
+      <option name="url" value="https://int.repositories.cloud.sap/artifactory/build-snapshots/" />
     </remote-repository>
   </component>
 </project>

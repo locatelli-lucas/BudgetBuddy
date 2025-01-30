@@ -43,6 +43,7 @@ public class SecurityFilter extends OncePerRequestFilter {
 
             SecurityContextHolder.getContext().setAuthentication(authToken);
         }
+        filterChain.doFilter(request, response);
     }
 
     private String getToken(HttpServletRequest request) {

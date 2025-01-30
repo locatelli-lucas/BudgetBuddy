@@ -10,10 +10,12 @@ public record UserDTORes(
        String profilePicture
 ) {
     public static UserDTORes userToDto(User user) {
-        return new UserDTORes(user.getId(),
+        return new UserDTORes(
+                user.getId(),
                 user.getName(),
                 user.getEmail(),
                 user.getPassword(),
-                user.getProfilePicture());
+                user.getProfilePicture()
+        );
     }
 }

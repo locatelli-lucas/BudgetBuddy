@@ -1,6 +1,6 @@
 package com.budgetbuddy.project.types;
 
-public enum IncomeTypes {
+public enum InvestmentTypes {
     FIXED,
     VARIABLE
 }

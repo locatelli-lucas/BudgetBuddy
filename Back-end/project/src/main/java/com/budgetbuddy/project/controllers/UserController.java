@@ -1,9 +1,12 @@
 package com.budgetbuddy.project.controllers;
 
+import com.budgetbuddy.project.dto.login.req.LoginDTOReq;
+import com.budgetbuddy.project.dto.login.res.LoginDTORes;
+import com.budgetbuddy.project.dto.user.req.UserDTOPatchReq;
 import com.budgetbuddy.project.dto.user.req.UserDTOReq;
 import com.budgetbuddy.project.dto.user.res.UserDTORes;
-import com.budgetbuddy.project.entities.User;
 import com.budgetbuddy.project.services.UserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +23,7 @@ public class UserController {
     private UserService userService;
 
     @PostMapping
-    private ResponseEntity<UserDTORes> createUser(@RequestBody UserDTOReq body, UriComponentsBuilder uriBuilder) {
+    private ResponseEntity<UserDTORes> createUser(@Valid @RequestBody UserDTOReq body, UriComponentsBuilder uriBuilder) {
         UserDTORes user = this.userService.createUser(body);
         URI uri = uriBuilder.path("users/{id}").buildAndExpand(user.id()).toUri();
         return ResponseEntity.created(uri).body(user);
@@ -38,11 +41,28 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
+    @PatchMapping("/{id}")
+    private ResponseEntity<UserDTORes> update(@PathVariable Long id, @Valid @RequestBody UserDTOPatchReq body) {
+        UserDTORes user = this.userService.update(id, body);
+        return ResponseEntity.ok(user);
+    }
+
+    @PutMapping("/{id}")
+    private ResponseEntity<UserDTORes> put(@PathVariable Long id, @Valid @RequestBody UserDTOReq body) {
+        UserDTORes user = this.userService.put(id, body);
+        return ResponseEntity.ok(user);
+    }
+
     @DeleteMapping("/{id}")
     private ResponseEntity<UserDTORes> deleteById(@PathVariable Long id) {
         this.userService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/login")
+    private ResponseEntity<LoginDTORes> login(@Valid @RequestBody LoginDTOReq body) {
+        LoginDTORes login = this.userService.login(body);
+        return ResponseEntity.ok(login);
+    }
 }
 

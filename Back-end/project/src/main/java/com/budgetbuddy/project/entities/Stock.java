@@ -1,6 +1,6 @@
 package com.budgetbuddy.project.entities;
 
-import com.budgetbuddy.project.types.IncomeTypes;
+import com.budgetbuddy.project.types.InvestmentTypes;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -23,7 +23,7 @@ public class Stock implements Serializable {
     private Long id;
 
     @Column(nullable = false)
-    private IncomeTypes type;
+    private InvestmentTypes type;
 
     @Column(nullable = false, unique = true)
     private String code;
@@ -51,15 +51,35 @@ public class Stock implements Serializable {
 
     }
 
-    public Stock(Long id,
-                 IncomeTypes type,
-                 String code,
-                 String name,
-                 double currentPrice,
-                 double acquisitionPrice,
-                 Date acquisitionDate,
-                 int quantity,
-                 Portfolio portfolio) {
+    public Stock(
+            InvestmentTypes type,
+            String code,
+            String name,
+            double currentPrice,
+            double acquisitionPrice,
+            Date acquisitionDate,
+            int quantity,
+            Portfolio portfolio) {
+        this.type = type;
+        this.code = code;
+        this.name = name;
+        this.currentPrice = currentPrice;
+        this.acquisitionPrice = acquisitionPrice;
+        this.acquisitionDate = acquisitionDate;
+        this.quantity = quantity;
+        this.portfolio = portfolio;
+    }
+
+    public Stock(
+            Long id,
+            InvestmentTypes type,
+            String code,
+            String name,
+            double currentPrice,
+            double acquisitionPrice,
+            Date acquisitionDate,
+            int quantity,
+            Portfolio portfolio) {
         this.id = id;
         this.type = type;
         this.code = code;

@@ -1,6 +1,5 @@
 package com.budgetbuddy.project.entities;
 
-import com.budgetbuddy.project.types.IncomeTypes;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -25,6 +24,7 @@ public class Portfolio implements Serializable {
 
     @OneToOne
     @JoinColumn(name = "user_id")
+    @Column(nullable = false)
     private User user;
 
     @OneToMany(mappedBy = "portfolio")
@@ -35,6 +35,12 @@ public class Portfolio implements Serializable {
 
     public Portfolio() {
 
+    }
+
+    public Portfolio(User user, List<Stock> stockList, List<DirectTreasure> directTreasure) {
+        this.user = user;
+        this.stockList = stockList;
+        this.directTreasure = directTreasure;
     }
 
     public Portfolio(Long id, User user, List<Stock> stockList, List<DirectTreasure> directTreasure) {

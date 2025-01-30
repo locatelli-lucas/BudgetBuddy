@@ -2,19 +2,21 @@ package com.budgetbuddy.project.dto.user.req;
 
 import com.budgetbuddy.project.domain.Role;
 import com.budgetbuddy.project.entities.User;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
 import java.util.List;
 
 
 public record UserDTOReq(
-        @NotBlank
+        @NotBlank(message = "Name is required")
         String name,
 
-        @NotBlank
+        @Email(message = "Invalid email")
+        @NotBlank(message = "Email is required")
         String email,
 
-        @NotBlank
+        @NotBlank(message = "Password is required")
         String password,
 
         String profilePicture,

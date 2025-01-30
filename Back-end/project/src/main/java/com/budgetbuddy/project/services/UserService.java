@@ -1,5 +1,8 @@
 package com.budgetbuddy.project.services;
 
+import com.budgetbuddy.project.dto.login.req.LoginDTOReq;
+import com.budgetbuddy.project.dto.login.res.LoginDTORes;
+import com.budgetbuddy.project.dto.user.req.UserDTOPatchReq;
 import com.budgetbuddy.project.dto.user.req.UserDTOReq;
 import com.budgetbuddy.project.dto.user.res.UserDTORes;
 import com.budgetbuddy.project.entities.User;
@@ -10,9 +13,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -23,14 +29,21 @@ public class UserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private AuthenticationManager authenticationManager;
+    @Autowired
+    private TokenService tokenService;
 
-    public UserDTORes createUser(UserDTOReq body) {
-        if(body == null) throw new BadRequestException("Invalid user data provided");
-        if(findByEmail(body.email()) != null) throw new BadRequestException("User with email " + body.email() + " already exists");
+    public UserDTORes createUser(UserDTOReq userDTOReq) {
+        if(userDTOReq == null) throw new BadRequestException("Invalid user data provided");
+        if(findByEmail(userDTOReq.email())) throw new BadRequestException("User with email " + userDTOReq.email() + " already exists");
 
+        String encodedPassword = passwordEncoder.encode(userDTOReq.password());
 
+        User user = userDTOReq.dtoToUser();
+        user.setPassword(encodedPassword);
 
-        User user = this.userRepository.save(body.dtoToUser());
+        this.userRepository.save(userDTOReq.dtoToUser());
         return UserDTORes.userToDto(user);
     }
 
@@ -39,23 +52,62 @@ public class UserService {
         return this.userRepository.findAll(pageable).map(UserDTORes::userToDto);
     }
 
-    public UserDTORes findByIdEntity(Long id) {
+    public User findByIdEntity(Long id) {
         Optional<User> user = this.userRepository.findById(id);
         if(user.isEmpty()) throw new EntityNotFoundException("User with id " + id + " not found");
-        return UserDTORes.userToDto(user.get());
-    }
-
-    public UserDTORes findById(Long id) {
-        return findByIdEntity(id);
-    }
-
-    public User findByEmail(String email) {
-        Optional<User> user = this.userRepository.findByEmail(email);
-        if(user.isEmpty()) throw new EntityNotFoundException("User with email " + email + " not found");
         return user.get();
     }
 
+    public UserDTORes findById(Long id) {
+        User user = findByIdEntity(id);
+        return UserDTORes.userToDto(user);
+    }
+
+    public boolean findByEmail(String email) {
+        Optional<User> user = this.userRepository.findByEmail(email);
+        return user.isPresent();
+    }
+
+    public UserDTORes update(Long id, UserDTOPatchReq body) {
+        User user = findByIdEntity(id);
+
+        String encodedPassword = passwordEncoder.encode(body.password());
+
+        if(!Objects.equals(body.name(), user.getName())) user.setName(body.name());
+        if(!Objects.equals(body.email(), user.getEmail())) user.setEmail(body.email());
+        if(!Objects.equals(encodedPassword, user.getPassword())) user.setPassword(encodedPassword);
+        if(!Objects.equals(body.profilePicture(), user.getProfilePicture())) user.setProfilePicture(body.profilePicture());
+        if(!Objects.equals(body.monthlyIncome(), user.getMonthlyIncome())) user.setMonthlyIncome(body.monthlyIncome());
+
+        this.userRepository.save(user);
+        return UserDTORes.userToDto(user);
+    }
+
+    public UserDTORes put(Long id, UserDTOReq body) {
+        User user = this.userRepository.save(body.dtoToUser(id));
+        return UserDTORes.userToDto(user);
+    }
+
     public void deleteById(Long id) {
+        if(id == null) throw new BadRequestException("No id provided");
         this.userRepository.deleteById(id);
+    }
+
+    public LoginDTORes login(LoginDTOReq loginDTOReq) {
+        if(loginDTOReq == null) throw new BadRequestException("Invalid user data provided");
+        if(loginDTOReq.email() == null) throw new BadRequestException("No email provided");
+        if(loginDTOReq.password() == null) throw new BadRequestException("No password provided");
+        if(loginDTOReq.email().isEmpty()) throw new BadRequestException("Empty email provided");
+        if(loginDTOReq.password().isEmpty()) throw new BadRequestException("Empty password provided");
+
+        Optional<User> optionalUser = this.userRepository.findByEmail(loginDTOReq.email());
+
+        if(optionalUser.isEmpty()) throw new EntityNotFoundException("User with email " + loginDTOReq.email() + " not found");
+        User user = optionalUser.get();
+
+        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(loginDTOReq.email(), loginDTOReq.password());
+        authenticationManager.authenticate(token);
+
+        return tokenService.generateToken(user);
     }
 }

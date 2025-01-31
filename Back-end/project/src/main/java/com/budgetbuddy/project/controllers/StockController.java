@@ -30,4 +30,28 @@ public class StockController {
         StockDTORes stock = this.stockService.findById(id);
         return ResponseEntity.ok(stock);
     }
+
+    @GetMapping("/{code}")
+    public ResponseEntity<StockDTORes> findByCode(@PathVariable String code) {
+        StockDTORes stock = this.stockService.findByCode(code);
+        return ResponseEntity.ok(stock);
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<StockDTORes> patch(@PathVariable Long id, @Valid StockDTOReq body) {
+        StockDTORes stock = this.stockService.patch(id, body);
+        return ResponseEntity.ok(stock);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<StockDTORes> put(@PathVariable Long id, @Valid StockDTOReq body) {
+        StockDTORes stock = this.stockService.put(id, body);
+        return ResponseEntity.ok(stock);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<StockDTORes> deleteById(@PathVariable Long id) {
+        this.stockService.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
 }

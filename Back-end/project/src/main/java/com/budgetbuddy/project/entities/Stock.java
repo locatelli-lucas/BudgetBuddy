@@ -34,13 +34,8 @@ public class Stock implements Serializable {
     @Column(nullable = false)
     private double currentPrice;
 
-    @Column
     private double acquisitionPrice;
-
-    @Column
     private Date acquisitionDate;
-
-    @Column
     private int quantity;
 
     @ManyToOne
@@ -52,7 +47,6 @@ public class Stock implements Serializable {
     }
 
     public Stock(
-            InvestmentTypes type,
             String code,
             String name,
             double currentPrice,
@@ -60,7 +54,7 @@ public class Stock implements Serializable {
             Date acquisitionDate,
             int quantity,
             Portfolio portfolio) {
-        this.type = type;
+        this.type = InvestmentTypes.VARIABLE;
         this.code = code;
         this.name = name;
         this.currentPrice = currentPrice;
@@ -72,7 +66,6 @@ public class Stock implements Serializable {
 
     public Stock(
             Long id,
-            InvestmentTypes type,
             String code,
             String name,
             double currentPrice,
@@ -81,7 +74,7 @@ public class Stock implements Serializable {
             int quantity,
             Portfolio portfolio) {
         this.id = id;
-        this.type = type;
+        this.type = InvestmentTypes.VARIABLE;
         this.code = code;
         this.name = name;
         this.currentPrice = currentPrice;

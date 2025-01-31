@@ -34,13 +34,8 @@ public class Stock implements Serializable {
     @Column(nullable = false)
     private double currentPrice;
 
-    @Column
     private double acquisitionPrice;
-
-    @Column
     private Date acquisitionDate;
-
-    @Column
     private int quantity;
 
     @ManyToOne

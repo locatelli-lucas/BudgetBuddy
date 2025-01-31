@@ -25,22 +25,13 @@ public class DirectTreasure implements Serializable {
 
     @NotNull
     @NotBlank
-    @Column(nullable = false)
+    @Column(unique = true ,nullable = false)
     private String name;
 
-    @Column
     private double profitability;
-
-    @Column
     private double minInvestment;
-
-    @Column
     private double unitPrice;
-
-    @Column
     private Date dueDate;
-
-    @Column
     private double amountInvested;
 
     @ManyToOne
@@ -51,7 +42,14 @@ public class DirectTreasure implements Serializable {
 
     }
 
-    public DirectTreasure(String name, double profitability, double minInvestment, double unitPrice, Date dueDate, double amountInvested, Portfolio portfolio) {
+    public DirectTreasure(String name,
+                          double profitability,
+                          double minInvestment,
+                          double unitPrice,
+                          Date dueDate,
+                          double amountInvested,
+                          Portfolio portfolio
+    ) {
         this.name = name;
         this.profitability = profitability;
         this.minInvestment = minInvestment;
@@ -61,7 +59,14 @@ public class DirectTreasure implements Serializable {
         this.portfolio = portfolio;
     }
 
-    public DirectTreasure(Long id, String name, double profitability, double minInvestment, double unitPrice, Date dueDate, double amountInvested) {
+    public DirectTreasure(Long id,
+                          String name,
+                          double profitability,
+                          double minInvestment,
+                          double unitPrice,
+                          Date dueDate,
+                          double amountInvested
+    ) {
         this.id = id;
         this.name = name;
         this.profitability = profitability;
@@ -70,10 +75,6 @@ public class DirectTreasure implements Serializable {
         this.dueDate = dueDate;
         this.amountInvested = amountInvested;
     }
-
-//    public DirectTreasure(@NotNull @NotBlank String name, double profitability, double minInvestment, double unitPrice, com.google.type.Date dueDate, double amountInvestment, Portfolio portfolio) {
-//    }
-
 
     @Override
     public boolean equals(Object o) {

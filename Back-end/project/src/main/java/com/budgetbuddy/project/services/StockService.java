@@ -41,6 +41,17 @@ public class StockService {
         return stock.get();
     }
 
+    public StockDTORes findByCode(String code) {
+        if(code == null) throw new IllegalArgumentException("Code cannot be null");
+        if(code.isBlank()) throw new IllegalArgumentException("Code cannot be blank");
+
+        Optional<Stock> stock = this.stockRepository.findByCode(code);
+
+        if(stock.isEmpty()) throw new EntityNotFoundException("Stock not found");
+
+        return StockDTORes.stockToDTO(stock.get());
+    }
+
     public StockDTORes patch(Long id, @Valid StockDTOReq body) {
         if(id == null) throw new IllegalArgumentException("Id cannot be null");
         if(body == null) throw new IllegalArgumentException("Stock cannot be null");
@@ -56,7 +67,6 @@ public class StockService {
 
         return StockDTORes.stockToDTO(stock);
     }
-
 
     public StockDTORes put(Long id, @Valid StockDTOReq body) {
         if(id == null) throw new IllegalArgumentException("Id cannot be null");
@@ -75,4 +85,5 @@ public class StockService {
 
         this.stockRepository.deleteById(id);
     }
+
 }

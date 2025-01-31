@@ -2,9 +2,10 @@ package com.budgetbuddy.project.dto.direct_treasure.req;
 
 import com.budgetbuddy.project.entities.DirectTreasure;
 import com.budgetbuddy.project.entities.Portfolio;
-import com.google.type.Date;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+
+import java.util.Date;
 
 public record DirectTreasureDTOReq(
         Long id,
@@ -21,7 +22,7 @@ public record DirectTreasureDTOReq(
 
         Date dueDate,
 
-        double amountInvestment,
+        double amountInvested,
 
         Portfolio portfolio
 ) {
@@ -32,7 +33,7 @@ public record DirectTreasureDTOReq(
                 this.minInvestment,
                 this.unitPrice,
                 this.dueDate,
-                this.amountInvestment,
+                this.amountInvested,
                 this.portfolio
         );
     }

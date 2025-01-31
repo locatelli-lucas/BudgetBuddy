@@ -31,6 +31,12 @@ public class StockController {
         return ResponseEntity.ok(stock);
     }
 
+    @GetMapping("/{code}")
+    public ResponseEntity<StockDTORes> findByCode(@PathVariable String code) {
+        StockDTORes stock = this.stockService.findByCode(code);
+        return ResponseEntity.ok(stock);
+    }
+
     @PatchMapping("/{id}")
     public ResponseEntity<StockDTORes> patch(@PathVariable Long id, @Valid StockDTOReq body) {
         StockDTORes stock = this.stockService.patch(id, body);

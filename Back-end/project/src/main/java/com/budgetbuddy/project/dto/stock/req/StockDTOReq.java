@@ -13,10 +13,6 @@ public record StockDTOReq(
 
         @NotNull
         @NotBlank
-        InvestmentTypes type,
-
-        @NotNull
-        @NotBlank
         String code,
 
         @NotBlank
@@ -37,7 +33,6 @@ public record StockDTOReq(
 ) {
     public Stock dtoToStock() {
         return new Stock(
-                this.type,
                 this.code,
                 this.name,
                 this.currentPrice,
@@ -51,7 +46,6 @@ public record StockDTOReq(
     public Stock dtoToStock(Long id) {
         return new Stock(
                 id,
-                this.type,
                 this.code,
                 this.name,
                 this.currentPrice,

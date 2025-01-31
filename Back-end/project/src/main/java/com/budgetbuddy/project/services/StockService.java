@@ -5,9 +5,11 @@ import com.budgetbuddy.project.dto.stock.res.StockDTORes;
 import com.budgetbuddy.project.entities.Stock;
 import com.budgetbuddy.project.exceptions.EntityNotFoundException;
 import com.budgetbuddy.project.repositories.StockRepository;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -38,4 +40,50 @@ public class StockService {
 
         return stock.get();
     }
+
+    public StockDTORes findByCode(String code) {
+        if(code == null) throw new IllegalArgumentException("Code cannot be null");
+        if(code.isBlank()) throw new IllegalArgumentException("Code cannot be blank");
+
+        Optional<Stock> stock = this.stockRepository.findByCode(code);
+
+        if(stock.isEmpty()) throw new EntityNotFoundException("Stock not found");
+
+        return StockDTORes.stockToDTO(stock.get());
+    }
+
+    public StockDTORes patch(Long id, @Valid StockDTOReq body) {
+        if(id == null) throw new IllegalArgumentException("Id cannot be null");
+        if(body == null) throw new IllegalArgumentException("Stock cannot be null");
+
+        Stock stock = findByIdEntity(id);
+
+        if(!Objects.equals(stock.getCurrentPrice(), body.currentPrice())) stock.setCurrentPrice(body.currentPrice());
+        if(!Objects.equals(stock.getAcquisitionPrice(), body.acquisitionPrice())) stock.setAcquisitionPrice(body.acquisitionPrice());
+        if(!Objects.equals(stock.getAcquisitionDate(), body.acquisitionDate())) stock.setAcquisitionDate(body.acquisitionDate());
+        if(!Objects.equals(stock.getQuantity(), body.quantity())) stock.setQuantity(body.quantity());
+
+        this.stockRepository.save(stock);
+
+        return StockDTORes.stockToDTO(stock);
+    }
+
+    public StockDTORes put(Long id, @Valid StockDTOReq body) {
+        if(id == null) throw new IllegalArgumentException("Id cannot be null");
+        if(body == null) throw new IllegalArgumentException("Stock cannot be null");
+
+        if(findByIdEntity(id) == null) throw new EntityNotFoundException("Stock not found");
+
+        Stock stock = this.stockRepository.save(body.dtoToStock());
+
+        return StockDTORes.stockToDTO(stock);
+    }
+
+    public void deleteById(Long id) {
+        if(id == null) throw new IllegalArgumentException("Id cannot be null");
+        if(findByIdEntity(id) == null) throw new EntityNotFoundException("Stock not found");
+
+        this.stockRepository.deleteById(id);
+    }
+
 }

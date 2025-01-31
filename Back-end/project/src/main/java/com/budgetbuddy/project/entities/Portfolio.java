@@ -23,8 +23,7 @@ public class Portfolio implements Serializable {
     private Long id;
 
     @OneToOne
-    @JoinColumn(name = "user_id")
-    @Column(nullable = false)
+    @PrimaryKeyJoinColumn(name = "user_id")
     private User user;
 
     @OneToMany(mappedBy = "portfolio")

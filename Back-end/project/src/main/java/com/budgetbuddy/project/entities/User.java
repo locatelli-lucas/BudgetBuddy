@@ -27,7 +27,7 @@ public class User implements Serializable, UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column
+    @Column(nullable = false)
     private String name;
 
     @Column(nullable = false, unique = true)
@@ -38,10 +38,9 @@ public class User implements Serializable, UserDetails {
 
     private String profilePicture;
 
-    @Column
     private double monthlyIncome;
 
-    @OneToOne
+    @OneToOne(mappedBy = "user")
     private Portfolio portfolio;
 
     @ElementCollection(fetch = FetchType.EAGER, targetClass = Role.class)

@@ -9,8 +9,6 @@ import jakarta.validation.constraints.NotNull;
 import java.util.List;
 
 public record PortfolioDTOReq(
-        Long id,
-
         @NotNull
         User user,
 
@@ -22,10 +20,17 @@ public record PortfolioDTOReq(
 ) {
 
     public Portfolio dtoToPortfolio() {
-        return new Portfolio(user, stockList, directTreasure);
+        return new Portfolio(
+                this.user,
+                this.stockList,
+                this.directTreasure);
     }
 
     public Portfolio dtoToPortfolio(Long id) {
-        return new Portfolio(id, user, stockList, directTreasure);
+        return new Portfolio(
+                id,
+                this.user,
+                this.stockList,
+                this.directTreasure);
     }
 }

@@ -5,8 +5,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public record UserDTOPatchReq(
-        @NotNull
-        Long id,
 
         @NotNull
         @NotBlank(message = "Name is required")

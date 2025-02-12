@@ -65,8 +65,8 @@ public class DirectTreasure implements Serializable {
                           double minInvestment,
                           double unitPrice,
                           Date dueDate,
-                          double amountInvested
-    ) {
+                          double amountInvested,
+                          Portfolio portfolio) {
         this.id = id;
         this.name = name;
         this.profitability = profitability;
@@ -74,6 +74,7 @@ public class DirectTreasure implements Serializable {
         this.unitPrice = unitPrice;
         this.dueDate = dueDate;
         this.amountInvested = amountInvested;
+        this.portfolio = portfolio;
     }
 
     @Override

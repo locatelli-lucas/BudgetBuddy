@@ -1,5 +1,6 @@
 package com.budgetbuddy.project.controllers;
 
+import com.budgetbuddy.project.dto.stock.req.StockDTOPatchReq;
 import com.budgetbuddy.project.dto.stock.req.StockDTOReq;
 import com.budgetbuddy.project.dto.stock.res.StockDTORes;
 import com.budgetbuddy.project.services.StockService;
@@ -38,13 +39,13 @@ public class StockController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<StockDTORes> patch(@PathVariable Long id, @Valid StockDTOReq body) {
-        StockDTORes stock = this.stockService.patch(id, body);
+    public ResponseEntity<StockDTORes> update(@PathVariable Long id, @Valid @RequestBody StockDTOPatchReq body) {
+        StockDTORes stock = this.stockService.update(id, body);
         return ResponseEntity.ok(stock);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<StockDTORes> put(@PathVariable Long id, @Valid StockDTOReq body) {
+    public ResponseEntity<StockDTORes> put(@PathVariable Long id, @Valid @RequestBody StockDTOReq body) {
         StockDTORes stock = this.stockService.put(id, body);
         return ResponseEntity.ok(stock);
     }

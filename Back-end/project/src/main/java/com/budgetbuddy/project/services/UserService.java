@@ -43,7 +43,7 @@ public class UserService {
         User user = userDTOReq.dtoToUser();
         user.setPassword(encodedPassword);
 
-        this.userRepository.save(userDTOReq.dtoToUser());
+        this.userRepository.save(user);
         return UserDTORes.userToDto(user);
     }
 
@@ -53,22 +53,32 @@ public class UserService {
     }
 
     public User findByIdEntity(Long id) {
+        if(id == null) throw new BadRequestException("No id provided");
+
         Optional<User> user = this.userRepository.findById(id);
         if(user.isEmpty()) throw new EntityNotFoundException("User with id " + id + " not found");
         return user.get();
     }
 
     public UserDTORes findById(Long id) {
+        if(id == null) throw new BadRequestException("No id provided");
+        if(findByIdEntity(id) == null) throw new EntityNotFoundException("User with id " + id + " not found");
+
         User user = findByIdEntity(id);
         return UserDTORes.userToDto(user);
     }
 
     public boolean findByEmail(String email) {
+        if(email == null) throw new BadRequestException("No email provided");
+
         Optional<User> user = this.userRepository.findByEmail(email);
         return user.isPresent();
     }
 
     public UserDTORes update(Long id, UserDTOPatchReq body) {
+        if(id == null) throw new BadRequestException("No id provided");
+        if(body == null) throw new BadRequestException("No user data provided");
+
         User user = findByIdEntity(id);
 
         String encodedPassword = passwordEncoder.encode(body.password());
@@ -84,6 +94,9 @@ public class UserService {
     }
 
     public UserDTORes put(Long id, UserDTOReq body) {
+        if(id == null) throw new BadRequestException("No id provided");
+        if(body == null) throw new BadRequestException("No user data provided");
+
         User user = this.userRepository.save(body.dtoToUser(id));
         return UserDTORes.userToDto(user);
     }

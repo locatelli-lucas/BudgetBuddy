@@ -37,4 +37,17 @@ public record DirectTreasureDTOReq(
                 this.portfolio
         );
     }
+
+    public DirectTreasure dtoToDirectTreasure(Long id) {
+        return new DirectTreasure(
+                id,
+                this.name,
+                this.profitability,
+                this.minInvestment,
+                this.unitPrice,
+                this.dueDate,
+                this.amountInvested,
+                this.portfolio
+        );
+    }
 }

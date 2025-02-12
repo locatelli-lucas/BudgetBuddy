@@ -3,6 +3,7 @@ package com.budgetbuddy.project.services;
 import com.budgetbuddy.project.dto.portfolio.req.PortfolioDTOReq;
 import com.budgetbuddy.project.dto.portfolio.res.PortfolioDTORes;
 import com.budgetbuddy.project.entities.Portfolio;
+import com.budgetbuddy.project.exceptions.BadRequestException;
 import com.budgetbuddy.project.exceptions.EntityNotFoundException;
 import com.budgetbuddy.project.repositories.PortfolioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,34 +19,41 @@ public class PortfolioService {
     private PortfolioRepository portfolioRepository;
 
     public PortfolioDTORes createPortfolio(PortfolioDTOReq body) {
+        if(body == null) throw new BadRequestException("Portfolio cannot be null");
+
         Portfolio portfolio = this.portfolioRepository.save(body.dtoToPortfolio());
         return PortfolioDTORes.portfolioToDto(portfolio);
     }
 
     public PortfolioDTORes findById(Long id) {
-        if(id == null) throw new IllegalArgumentException("Id cannot be null");
-        Portfolio portfolio = findEntityById(id);
+        if(id == null) throw new BadRequestException("Id cannot be null");
+
+        Portfolio portfolio = findByIdEntity(id);
         return PortfolioDTORes.portfolioToDto(portfolio);
     }
 
-    public Portfolio findEntityById(Long id) {
+    public Portfolio findByIdEntity(Long id) {
+        if(id == null) throw new BadRequestException("Id cannot be null");
+
         Optional<Portfolio> portfolio = this.portfolioRepository.findById(id);
+
         if(portfolio.isEmpty()) throw new EntityNotFoundException("Portfolio not found");
+
         return portfolio.get();
     }
 
     public void deleteById(Long id) {
-        if(id == null) throw new IllegalArgumentException("Id cannot be null");
-        if(findEntityById(id) == null) throw new EntityNotFoundException("Portfolio not found");
+        if(id == null) throw new BadRequestException("Id cannot be null");
+        if(findByIdEntity(id) == null) throw new EntityNotFoundException("Portfolio not found");
 
         this.portfolioRepository.deleteById(id);
     }
 
-    public PortfolioDTORes patch(Long id, PortfolioDTOReq body) {
-        if(id == null) throw new IllegalArgumentException("Id cannot be null");
-        if(body == null) throw new IllegalArgumentException("Portfolio cannot be null");
+    public PortfolioDTORes update(Long id, PortfolioDTOReq body) {
+        if(id == null) throw new BadRequestException("Id cannot be null");
+        if(body == null) throw new BadRequestException("Portfolio cannot be null");
 
-        Portfolio portfolio = findEntityById(id);
+        Portfolio portfolio = findByIdEntity(id);
 
         if(portfolio == null) throw new EntityNotFoundException("Portfolio not found");
 
@@ -58,12 +66,12 @@ public class PortfolioService {
     }
 
     public PortfolioDTORes put(Long id, PortfolioDTOReq body) {
-        if(id == null) throw new IllegalArgumentException("Id cannot be null");
-        if(body == null) throw new IllegalArgumentException("Portfolio cannot be null");
+        if(id == null) throw new BadRequestException("Id cannot be null");
+        if(body == null) throw new BadRequestException("Portfolio cannot be null");
 
-        if(findEntityById(id) == null) throw new EntityNotFoundException("Portfolio not found");
+        if(findByIdEntity(id) == null) throw new EntityNotFoundException("Portfolio not found");
 
-        Portfolio portfolio = this.portfolioRepository.save(body.dtoToPortfolio());
+        Portfolio portfolio = this.portfolioRepository.save(body.dtoToPortfolio(id));
 
         return PortfolioDTORes.portfolioToDto(portfolio);
     }

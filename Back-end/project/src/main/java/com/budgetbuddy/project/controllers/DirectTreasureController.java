@@ -1,5 +1,6 @@
 package com.budgetbuddy.project.controllers;
 
+import com.budgetbuddy.project.dto.direct_treasure.req.DirectTreasureDTOPatchReq;
 import com.budgetbuddy.project.dto.direct_treasure.req.DirectTreasureDTOReq;
 import com.budgetbuddy.project.dto.direct_treasure.res.DirectTreasureDTORes;
 import com.budgetbuddy.project.entities.DirectTreasure;
@@ -32,9 +33,27 @@ public class DirectTreasureController {
         return ResponseEntity.ok(directTreasure);
     }
 
-    @GetMapping("/name")
-    public ResponseEntity<DirectTreasureDTORes> findByName(@RequestParam String name) {
+    @GetMapping("/{name}")
+    public ResponseEntity<DirectTreasureDTORes> findByName(@PathVariable String name) {
         DirectTreasureDTORes directTreasure = this.directTreasureService.findByName(name);
+        return ResponseEntity.ok(directTreasure);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<DirectTreasureDTORes> deleteById(@PathVariable Long id) {
+        this.directTreasureService.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<DirectTreasureDTORes> update(@PathVariable Long id, @Valid @RequestBody DirectTreasureDTOPatchReq body) {
+        DirectTreasureDTORes directTreasure = this.directTreasureService.update(id, body);
+        return ResponseEntity.ok(directTreasure);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<DirectTreasureDTORes> put(@PathVariable Long id, @Valid @RequestBody DirectTreasureDTOReq body) {
+        DirectTreasureDTORes directTreasure = this.directTreasureService.put(id, body);
         return ResponseEntity.ok(directTreasure);
     }
 

@@ -1,6 +1,6 @@
 package com.budgetbuddy.project.types;
 
-public enum ExpensesTypes {
+public enum ExpenseTypes {
     FOOD,
     HOUSING,
     TRANSPORTATION,
@@ -29,5 +29,5 @@ public enum ExpensesTypes {
     BEAUTY_AND_WELLNESS,
     TRAVEL,
     UTILITIES,
-    SAVINGS
+    OTHERS
 }

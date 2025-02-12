@@ -1,6 +1,6 @@
 package com.budgetbuddy.project.entities;
 
-import com.budgetbuddy.project.types.ExpensesTypes;
+import com.budgetbuddy.project.types.CategoryTypes;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,20 +21,34 @@ public class Category implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private ExpensesTypes expenseType;
+    @Enumerated(EnumType.STRING)
+    private CategoryTypes type;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String name;
+
+    private String icon;
 
     public Category() {
 
     }
 
-    public Category(Long id, ExpensesTypes expenseType, String name) {
-        this.id = id;
-        this.expenseType = expenseType;
+    public Category(CategoryTypes type, String name) {
+        this.type = type;
         this.name = name;
+    }
+
+    public Category(CategoryTypes type, String name, String icon) {
+        this.type = type;
+        this.name = name;
+        this.icon = icon;
+    }
+
+    public Category(Long id, CategoryTypes type, String name, String icon) {
+        this.id = id;
+        this.type = type;
+        this.name = name;
+        this.icon = icon;
     }
 
     @Override
@@ -53,7 +67,6 @@ public class Category implements Serializable {
     public String toString() {
         return "Category{" +
                 "id=" + id +
-                ", expenseType=" + expenseType +
                 ", name='" + name + '\'' +
                 '}';
     }

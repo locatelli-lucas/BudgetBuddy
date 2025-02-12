@@ -38,8 +38,8 @@ public class PortfolioController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<PortfolioDTORes> patch(@PathVariable Long id, @Valid @RequestBody PortfolioDTOReq body) {
-        PortfolioDTORes portfolio = this.portfolioService.patch(id, body);
+    public ResponseEntity<PortfolioDTORes> update(@PathVariable Long id, @Valid @RequestBody PortfolioDTOReq body) {
+        PortfolioDTORes portfolio = this.portfolioService.update(id, body);
         return ResponseEntity.ok(portfolio);
     }
 

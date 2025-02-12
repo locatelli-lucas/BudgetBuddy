@@ -43,6 +43,19 @@ public class User implements Serializable, UserDetails {
     @OneToOne(mappedBy = "user")
     private Portfolio portfolio;
 
+    @OneToOne(mappedBy = "user")
+    private Goal savingGoals;
+
+    @OneToOne(mappedBy = "user")
+    private Goal expenseGoals;
+
+    @OneToMany(mappedBy = "user")
+    private List<Account> balances = new ArrayList<>();
+//
+//    private List<Bill> bills = new ArrayList<>();
+//
+//    private List<ExpenseCategory> expenses = new ArrayList<>();
+
     @ElementCollection(fetch = FetchType.EAGER, targetClass = Role.class)
     @Enumerated(EnumType.STRING)
     @JoinTable(name = "tb_roles", joinColumns = @JoinColumn(name = "user_id"))

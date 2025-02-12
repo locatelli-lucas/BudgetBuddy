@@ -60,7 +60,7 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    private ResponseEntity<LoginDTORes> login(@Valid @RequestBody LoginDTOReq body) {
+    private ResponseEntity<LoginDTORes> login(@RequestBody LoginDTOReq body) {
         LoginDTORes login = this.userService.login(body);
         return ResponseEntity.ok(login);
     }

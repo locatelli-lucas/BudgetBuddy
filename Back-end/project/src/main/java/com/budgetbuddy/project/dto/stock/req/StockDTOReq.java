@@ -9,8 +9,6 @@ import jakarta.validation.constraints.NotNull;
 import java.util.Date;
 
 public record StockDTOReq(
-        Long id,
-
         @NotNull
         @NotBlank
         String code,

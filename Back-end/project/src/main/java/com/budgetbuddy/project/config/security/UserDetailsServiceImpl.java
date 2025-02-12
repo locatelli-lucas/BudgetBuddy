@@ -1,7 +1,7 @@
 package com.budgetbuddy.project.config.security;
 
 import com.budgetbuddy.project.entities.User;
-import com.budgetbuddy.project.exceptions.EmailNotFoundException;
+import com.budgetbuddy.project.exceptions.EntityNotFoundException;
 import com.budgetbuddy.project.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,7 +21,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         Optional<User> user = userRepository.findByEmail(email);
 
-        if(user.isEmpty()) throw new EmailNotFoundException("User not found");
+        if(user.isEmpty()) throw new EntityNotFoundException("User not found");
 
         return user.get();
     }

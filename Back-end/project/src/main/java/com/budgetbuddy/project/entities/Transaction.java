@@ -26,7 +26,7 @@ public class Transaction implements Serializable {
 
     @ManyToOne
     @JoinColumn(name = "account_id")
-    private Transaction transaction;
+    private Account account;
 
     private Date date;
 
@@ -48,8 +48,38 @@ public class Transaction implements Serializable {
 
     }
 
-    public Transaction(Transaction transaction, Date date, StatusTypes status, TransactionTypes transactionType, String receipt, double amount, String item, String icon, String shopName) {
-        this.transaction = transaction;
+    public Transaction(Account account,
+                       Date date,
+                       StatusTypes status,
+                       TransactionTypes transactionType,
+                       String receipt,
+                       double amount,
+                       String item,
+                       String icon,
+                       String shopName) {
+        this.account = account;
+        this.date = date;
+        this.status = status;
+        this.transactionType = transactionType;
+        this.receipt = receipt;
+        this.amount = amount;
+        this.item = item;
+        this.icon = icon;
+        this.shopName = shopName;
+    }
+
+    public Transaction(Long id,
+                       Account account,
+                       Date date,
+                       StatusTypes status,
+                       TransactionTypes transactionType,
+                       String receipt,
+                       double amount,
+                       String item,
+                       String icon,
+                       String shopName) {
+        this.id = id;
+        this.account = account;
         this.date = date;
         this.status = status;
         this.transactionType = transactionType;

@@ -24,6 +24,10 @@ public class Account implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
     private String accountName;
 
     private AccountTypes accountType;
@@ -34,7 +38,7 @@ public class Account implements Serializable {
 
     private String accountNumber;
 
-    private String logo;
+    private String icon;
 
     @OneToMany(mappedBy = "account")
     private List<Transaction> transactionHistory = new ArrayList<>();
@@ -43,23 +47,26 @@ public class Account implements Serializable {
 
     }
 
-    public Account(String accountName, AccountTypes accountType, double balance, String branchName, String accountNumber, String logo) {
+    public Account(User user, String accountName, AccountTypes accountType, double balance, String branchName, String accountNumber, String icon) {
+        this.user = user;
         this.accountName = accountName;
         this.accountType = accountType;
         this.balance = balance;
         this.branchName = branchName;
         this.accountNumber = accountNumber;
-        this.logo = logo;
+        this.icon = icon;
     }
 
-    public Account(Long id, String accountName, AccountTypes accountType, double balance, String branchName, String accountNumber, String logo) {
+    public Account(Long id, User user, String accountName, AccountTypes accountType, double balance, String branchName, String accountNumber,
+                   String icon) {
         this.id = id;
+        this.user = user;
         this.accountName = accountName;
         this.accountType = accountType;
         this.balance = balance;
         this.branchName = branchName;
         this.accountNumber = accountNumber;
-        this.logo = logo;
+        this.icon = icon;
     }
 
     @Override
@@ -83,7 +90,7 @@ public class Account implements Serializable {
                 ", balance=" + balance +
                 ", branchName='" + branchName + '\'' +
                 ", accountNumber='" + accountNumber + '\'' +
-                ", logo='" + logo + '\'' +
+                ", icon='" + icon + '\'' +
                 ", transactionHistory=" + transactionHistory +
                 '}';
     }

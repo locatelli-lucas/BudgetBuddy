@@ -49,4 +49,19 @@ public record TransactionDTOReq(
                 this.shopName
         );
     }
+
+    public Transaction dtoToTransaction(Long id) {
+        return new Transaction(
+                id,
+                this.account,
+                this.date,
+                this.status,
+                this.transactionType,
+                this.receipt,
+                this.amount,
+                this.item,
+                this.icon,
+                this.shopName
+        );
+    }
 }

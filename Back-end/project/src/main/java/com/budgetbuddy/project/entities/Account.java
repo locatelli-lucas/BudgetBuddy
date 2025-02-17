@@ -3,7 +3,9 @@ package com.budgetbuddy.project.entities;
 import com.budgetbuddy.project.types.AccountTypes;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -11,8 +13,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+@NoArgsConstructor
 @Getter
 @Setter
+@ToString(onlyExplicitlyIncluded = true)
 @Entity
 @Table(name = "tb_accounts")
 public class Account implements Serializable {
@@ -42,10 +46,6 @@ public class Account implements Serializable {
 
     @OneToMany(mappedBy = "account")
     private List<Transaction> transactionHistory = new ArrayList<>();
-
-    public Account() {
-
-    }
 
     public Account(User user, String accountName, AccountTypes accountType, double balance, String branchName, String accountNumber, String icon) {
         this.user = user;
@@ -79,19 +79,5 @@ public class Account implements Serializable {
     @Override
     public int hashCode() {
         return Objects.hashCode(id);
-    }
-
-    @Override
-    public String toString() {
-        return "Account{" +
-                "id=" + id +
-                ", accountName='" + accountName + '\'' +
-                ", accountType=" + accountType +
-                ", balance=" + balance +
-                ", branchName='" + branchName + '\'' +
-                ", accountNumber='" + accountNumber + '\'' +
-                ", icon='" + icon + '\'' +
-                ", transactionHistory=" + transactionHistory +
-                '}';
     }
 }

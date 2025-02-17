@@ -9,22 +9,24 @@ import jakarta.validation.constraints.NotNull;
 import java.util.Date;
 
 public record StockDTOReq(
-        @NotNull
-        @NotBlank
+        @NotNull(message = "code is mandatory")
+        @NotBlank(message = "code is mandatory")
         String code,
 
-        @NotBlank
+        @NotBlank(message = "name is mandatory")
         String name,
 
-        @NotBlank
-        double currentPrice,
+        @NotBlank(message = "quantity is mandatory")
+        @NotNull(message = "quantity is mandatory")
+        int quantity,
+
+        @NotNull(message = "amount invested is mandatory")
+        @NotBlank(message = "amount invested is mandatory")
+        int amountInvested,
 
         double acquisitionPrice,
 
         Date acquisitionDate,
-
-        @NotBlank
-        int quantity,
 
         @NotNull
         Portfolio portfolio
@@ -33,11 +35,10 @@ public record StockDTOReq(
         return new Stock(
                 this.code,
                 this.name,
-                this.currentPrice,
-                this.acquisitionPrice,
-                this.acquisitionDate,
                 this.quantity,
-                this.portfolio
+                this.amountInvested,
+                this.acquisitionPrice,
+                this.acquisitionDate
         );
     }
 

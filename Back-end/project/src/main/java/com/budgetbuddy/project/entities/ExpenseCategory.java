@@ -8,15 +8,18 @@ import lombok.ToString;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
-@NoArgsConstructor
 @Getter
 @Setter
+@NoArgsConstructor
 @ToString(onlyExplicitlyIncluded = true)
 @Entity
-@Table(name = "tb_category_goals")
-public class CategoryGoal implements Serializable {
+@Table(name = "tb_expense_categories")
+public class ExpenseCategory implements Serializable {
+
     @Serial
     private static final long serialVersionUID = 1L;
 
@@ -25,31 +28,30 @@ public class CategoryGoal implements Serializable {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "goal_id")
-    private Goal goal;
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @OneToOne
     private Category category;
 
-    private double amount;
+    @OneToMany(mappedBy = "expenseCategory")
+    private List<Expense> expenses = new ArrayList<>();
 
-    public CategoryGoal(Goal goal, Category category, double amount) {
-        this.goal = goal;
+    public ExpenseCategory(User user, Category category) {
+        this.user = user;
         this.category = category;
-        this.amount = amount;
     }
 
-    public CategoryGoal(Long id, Goal goal, Category category, double amount) {
+    public ExpenseCategory(Long id, User user, Category category) {
         this.id = id;
-        this.goal = goal;
+        this.user = user;
         this.category = category;
-        this.amount = amount;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof CategoryGoal that)) return false;
+        if (!(o instanceof ExpenseCategory that)) return false;
         return Objects.equals(id, that.id);
     }
 
@@ -57,4 +59,5 @@ public class CategoryGoal implements Serializable {
     public int hashCode() {
         return Objects.hashCode(id);
     }
+
 }

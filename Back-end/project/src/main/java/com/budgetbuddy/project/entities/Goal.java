@@ -2,7 +2,9 @@ package com.budgetbuddy.project.entities;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -11,8 +13,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
+@NoArgsConstructor
 @Getter
 @Setter
+@ToString(onlyExplicitlyIncluded = true)
 @Entity
 @Table(name = "tb_goals")
 public class Goal implements Serializable {
@@ -36,10 +40,6 @@ public class Goal implements Serializable {
     @OneToOne
     @JoinColumn(name = "user_id")
     private User user;
-
-    public Goal() {
-
-    }
 
     public Goal(Date month, double targetAchieved, double thisMonthTarget, User user) {
         this.month = month;
@@ -66,16 +66,5 @@ public class Goal implements Serializable {
     @Override
     public int hashCode() {
         return Objects.hashCode(id);
-    }
-
-    @Override
-    public String toString() {
-        return "Goal{" +
-                "id=" + id +
-                ", month=" + month +
-                ", targetAchieved=" + targetAchieved +
-                ", thisMonthTarget=" + thisMonthTarget +
-                ", goalsByCategory=" + goalsByCategory +
-                '}';
     }
 }

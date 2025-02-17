@@ -60,10 +60,10 @@ public class StockService {
 
         Stock stock = findByIdEntity(id);
 
-        if(!Objects.equals(stock.getCurrentPrice(), body.currentPrice())) stock.setCurrentPrice(body.currentPrice());
+        if(!Objects.equals(stock.getQuantity(), body.quantity())) stock.setQuantity(body.quantity());
+        if(!Objects.equals(stock.getAmountInvested(), body.amountInvested())) stock.setAmountInvested(body.amountInvested());
         if(!Objects.equals(stock.getAcquisitionPrice(), body.acquisitionPrice())) stock.setAcquisitionPrice(body.acquisitionPrice());
         if(!Objects.equals(stock.getAcquisitionDate(), body.acquisitionDate())) stock.setAcquisitionDate(body.acquisitionDate());
-        if(!Objects.equals(stock.getQuantity(), body.quantity())) stock.setQuantity(body.quantity());
 
         this.stockRepository.save(stock);
 

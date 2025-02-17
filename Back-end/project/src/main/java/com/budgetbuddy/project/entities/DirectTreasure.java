@@ -4,15 +4,19 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Objects;
 
+@NoArgsConstructor
 @Getter
 @Setter
+@ToString(onlyExplicitlyIncluded = true)
 @Entity
 @Table(name = "tb_direct_treasure")
 public class DirectTreasure implements Serializable {
@@ -37,10 +41,6 @@ public class DirectTreasure implements Serializable {
     @ManyToOne
     @JoinColumn(name = "porfolio_id")
     private Portfolio portfolio;
-
-    public DirectTreasure() {
-
-    }
 
     public DirectTreasure(String name,
                           double profitability,
@@ -87,18 +87,5 @@ public class DirectTreasure implements Serializable {
     @Override
     public int hashCode() {
         return Objects.hashCode(id);
-    }
-
-    @Override
-    public String toString() {
-        return "DirectTreasure{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", profitability=" + profitability +
-                ", minInvestment=" + minInvestment +
-                ", unitPrice=" + unitPrice +
-                ", dueDate=" + dueDate +
-                ", amountInvested=" + amountInvested +
-                '}';
     }
 }

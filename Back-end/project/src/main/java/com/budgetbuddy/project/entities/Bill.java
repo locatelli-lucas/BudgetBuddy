@@ -2,15 +2,19 @@ package com.budgetbuddy.project.entities;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Objects;
 
+@NoArgsConstructor
 @Getter
 @Setter
+@ToString(onlyExplicitlyIncluded = true)
 @Entity
 @Table(name = "tb_bills")
 public class Bill implements Serializable {
@@ -37,10 +41,6 @@ public class Bill implements Serializable {
     private Date lastChargeDate;
 
     private double amount;
-
-    public Bill() {
-
-    }
 
     public Bill(User user, Date dueDate, String icon, String billName, String description, Date lastChargeDate, double amount) {
         this.user = user;
@@ -73,19 +73,5 @@ public class Bill implements Serializable {
     @Override
     public int hashCode() {
         return Objects.hashCode(id);
-    }
-
-    @Override
-    public String toString() {
-        return "Bill{" +
-                "id=" + id +
-                ", user=" + user +
-                ", dueDate=" + dueDate +
-                ", icon='" + icon + '\'' +
-                ", billName='" + billName + '\'' +
-                ", description='" + description + '\'' +
-                ", lastChargeDate=" + lastChargeDate +
-                ", amount=" + amount +
-                '}';
     }
 }

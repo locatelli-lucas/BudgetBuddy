@@ -3,7 +3,9 @@ package com.budgetbuddy.project.entities;
 import com.budgetbuddy.project.domain.Role;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,8 +17,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
+@NoArgsConstructor
 @Getter
 @Setter
+@ToString(onlyExplicitlyIncluded = true)
 @Entity
 @Table(name = "tb_users")
 public class User implements Serializable, UserDetails {
@@ -51,20 +55,18 @@ public class User implements Serializable, UserDetails {
 
     @OneToMany(mappedBy = "user")
     private List<Account> balances = new ArrayList<>();
-//
-//    private List<Bill> bills = new ArrayList<>();
-//
-//    private List<ExpenseCategory> expenses = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user")
+    private List<Bill> bills = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user")
+    private List<ExpenseCategory> expenses = new ArrayList<>();
 
     @ElementCollection(fetch = FetchType.EAGER, targetClass = Role.class)
     @Enumerated(EnumType.STRING)
     @JoinTable(name = "tb_roles", joinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "role_name")
     private List<Role> roles = new ArrayList<>();
-
-    public User() {
-
-    }
 
     public User(
             String name,
@@ -107,19 +109,6 @@ public class User implements Serializable, UserDetails {
     @Override
     public int hashCode() {
         return Objects.hashCode(id);
-    }
-
-    @Override
-    public String toString() {
-        return "User{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", email='" + email + '\'' +
-                ", password='" + password + '\'' +
-                ", profilePicture='" + profilePicture + '\'' +
-                ", monthlyIncome=" + monthlyIncome +
-                ", portfolio=" + portfolio +
-                '}';
     }
 
     public Collection<? extends GrantedAuthority> getAuthorities() {

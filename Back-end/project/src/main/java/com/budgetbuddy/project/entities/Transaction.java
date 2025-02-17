@@ -4,15 +4,19 @@ import com.budgetbuddy.project.types.StatusTypes;
 import com.budgetbuddy.project.types.TransactionTypes;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Objects;
 
+@NoArgsConstructor
 @Getter
 @Setter
+@ToString(onlyExplicitlyIncluded = true)
 @Entity
 @Table(name = "tb_transactions")
 public class Transaction implements Serializable {
@@ -43,10 +47,6 @@ public class Transaction implements Serializable {
     private String icon;
 
     private String shopName;
-
-    public Transaction() {
-
-    }
 
     public Transaction(Account account,
                        Date date,
@@ -100,20 +100,5 @@ public class Transaction implements Serializable {
     @Override
     public int hashCode() {
         return Objects.hashCode(id);
-    }
-
-    @Override
-    public String toString() {
-        return "Transaction{" +
-                "id=" + id +
-                ", date=" + date +
-                ", status=" + status +
-                ", transactionType=" + transactionType +
-                ", receipt='" + receipt + '\'' +
-                ", amount=" + amount +
-                ", item='" + item + '\'' +
-                ", icon='" + icon + '\'' +
-                ", shopName='" + shopName + '\'' +
-                '}';
     }
 }

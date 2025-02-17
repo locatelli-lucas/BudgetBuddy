@@ -3,14 +3,18 @@ package com.budgetbuddy.project.entities;
 import com.budgetbuddy.project.types.CategoryTypes;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
 
+@NoArgsConstructor
 @Getter
 @Setter
+@ToString(onlyExplicitlyIncluded = true)
 @Entity
 @Table(name = "tb_categories")
 public class Category implements Serializable {
@@ -28,10 +32,6 @@ public class Category implements Serializable {
     private String name;
 
     private String icon;
-
-    public Category() {
-
-    }
 
     public Category(CategoryTypes type, String name) {
         this.type = type;
@@ -63,11 +63,4 @@ public class Category implements Serializable {
         return Objects.hashCode(id);
     }
 
-    @Override
-    public String toString() {
-        return "Category{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                '}';
-    }
 }

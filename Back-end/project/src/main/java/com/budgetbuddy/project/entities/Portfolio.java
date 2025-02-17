@@ -2,7 +2,9 @@ package com.budgetbuddy.project.entities;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -10,8 +12,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+@NoArgsConstructor
 @Getter
 @Setter
+@ToString(doNotUseGetters = true)
 @Entity
 @Table(name = "tb_portfolio")
 public class Portfolio implements Serializable {
@@ -31,10 +35,6 @@ public class Portfolio implements Serializable {
 
     @OneToMany(mappedBy = "portfolio")
     private List<DirectTreasure> directTreasure = new ArrayList<>();
-
-    public Portfolio() {
-
-    }
 
     public Portfolio(User user, List<Stock> stockList, List<DirectTreasure> directTreasure) {
         this.user = user;
@@ -59,15 +59,5 @@ public class Portfolio implements Serializable {
     @Override
     public int hashCode() {
         return Objects.hashCode(id);
-    }
-
-    @Override
-    public String toString() {
-        return "Portfolio{" +
-                "id=" + id +
-                ", user=" + user +
-                ", stockList=" + stockList +
-                ", directTreasure=" + directTreasure +
-                '}';
     }
 }

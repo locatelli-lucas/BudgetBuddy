@@ -4,17 +4,9 @@ import jakarta.validation.constraints.NotBlank;
 import java.util.Date;
 
 public record StockDTOPatchReq(
-
-        @NotBlank
-        double currentPrice,
-
-        @NotBlank
+        int quantity,
+        double amountInvested,
         double acquisitionPrice,
-
-        @NotBlank
-        Date acquisitionDate,
-
-        @NotBlank
-        int quantity
+        Date acquisitionDate
 ) {
 }

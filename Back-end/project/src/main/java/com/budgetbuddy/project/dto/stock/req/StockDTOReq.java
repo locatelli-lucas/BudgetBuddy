@@ -47,11 +47,10 @@ public record StockDTOReq(
                 id,
                 this.code,
                 this.name,
-                this.currentPrice,
-                this.acquisitionPrice,
-                this.acquisitionDate,
                 this.quantity,
-                this.portfolio
+                this.amountInvested,
+                this.acquisitionPrice,
+                this.acquisitionDate
         );
     }
 }

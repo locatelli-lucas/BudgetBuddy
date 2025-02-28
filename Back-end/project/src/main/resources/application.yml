@@ -2,8 +2,8 @@ spring:
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/BudgetBuddy
-    username: ${POSTGRES_DB_USER}
-    password: ${POSTGRES_DB_PASSWORD}
+    username: postgres
+    password: 123
   jpa:
     hibernate:
       ddl-auto: update

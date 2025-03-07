@@ -18,7 +18,7 @@ public class OllamaService {
                 .writeTimeout(60, TimeUnit.SECONDS)
                 .build();
 
-        String json = "{\"model\": \"llama3:latest\", \"prompt\": \"" + prompt + "\", \"stream\": false}";
+        String json = "{\"model\": \"deepseek-r1:latest\", \"prompt\": \"" + prompt + "\", \"stream\": false}";
         RequestBody requestBody = RequestBody.create(json, MediaType.get("application/json; charset=utf-8"));
 
         Request request = new Request.Builder()

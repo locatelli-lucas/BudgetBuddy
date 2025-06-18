@@ -12,8 +12,9 @@
   "description": "",
   "dependencies": {
     "axios": "^1.7.9",
-    "cheerio": "^1.0.0",
+    "cheerio": "^1.1.0",
     "puppeteer": "^24.2.1",
+    "statusinvest": "^0.0.1",
     "test": "file:",
     "yahoo-finance2": "^2.13.3"
   }

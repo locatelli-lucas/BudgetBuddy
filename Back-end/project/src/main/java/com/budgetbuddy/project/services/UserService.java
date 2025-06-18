@@ -121,6 +121,7 @@ public class UserService {
         User user = optionalUser.get();
 
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(loginDTOReq.email(), loginDTOReq.password());
+
         authenticationManager.authenticate(token);
 
         return tokenService.generateToken(user);

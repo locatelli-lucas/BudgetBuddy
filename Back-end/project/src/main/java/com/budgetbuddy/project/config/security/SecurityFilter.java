@@ -9,8 +9,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -28,30 +31,59 @@ public class SecurityFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull FilterChain filterChain) throws ServletException, IOException {
-        String token = getToken(request);
-
-        if(token != null) {
-            String email = tokenService.validateToken(token);
-            Optional<User> user = this.userRepository.findByEmail(email);
-
-            if(user.isEmpty()) throw new RuntimeException("User not found");
-
-            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                    user.get(),
-                    null,
-                    user.get().getAuthorities()
-            );
-
-            SecurityContextHolder.getContext().setAuthentication(authToken);
+        if (SecurityContextHolder.getContext().getAuthentication() instanceof OAuth2AuthenticationToken oauthToken) {
+            processOAuth2User(oauthToken.getPrincipal());
         }
+        else if (SecurityContextHolder.getContext().getAuthentication() == null) {
+            processJwtToken(request);
+        }
+
         filterChain.doFilter(request, response);
+    }
+
+    private void processOAuth2User(OAuth2User oauthUser) {
+        String email = oauthUser.getAttribute("email");
+        Optional<User> userOptional = userRepository.findByEmail(email);
+
+        User user = userOptional.orElseGet(() -> createUserFromOAuth2(oauthUser));
+
+        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                user,
+                null,
+                user.getAuthorities()
+        );
+
+        SecurityContextHolder.getContext().setAuthentication(authToken);
+    }
+
+    private User createUserFromOAuth2(OAuth2User oauthUser) {
+        User newUser = new User();
+        newUser.setEmail(oauthUser.getAttribute("email"));
+        newUser.setName(oauthUser.getAttribute("name"));
+        return userRepository.save(newUser);
+    }
+
+    private void processJwtToken(HttpServletRequest request) {
+        String token = getToken(request);
+        if (token != null) {
+            String email = tokenService.validateToken(token);
+            userRepository.findByEmail(email)
+                    .ifPresentOrElse(
+                            user -> {
+                                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                                        user,
+                                        null,
+                                        user.getAuthorities()
+                                );
+                                SecurityContextHolder.getContext().setAuthentication(authToken);
+                            },
+                            () -> { throw new RuntimeException("User not found"); }
+                    );
+        }
     }
 
     private String getToken(HttpServletRequest request) {
         String token = request.getHeader("Authorization");
-
-        if(token != null && token.startsWith("Bearer ")) return token.substring(7);
-
-        return null;
+        return (token != null && token.startsWith("Bearer ")) ? token.substring(7) : null;
     }
 }

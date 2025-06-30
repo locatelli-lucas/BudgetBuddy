@@ -1,5 +1,5 @@
 import {BrowserRouter, Route, Routes} from "react-router-dom";
-import {Login} from "./pages/Login.tsx";
+import {Login} from "./pages/login/Login.tsx";
 
 function App() {
 

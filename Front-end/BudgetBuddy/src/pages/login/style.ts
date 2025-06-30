@@ -1,4 +1,6 @@
 import styled from "styled-components";
+import {fontFamily, googleColor, hiddenGray, mainColor} from "../../global_styles/style.ts";
+
 
 export const ContainerLogin = styled.div`
     display: flex;

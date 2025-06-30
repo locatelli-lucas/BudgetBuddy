@@ -1,5 +1,5 @@
 import {Title} from "../../components/title/Title.tsx";
-import {ContainerLogin, FormLogin} from "./style.ts";
+import {ContainerLogin, FormLogin, GoogleButton, GoogleLoginSpan, LoginButton, Visibility} from "./style.ts";
 import {useState} from "react";
 
 import { GoEye } from "react-icons/go";
@@ -30,7 +30,18 @@ export function Login() {
                     <input type={passwordVisibility} placeholder="Digite sua senha" required  />
                     <button onClick={handlePasswordVisibility}>{eyeIcon}</button>
                 </div>
-
+                <LoginButton>
+                    Login
+                </LoginButton>
+                <GoogleLoginSpan>
+                    <hr />
+                    <span>ou faça login com</span>
+                    <hr />
+                </GoogleLoginSpan>
+                <GoogleButton>
+                    <FcGoogle />
+                    <a>Continuar com Google</a>
+                </GoogleButton>
             </FormLogin>
         </ContainerLogin>
     );

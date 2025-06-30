@@ -4,12 +4,14 @@ import {useState} from "react";
 
 import { GoEye } from "react-icons/go";
 import { GoEyeClosed } from "react-icons/go";
+import { FcGoogle } from "react-icons/fc";
 
 export function Login() {
     const [passwordVisibility, setPasswordVisibility] = useState("password");
     const [eyeIcon, setEyeIcon] = useState(<GoEye />);
 
-    const handlePasswordVisibility = () => {
+    const handlePasswordVisibility = (e: { preventDefault: () => void; }) => {
+        e.preventDefault();
         if(passwordVisibility === "password") {
             setPasswordVisibility("text");
             setEyeIcon(<GoEyeClosed />);
@@ -25,10 +27,14 @@ export function Login() {
             <FormLogin>
                 <label htmlFor="email">E-mail</label>
                 <input type="email" placeholder="Digite seu e-mail" required />
-                <label htmlFor="password">Senha</label>
+                <div>
+                    <label htmlFor="password">Senha</label>
+                    <a>Esqueceu a senha?</a>
+                </div>
+
                 <div>
                     <input type={passwordVisibility} placeholder="Digite sua senha" required  />
-                    <button onClick={handlePasswordVisibility}>{eyeIcon}</button>
+                    <Visibility onClick={handlePasswordVisibility}>{eyeIcon}</Visibility>
                 </div>
                 <LoginButton>
                     Login

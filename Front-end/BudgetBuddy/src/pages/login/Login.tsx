@@ -1,5 +1,5 @@
 import {Title} from "../../components/title/Title.tsx";
-import {ContainerLogin, FormLogin, GoogleButton, GoogleLoginSpan, LoginButton, Visibility} from "./style.ts";
+import {ContainerLogin, FormLogin, GoogleButton, GoogleIcon, GoogleLoginSpan, LoginButton, Visibility} from "./style.ts";
 import {useState} from "react";
 
 import { GoEye } from "react-icons/go";
@@ -45,8 +45,10 @@ export function Login() {
                     <hr />
                 </GoogleLoginSpan>
                 <GoogleButton>
-                    <FcGoogle />
-                    <a>Continuar com Google</a>
+                    <GoogleIcon>
+                        <FcGoogle />
+                    </GoogleIcon>
+                    <span>Continuar com Google</span>
                 </GoogleButton>
             </FormLogin>
         </ContainerLogin>

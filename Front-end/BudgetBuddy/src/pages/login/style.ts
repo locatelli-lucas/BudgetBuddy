@@ -67,7 +67,7 @@ export const GoogleLoginSpan = styled.div`
     }
     
     & hr {
-        background: #4B5768;
+        background: ${hiddenGray};
         width: 8em;
         height: 1px;
         border: none
@@ -75,7 +75,12 @@ export const GoogleLoginSpan = styled.div`
 `
 
 export const GoogleButton = styled.button`
-    color: #4B5768;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: row;
+    gap: 1.5em;
+    color: ${hiddenGray};
     background-color: ${googleColor};
     font-weight: 600;
     width: 31.5em;
@@ -83,8 +88,15 @@ export const GoogleButton = styled.button`
     border-radius: 0.5em;
     border-style: none;
     margin-top: 1em;
-    & a {
+    
+    & span {
         position: relative;
-        color: #4B5768;
+        color: ${hiddenGray};
     }
+`
+
+export const GoogleIcon = styled.div`
+    transform: scale(2.0);
+    position: relative;
+    top: 0.2em;
 `

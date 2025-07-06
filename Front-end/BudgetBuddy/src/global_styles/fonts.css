@@ -1,6 +1,5 @@
 @font-face {
-    font-family: 'Inter';
-    src: url("../assets/fonts/Inter-VariableFont_opsz,wght.ttf") format("ttf");
-    font-weight: 100 900;
+    font-family: 'Montserrat';
+    src: url("../assets/fonts/Montserrat-VariableFont_wght.ttf") format("ttf-variations");
     font-style: normal;
 }

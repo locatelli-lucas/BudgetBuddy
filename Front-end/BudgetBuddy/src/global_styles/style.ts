@@ -66,14 +66,15 @@ export const Visibility = styled.button`
     background: none;
     color: ${hiddenGray};
 `
-export const LoginCreateButton = styled.button`
-    color: white;
+export const FormButton = styled.button`
+    color: #ffffff;
     background-color: ${mainColor};
     font-weight: 600;
-    width: 31.5em;
+    width: 26rem;
     height: 2.8em;
     border-radius: 0.5em;
-    border-style: none;
+    border: none;
+    cursor: pointer;
 `
 export const GoogleLoginSpan = styled.div`
     position: relative;

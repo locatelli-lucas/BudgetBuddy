@@ -33,7 +33,6 @@ public class SecurityConfig implements Filter {
                 csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/users/login", "/oauth2/**").permitAll()
                         .requestMatchers( "/users").permitAll()
                         .anyRequest()
                         .authenticated())

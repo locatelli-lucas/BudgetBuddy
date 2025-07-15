@@ -6,7 +6,6 @@ Content-Type: application/json
   "name": "Lusca R",
   "email": "locatellilucas2002@gmail.com",
   "password": "123",
-  "profilePicture": "https://thispersondoesnotexist.com/",
   "monthlyIncome": 1000,
   "role": "USER"
 }

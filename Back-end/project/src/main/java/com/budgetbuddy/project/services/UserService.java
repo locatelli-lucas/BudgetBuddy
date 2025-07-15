@@ -88,7 +88,6 @@ public class UserService {
         if(!Objects.equals(body.name(), user.getName())) user.setName(body.name());
         if(!Objects.equals(body.email(), user.getEmail())) user.setEmail(body.email());
         if(!Objects.equals(encodedPassword, user.getPassword())) user.setPassword(encodedPassword);
-        if(!Objects.equals(body.profilePicture(), user.getProfilePicture())) user.setProfilePicture(body.profilePicture());
         if(!Objects.equals(body.monthlyIncome(), user.getMonthlyIncome())) user.setMonthlyIncome(body.monthlyIncome());
 
         this.userRepository.save(user);

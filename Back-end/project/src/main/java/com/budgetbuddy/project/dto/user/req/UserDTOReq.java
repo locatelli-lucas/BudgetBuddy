@@ -4,22 +4,23 @@ import com.budgetbuddy.project.domain.Role;
 import com.budgetbuddy.project.entities.User;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 
 
 public record UserDTOReq(
-        @NotBlank(message = "Name is required")
+        @NotBlank
+        @NotNull(message = "Name is required")
         String name,
 
         @Email(message = "Invalid email")
-        @NotBlank(message = "Email is required")
+        @NotNull(message = "Email is required")
         String email,
 
-        @NotBlank(message = "Password is required")
+        @NotBlank
+        @NotNull(message = "Password is required")
         String password,
-
-        String profilePicture,
 
         double monthlyIncome,
 
@@ -31,7 +32,6 @@ public record UserDTOReq(
                 this.name(),
                 this.email(),
                 this.password(),
-                this.profilePicture(),
                 this.monthlyIncome(),
                 roles
         );
@@ -44,7 +44,6 @@ public record UserDTOReq(
                 this.name(),
                 this.email(),
                 this.password(),
-                this.profilePicture(),
                 this.monthlyIncome(),
                 roles
         );

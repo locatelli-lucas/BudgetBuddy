@@ -1,4 +1,4 @@
-import {Title} from "../../components/title/Title.tsx";
+import {Title} from "../../components/Title.tsx";
 
 import { GoEye } from "react-icons/go";
 import { GoEyeClosed } from "react-icons/go";
@@ -10,9 +10,9 @@ import {
     GoogleButton,
     GoogleIcon,
     GoogleLoginSpan, LinkRegisterLogin,
-    LoginCreateButton,
     Visibility
 } from "../../global_styles/style.ts";
+import {LoginCreateButton} from "../../components/LoginCreateButton.tsx";
 
 export function Login() {
     const {inputType, passwordVisibility, handlePasswordVisibility} = usePasswordVisibility();
@@ -34,9 +34,7 @@ export function Login() {
                         {passwordVisibility ? <GoEyeClosed /> : <GoEye />}
                     </Visibility>
                 </div>
-                <LoginCreateButton>
-                    Login
-                </LoginCreateButton>
+                <LoginCreateButton text="Login"/>
                 <GoogleLoginSpan>
                     <hr />
                     <span>ou faça login com</span>

@@ -40,8 +40,6 @@ public class User implements Serializable, UserDetails {
     @Column(nullable = false)
     private String password;
 
-    private String profilePicture;
-
     private double monthlyIncome;
 
     @OneToOne(mappedBy = "user")
@@ -72,13 +70,11 @@ public class User implements Serializable, UserDetails {
             String name,
             String email,
             String password,
-            String profilePicture,
             double monthlyIncome,
             List<Role> roles) {
         this.name = name;
         this.email = email;
         this.password = password;
-        this.profilePicture = profilePicture;
         this.monthlyIncome = monthlyIncome;
         this.roles = roles;
     }
@@ -87,14 +83,12 @@ public class User implements Serializable, UserDetails {
                 String name,
                 String email,
                 String password,
-                String profilePicture,
                 double monthlyIncome,
                 List<Role> roles) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.password = password;
-        this.profilePicture = profilePicture;
         this.monthlyIncome = monthlyIncome;
         this.roles = roles;
     }

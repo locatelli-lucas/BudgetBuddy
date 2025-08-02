@@ -7,6 +7,10 @@ export const fontFamily = "Montserrat, sans-serif;"
 export const googleColor = "#E4E7EB"
 export const darkTextColor = "#191d23"
 
+interface GlobalProps {
+    isMoneyInput?: boolean;
+}
+
 export const GlobalTitle = styled.h1`
     position: relative;
     font-family: ${fontFamily};
@@ -26,15 +30,6 @@ export const GlobalForm = styled.form`
         top: 0.5em;
     }
     
-    & input {
-        width: 30em;
-        height: 2.8em;
-        border-radius: 0.5em;
-        border: 1px solid ${hiddenGray};
-        color: ${hiddenGray};
-        padding-left: 1em;
-    }
-    
     & a {
         position: relative;
         color: ${mainColor};
@@ -46,8 +41,20 @@ export const GlobalForm = styled.form`
     & button {
         cursor: pointer;
     }
-    
 `;
+
+export const GlobalMoneySign = styled.span`
+    
+`
+
+export const GlobalInput = styled.input<GlobalProps>`
+    width: 30em;
+    height: 2.8em;
+    border-radius: 0.5em;
+    border: 1px solid ${hiddenGray};
+    color: ${hiddenGray};
+    padding-left: 1em;
+`
 
 export const GlobalFormContainer = styled.div`
     font-family: ${fontFamily};
@@ -66,14 +73,15 @@ export const Visibility = styled.button`
     background: none;
     color: ${hiddenGray};
 `
-export const LoginCreateButton = styled.button`
-    color: white;
+export const FormButton = styled.button`
+    color: #ffffff;
     background-color: ${mainColor};
     font-weight: 600;
-    width: 31.5em;
+    width: 26rem;
     height: 2.8em;
     border-radius: 0.5em;
-    border-style: none;
+    border: none;
+    cursor: pointer;
 `
 export const GoogleLoginSpan = styled.div`
     position: relative;

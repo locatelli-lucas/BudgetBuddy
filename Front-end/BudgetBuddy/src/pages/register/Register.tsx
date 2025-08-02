@@ -50,6 +50,7 @@ export function Register() {
         const input = e.key;
         let value;
         let newValue = "";
+        console.log("pos: " + monthlyIncomeInput.current!.selectionStart);
 
         if (isNumeric(input)) {
             if (currentValue) {
@@ -66,7 +67,9 @@ export function Register() {
                 newValue = formatNumberToMoney(value);
             }
         }
-        setCurrentValue(newValue);
+
+        if(newValue !== "")
+            setCurrentValue(newValue);
     };
 
     useEffect(() => {
@@ -92,7 +95,7 @@ export function Register() {
                     </Visibility>
                 </div>
                 <label htmlFor="monthlyIncome">Renda mensal</label>
-                <GlobalInput ref={monthlyIncomeInput} onKeyDown={e => handleMonthlyIncomeChange(e)} type="text" name="monthlyIncome" placeholder="R$"/>
+                <GlobalInput ref={monthlyIncomeInput} onKeyDown={e => handleMonthlyIncomeChange(e)} type="text" name="monthlyIncome" placeholder="R$0,00"/>
                 <LoginCreateButton text="Criar conta" onClick={() => createUserReq()} />
                 <GoogleLoginSpan>
                     <hr />

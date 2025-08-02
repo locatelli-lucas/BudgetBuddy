@@ -5,3 +5,8 @@ export type User = {
     monthlyIncome: number,
     role: "USER" | "ADMIN"
 }
+
+export type Login = {
+    email: string,
+    password: string
+}

@@ -1,5 +1,5 @@
-import Image from "../../assets/images/Title.png";
-import {GlobalTitle} from "../../global_styles/style.ts";
+import Image from "../assets/images/Title.png";
+import {GlobalTitle} from "../global_styles/style.ts";
 
 export function Title() {
     return (

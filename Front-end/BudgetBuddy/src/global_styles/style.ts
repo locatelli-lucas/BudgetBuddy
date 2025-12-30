@@ -2,10 +2,11 @@ import styled from "styled-components";
 import {Link} from "react-router-dom";
 
 export const mainColor = "#299e92";
-export const hiddenGray = "#999DA3"
-export const fontFamily = "Montserrat, sans-serif;"
-export const googleColor = "#E4E7EB"
-export const darkTextColor = "#191d23"
+export const hiddenGray = "#999DA3";
+export const fontFamily = "Montserrat, sans-serif";
+export const labelFontFamily = "Roboto, sans-serif"
+export const googleColor = "#E4E7EB";
+export const darkTextColor = "#191d24";
 
 interface GlobalProps {
     isMoneyInput?: boolean;
@@ -21,6 +22,7 @@ export const GlobalTitle = styled.h1`
 export const GlobalForm = styled.form`
     display: flex;
     flex-direction: column;
+    align-items: center;
     gap: 1em;
     
     & label {
@@ -33,7 +35,6 @@ export const GlobalForm = styled.form`
     & a {
         position: relative;
         color: ${mainColor};
-        margin-left: 14em;
         top: 0.5em;
         cursor: pointer;
     }
@@ -63,7 +64,8 @@ export const GlobalFormContainer = styled.div`
     align-items: center;
     justify-content: center;
     gap: 3em;
-    height: 98vh;
+    margin-top: 5em;
+    margin-bottom: 5em;
 `;
 
 export const Visibility = styled.button`
@@ -72,6 +74,7 @@ export const Visibility = styled.button`
     border: none;
     background: none;
     color: ${hiddenGray};
+    padding: 1rem 0 0 0.5rem;
 `
 export const FormButton = styled.button`
     color: #ffffff;
@@ -130,8 +133,19 @@ export const GoogleIcon = styled.div`
     top: 0.2em;
 `
 
-export const LinkRegisterLogin = styled(Link)`
+export const GlobalFormLink = styled(Link)`
     color: ${mainColor};
     font-weight: 600;
     text-decoration: none;
+`
+export const GlobalInputContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.8rem;
+`
+
+export const GlobalLabel = styled.label`
+    font-family: ${labelFontFamily};
+    font-weight: 600;
 `

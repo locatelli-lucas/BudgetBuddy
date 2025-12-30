@@ -10,7 +10,7 @@ public class TestController {
 
     @GetMapping("/open")
     public String open() {
-        System.out.println("Endpoint '/test/open' foi chamado");
+        System.out.println("Endpoint '/test/open' was called");
         return "open";
     }
 }

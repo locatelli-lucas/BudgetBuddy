@@ -35,9 +35,15 @@ public class UserController {
         return ResponseEntity.ok(list);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("id/{id}")
     private ResponseEntity<UserDTORes> findById(@PathVariable Long id) {
         UserDTORes user = this.userService.findById(id);
+        return ResponseEntity.ok(user);
+    }
+
+    @GetMapping("email/{email}")
+    private ResponseEntity<UserDTORes> findByEmail(@PathVariable String email) {
+        UserDTORes user = this.userService.findByEmail(email);
         return ResponseEntity.ok(user);
     }
 

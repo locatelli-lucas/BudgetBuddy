@@ -1,10 +1,9 @@
-import type {Login, User} from "../types/Types.ts";
-import {API} from "./API.ts";
+import type {Login, Page, User} from "../types/Types.ts";
+import {API, configAPI} from "./API.ts";
 
 export async function createUser (user : User) {
     try {
-        const res = await API.post("/users", user);
-        return res.data;
+        return await API.post("/users", user);
     } catch (error) {
         console.error("Error creating user:", error);
         throw error;
@@ -14,9 +13,45 @@ export async function createUser (user : User) {
 export async function loginUser(login : Login) {
     try {
         return await API.post("/users/login", login)
-            .then(res => console.log(res.data));
+            .then(res => {
+                if (res.data.token) {
+                    localStorage.setItem("tokenType", res.data.type);
+                    localStorage.setItem("tokenValue", res.data.token);
+                    configAPI();
+                }
+            });
     } catch(error) {
         console.error("Error logging in user:", error);
         throw error;
     }
+}
+
+export async function getUserByEmail(email: string) : Promise<User> {
+    try {
+        return await API.get(`/users/email/${email}`).then(res => {
+            console.log(res.data as User)
+            return res.data as User;
+        });
+    } catch (error) {
+        console.error("Error fetching user by email:", error);
+        throw error;
+    }
+}
+
+export async function getAllUsers(page : Page) : Promise<void | User[]> {
+    try {
+        return await API.get("/users", {
+            params: {
+                page: page.pageNumber,
+                size: page.size
+            }
+        }).then(res => console.log(res))
+    } catch (error) {
+        console.error("Error fetching all users:", error);
+        throw error;
+    }
+}
+
+export async function testCall() {
+    return await API.get("/test/open")
 }

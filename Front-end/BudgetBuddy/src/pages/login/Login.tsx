@@ -9,14 +9,19 @@ import {
     GlobalFormContainer, GlobalInput,
     GoogleButton,
     GoogleIcon,
-    GoogleLoginSpan, LinkRegisterLogin,
-    Visibility
+    GoogleLoginSpan, GlobalFormLink,
+    Visibility, GlobalInputContainer, GlobalLabel
 } from "../../global_styles/style.ts";
-import {LoginCreateButton} from "../../components/LoginCreateButton.tsx";
+import {GlobalFormButton} from "../../components/GlobalFormButton.tsx";
 import {useRef, useState} from "react";
-import {loginUser} from "../../services/user-service.ts";
+import {getUserByEmail} from "../../services/user-service.ts";
+import * as React from "react";
+import {useNavigate} from "react-router-dom";
+import {ForgotPasswordLink, LabelLinkContainer, LoginPasswordContainer} from "./style.ts";
+
 
 export function Login() {
+    const navigate = useNavigate();
     const {inputType, passwordVisibility, handlePasswordVisibility} = usePasswordVisibility();
     const emailInput = useRef<HTMLInputElement>(null);
     const passwordInput = useRef<HTMLInputElement>(null);
@@ -25,29 +30,39 @@ export function Login() {
         password: ""
     })
 
-    const handleLoginButtonClick = async () => {
-        if(!emailInput.current || !passwordInput.current) return;
-        await loginUser(loginData);
-        console.log("Login successful");
+    const handleLoginButtonClick = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            await getUserByEmail(loginData.email);
+            navigate(`/${loginData.email}/dashboard`);
+        } catch (error) {
+            console.error("Error logging in:", error);
+        }
     }
 
     return (
         <GlobalFormContainer>
             <Title />
-            <GlobalForm>
-                <label htmlFor="email">E-mail</label>
-                <GlobalInput ref={emailInput} onChange={e => setLoginData(prev => ({...prev, email: e.target.value}))} type="email" placeholder="Digite seu e-mail" required />
-                <div>
-                    <label htmlFor="password">Senha</label>
-                    <a>Esqueceu a senha?</a>
-                </div>
-                <div>
-                    <GlobalInput ref={passwordInput} onChange={e => setLoginData(prev => ({...prev, password: e.target.value}))} type={inputType} placeholder="Digite sua senha" required  />
-                    <Visibility onClick={handlePasswordVisibility}>
-                        {passwordVisibility ? <GoEyeClosed /> : <GoEye />}
-                    </Visibility>
-                </div>
-                <LoginCreateButton text="Login" onClick={handleLoginButtonClick} />
+            <GlobalForm onSubmit={handleLoginButtonClick}>
+                <GlobalInputContainer>
+                    <GlobalLabel htmlFor="email">E-mail</GlobalLabel>
+                    <GlobalInput ref={emailInput} onChange={e => setLoginData(prev => ({...prev, email: e.target.value}))} type="email" placeholder="Digite seu e-mail" required />
+                </GlobalInputContainer>
+                <LoginPasswordContainer>
+                    <LabelLinkContainer>
+                        <GlobalLabel htmlFor="password">Senha</GlobalLabel>
+                        <ForgotPasswordLink to="/forgotpassword">
+                            Esqueceu a senha?
+                        </ForgotPasswordLink>
+                    </LabelLinkContainer>
+                    <div>
+                        <GlobalInput ref={passwordInput} onChange={e => setLoginData(prev => ({...prev, password: e.target.value}))} type={inputType} placeholder="Digite sua senha" required  />
+                        <Visibility onClick={handlePasswordVisibility}>
+                            {passwordVisibility ? <GoEyeClosed /> : <GoEye />}
+                        </Visibility>
+                    </div>
+                </LoginPasswordContainer>
+                <GlobalFormButton text="Login" type="submit" />
                 <GoogleLoginSpan>
                     <hr />
                     <span>ou faça login com</span>
@@ -60,9 +75,9 @@ export function Login() {
                     <span>Continuar com Google</span>
                 </GoogleButton>
             </GlobalForm>
-            <LinkRegisterLogin to="/register">
+            <GlobalFormLink to="/register">
                 Crie uma conta
-            </LinkRegisterLogin>
+            </GlobalFormLink>
         </GlobalFormContainer>
     );
 }

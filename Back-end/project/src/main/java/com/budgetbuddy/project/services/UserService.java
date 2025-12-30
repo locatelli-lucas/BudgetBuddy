@@ -9,6 +9,9 @@ import com.budgetbuddy.project.entities.User;
 import com.budgetbuddy.project.exceptions.BadRequestException;
 import com.budgetbuddy.project.exceptions.EntityNotFoundException;
 import com.budgetbuddy.project.repositories.UserRepository;
+import lombok.extern.java.Log;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -27,23 +30,25 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private AuthenticationManager authenticationManager;
+//    @Autowired
+//    private PasswordEncoder passwordEncoder;
+//
+//    @Autowired
+//    private AuthenticationManager authenticationManager;
 
     @Autowired
     private TokenService tokenService;
 
+    Logger logger = LogManager.getLogger(UserService.class);
+
     public UserDTORes createUser(UserDTOReq userDTOReq) {
         if(userDTOReq == null) throw new BadRequestException("Invalid user data provided");
-        if(findByEmail(userDTOReq.email())) throw new BadRequestException("User with email " + userDTOReq.email() + " already exists");
+        if(findByEmail(userDTOReq.email()) == null) throw new BadRequestException("User with email " + userDTOReq.email() + " already exists");
 
-        String encodedPassword = passwordEncoder.encode(userDTOReq.password());
+//        String encodedPassword = passwordEncoder.encode(userDTOReq.password());
 
         User user = userDTOReq.dtoToUser();
-        user.setPassword(encodedPassword);
+//        user.setPassword(encodedPassword);
 
         this.userRepository.save(user);
         return UserDTORes.userToDto(user);
@@ -70,11 +75,16 @@ public class UserService {
         return UserDTORes.userToDto(user);
     }
 
-    public boolean findByEmail(String email) {
+    public UserDTORes findByEmail(String email) {
         if(email == null) throw new BadRequestException("No email provided");
 
         Optional<User> user = this.userRepository.findByEmail(email);
-        return user.isPresent();
+        logger.info(user);
+        System.out.println("user: " + user);
+
+        if(user.isEmpty()) throw new EntityNotFoundException("User with email " + email + " not found");
+
+        return UserDTORes.userToDto(user.get());
     }
 
     public UserDTORes update(Long id, UserDTOPatchReq body) {
@@ -83,12 +93,11 @@ public class UserService {
 
         User user = findByIdEntity(id);
 
-        String encodedPassword = passwordEncoder.encode(body.password());
+//        String encodedPassword = passwordEncoder.encode(body.password());
 
         if(!Objects.equals(body.name(), user.getName())) user.setName(body.name());
         if(!Objects.equals(body.email(), user.getEmail())) user.setEmail(body.email());
-        if(!Objects.equals(encodedPassword, user.getPassword())) user.setPassword(encodedPassword);
-        if(!Objects.equals(body.profilePicture(), user.getProfilePicture())) user.setProfilePicture(body.profilePicture());
+//        if(!Objects.equals(encodedPassword, user.getPassword())) user.setPassword(encodedPassword);
         if(!Objects.equals(body.monthlyIncome(), user.getMonthlyIncome())) user.setMonthlyIncome(body.monthlyIncome());
 
         this.userRepository.save(user);
@@ -109,12 +118,6 @@ public class UserService {
     }
 
     public LoginDTORes login(LoginDTOReq loginDTOReq) {
-        if(loginDTOReq == null) throw new BadRequestException("Invalid user data provided");
-        if(loginDTOReq.email() == null) throw new BadRequestException("No email provided");
-        if(loginDTOReq.password() == null) throw new BadRequestException("No password provided");
-        if(loginDTOReq.email().isEmpty()) throw new BadRequestException("Empty email provided");
-        if(loginDTOReq.password().isEmpty()) throw new BadRequestException("Empty password provided");
-
         Optional<User> optionalUser = this.userRepository.findByEmail(loginDTOReq.email());
 
         if(optionalUser.isEmpty()) throw new EntityNotFoundException("User with email " + loginDTOReq.email() + " not found");
@@ -122,7 +125,7 @@ public class UserService {
 
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(loginDTOReq.email(), loginDTOReq.password());
 
-        authenticationManager.authenticate(token);
+//        authenticationManager.authenticate(token);
 
         return tokenService.generateToken(user);
     }

@@ -2,8 +2,6 @@ package com.budgetbuddy.project.dto.goal.req;
 
 import com.budgetbuddy.project.entities.Goal;
 import com.budgetbuddy.project.entities.User;
-import com.budgetbuddy.project.types.CategoryTypes;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.Date;

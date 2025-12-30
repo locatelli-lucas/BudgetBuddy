@@ -33,8 +33,9 @@ export function Login() {
     const handleLoginButtonClick = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            await getUserByEmail(loginData.email);
-            navigate(`/${loginData.email}/dashboard`);
+            await getUserByEmail(loginData.email).then(res => {
+                navigate(`/${res.id}/dashboard`);
+            })
         } catch (error) {
             console.error("Error logging in:", error);
         }

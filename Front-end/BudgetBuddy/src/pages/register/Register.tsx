@@ -14,11 +14,13 @@ import {
 import {Subtitle} from "./style.ts";
 import {useEffect, useRef, useState} from "react";
 import type {User} from "../../types/Types.ts";
-import {createUser, testCall} from "../../services/user-service.ts";
+import {createUser} from "../../services/user-service.ts";
 import {GlobalFormButton} from "../../components/GlobalFormButton.tsx";
 import * as React from "react";
+import {useNavigate} from "react-router-dom";
 
 export function Register() {
+    const navigate = useNavigate();
     const nameInput = useRef<HTMLInputElement>(null);
     const emailInput = useRef<HTMLInputElement>(null);
     const passwordInput = useRef<HTMLInputElement>(null);
@@ -38,8 +40,9 @@ export function Register() {
     const createUserReq = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            console.log(user)
-            if(user) await createUser(user).then(res => console.log(res.data));
+            if(user) await createUser(user).then(res => {
+                navigate(`/${res.id}/dashboard`);
+            });
         } catch (error) {
             console.error("Error creating user:", error);
         }
@@ -69,10 +72,6 @@ export function Register() {
         if(newValue !== "")
             setCurrentValue(newValue);
     };
-
-    useEffect(() => {
-        console.log(user)
-    }, [user])
 
     useEffect(() => {
         monthlyIncomeInput.current!.value = currentValue || "";

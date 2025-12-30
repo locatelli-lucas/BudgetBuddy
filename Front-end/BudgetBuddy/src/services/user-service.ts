@@ -3,7 +3,9 @@ import {API, configAPI} from "./API.ts";
 
 export async function createUser (user : User) {
     try {
-        return await API.post("/users", user);
+        return await API.post("/users", user).then(res => {
+            return res.data as User;
+        });
     } catch (error) {
         console.error("Error creating user:", error);
         throw error;
@@ -29,7 +31,6 @@ export async function loginUser(login : Login) {
 export async function getUserByEmail(email: string) : Promise<User> {
     try {
         return await API.get(`/users/email/${email}`).then(res => {
-            console.log(res.data as User)
             return res.data as User;
         });
     } catch (error) {

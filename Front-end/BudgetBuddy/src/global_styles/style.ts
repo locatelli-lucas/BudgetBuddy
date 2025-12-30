@@ -7,9 +7,12 @@ export const fontFamily = "Montserrat, sans-serif";
 export const labelFontFamily = "Roboto, sans-serif"
 export const googleColor = "#E4E7EB";
 export const darkTextColor = "#191d24";
+export const sidebarBg = "#1a1a1a";
+export const sidebarColor = "#FFFFFF"
+export const sideBarButtonHoverBg = "#333333";
 
-interface GlobalProps {
-    isMoneyInput?: boolean;
+interface GlobalFormContainerProps {
+    height?: string;
 }
 
 export const GlobalTitle = styled.h1`
@@ -48,7 +51,7 @@ export const GlobalMoneySign = styled.span`
     
 `
 
-export const GlobalInput = styled.input<GlobalProps>`
+export const GlobalInput = styled.input`
     width: 30em;
     height: 2.8em;
     border-radius: 0.5em;
@@ -57,15 +60,14 @@ export const GlobalInput = styled.input<GlobalProps>`
     padding-left: 1em;
 `
 
-export const GlobalFormContainer = styled.div`
+export const GlobalFormContainer = styled.div<GlobalFormContainerProps>`
     font-family: ${fontFamily};
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 3em;
-    margin-top: 5em;
-    margin-bottom: 5em;
+    height: ${props => props.height || "100vh"};
 `;
 
 export const Visibility = styled.button`
@@ -80,7 +82,7 @@ export const FormButton = styled.button`
     color: #ffffff;
     background-color: ${mainColor};
     font-weight: 600;
-    width: 26rem;
+    width: 30rem;
     height: 2.8em;
     border-radius: 0.5em;
     border: none;
@@ -148,4 +150,23 @@ export const GlobalInputContainer = styled.div`
 export const GlobalLabel = styled.label`
     font-family: ${labelFontFamily};
     font-weight: 600;
+`
+
+export const SidebarContainer = styled.div`
+    background: ${sidebarBg};
+    color: ${sidebarColor};
+    //width: 20vw;
+    //height: 100vh;
+`
+
+export const SidebarButtonContainer = styled.div`
+    height: 3.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    
+    &:hover {
+        background: ${sideBarButtonHoverBg};
+    }
 `

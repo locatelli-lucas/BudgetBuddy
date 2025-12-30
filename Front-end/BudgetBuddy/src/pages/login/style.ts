@@ -13,5 +13,5 @@ export const LoginPasswordContainer = styled.div`
 `
 export const LabelLinkContainer = styled.div`
     display: flex;
-    gap: 13rem;
+    gap: 17rem
 `

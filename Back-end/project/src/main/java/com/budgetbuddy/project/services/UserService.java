@@ -43,7 +43,7 @@ public class UserService {
 
     public UserDTORes createUser(UserDTOReq userDTOReq) {
         if(userDTOReq == null) throw new BadRequestException("Invalid user data provided");
-        if(findByEmail(userDTOReq.email()) == null) throw new BadRequestException("User with email " + userDTOReq.email() + " already exists");
+        if(findByEmail(userDTOReq.email()) != null) throw new BadRequestException("User with email " + userDTOReq.email() + " already exists");
 
 //        String encodedPassword = passwordEncoder.encode(userDTOReq.password());
 
@@ -82,9 +82,7 @@ public class UserService {
         logger.info(user);
         System.out.println("user: " + user);
 
-        if(user.isEmpty()) throw new EntityNotFoundException("User with email " + email + " not found");
-
-        return UserDTORes.userToDto(user.get());
+        return user.map(UserDTORes::userToDto).orElse(null);
     }
 
     public UserDTORes update(Long id, UserDTOPatchReq body) {

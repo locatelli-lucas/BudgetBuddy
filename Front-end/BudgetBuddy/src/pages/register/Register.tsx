@@ -38,9 +38,8 @@ export function Register() {
     const createUserReq = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            // if(user)
-            //     return await createUser(user).then(res => console.log(res.data));
-            await testCall()
+            console.log(user)
+            if(user) await createUser(user).then(res => console.log(res.data));
         } catch (error) {
             console.error("Error creating user:", error);
         }
@@ -80,7 +79,7 @@ export function Register() {
     }, [currentValue]);
 
     return (
-        <GlobalFormContainer>
+        <GlobalFormContainer height="120vh">
             <Title />
             <Subtitle>Crie sua conta</Subtitle>
             <GlobalForm onSubmit={createUserReq}>

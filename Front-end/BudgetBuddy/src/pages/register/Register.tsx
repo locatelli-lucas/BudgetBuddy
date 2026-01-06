@@ -3,7 +3,7 @@ import {FcGoogle} from "react-icons/fc";
 import {useFormatNumber, useIsNumeric, usePasswordVisibility} from "../../hooks/Hooks.tsx";
 import {GoEye, GoEyeClosed} from "react-icons/go";
 import {Subtitle} from "./style.ts";
-import {useEffect, useRef, useState} from "react";
+import {useContext, useEffect, useRef, useState} from "react";
 import type {User} from "../../types/Types.ts";
 import {createUser} from "../../services/user-service.ts";
 import {GlobalFormButton} from "../../components/buttons/GlobalFormButton.tsx";
@@ -17,6 +17,7 @@ import {
 } from "../../global_styles/forms/forms.style.ts";
 import {GoogleButton, Visibility} from "../../global_styles/buttons/buttons.style.ts";
 import {GoogleIcon, GoogleLoginSpan} from "../../global_styles/google/google.style.ts";
+import {UserContext} from "../../contexts/UserContext.tsx";
 
 export function Register() {
     const navigate = useNavigate();
@@ -28,6 +29,7 @@ export function Register() {
     const {formatMoneyToNumberStr, formatNumberToMoney} = useFormatNumber();
     const {isNumeric} = useIsNumeric();
     const [currentValue, setCurrentValue] = useState<string>();
+    const {setId, setUsername, setEmail, setMonthlyIncome} = useContext(UserContext);
     const [user, setUser] = useState<User>({
         name: "",
         email: "",
@@ -40,6 +42,10 @@ export function Register() {
         e.preventDefault();
         try {
             if(user) await createUser(user).then(res => {
+                setId(user.id!);
+                setUsername(user.name);
+                setEmail(user.email);
+                setMonthlyIncome(user.monthlyIncome);
                 navigate(`/${res.id}/dashboard`);
             });
         } catch (error) {

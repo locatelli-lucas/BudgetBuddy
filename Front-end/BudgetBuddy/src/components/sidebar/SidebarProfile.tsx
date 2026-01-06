@@ -1,14 +1,13 @@
 import {SideBarProfileContainer} from "../../global_styles/sidebar/sidebar.style.ts";
 
 interface Props {
-    userName: string;
+    username: string;
 }
 
 export function SidebarProfile(props: Props) {
     return (
         <SideBarProfileContainer>
-            <span>{props.userName}</span>
-            <a>Ver perfil</a>
+            <span>{props.username}</span>
         </SideBarProfileContainer>
     )
 

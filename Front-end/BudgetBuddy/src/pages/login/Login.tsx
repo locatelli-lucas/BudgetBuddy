@@ -1,23 +1,22 @@
-import {Title} from "../../components/Title.tsx";
-
+import {Title} from "../../components/global/Title.tsx";
 import { GoEye } from "react-icons/go";
 import { GoEyeClosed } from "react-icons/go";
 import { FcGoogle } from "react-icons/fc";
 import {usePasswordVisibility} from "../../hooks/Hooks.tsx";
-import {
-    GlobalForm,
-    GlobalFormContainer, GlobalInput,
-    GoogleButton,
-    GoogleIcon,
-    GoogleLoginSpan, GlobalFormLink,
-    Visibility, GlobalInputContainer, GlobalLabel
-} from "../../global_styles/style.ts";
-import {GlobalFormButton} from "../../components/GlobalFormButton.tsx";
+import {GlobalFormButton} from "../../components/buttons/GlobalFormButton.tsx";
 import {useRef, useState} from "react";
 import {getUserByEmail} from "../../services/user-service.ts";
 import * as React from "react";
 import {useNavigate} from "react-router-dom";
 import {ForgotPasswordLink, LabelLinkContainer, LoginPasswordContainer} from "./style.ts";
+import {
+    GlobalForm,
+    GlobalFormContainer, GlobalFormLink, GlobalInput,
+    GlobalInputContainer,
+    GlobalLabel
+} from "../../global_styles/forms/forms.style.ts";
+import {GoogleButton, Visibility} from "../../global_styles/buttons/buttons.style.ts";
+import {GoogleIcon, GoogleLoginSpan} from "../../global_styles/google/google.style.ts";
 
 
 export function Login() {

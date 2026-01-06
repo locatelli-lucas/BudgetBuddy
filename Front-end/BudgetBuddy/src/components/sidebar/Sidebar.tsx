@@ -1,14 +1,18 @@
-import {GlobalTitle, SidebarContainer} from "../global_styles/style.ts";
-import {MdOutlineLogout, MdOutlineSettings} from "react-icons/md";
+import {MdOutlineSettings} from "react-icons/md";
 import {SidebarButton} from "./SidebarButton.tsx";
 import {HiOutlineSquares2X2} from "react-icons/hi2";
 import {LuArrowRightLeft, LuWallet} from "react-icons/lu";
 import {PiInvoiceBold} from "react-icons/pi";
 import {FiTrendingDown} from "react-icons/fi";
 import {GiBullseye} from "react-icons/gi";
-import {SideBarList} from "../pages/dashboard/style.ts";
+import {SidebarTitle} from "./SidebarTitle.tsx";
+import {useState} from "react";
+import {LogoutButton} from "../buttons/LogoutButton.tsx";
+import {SidebarProfile} from "./SidebarProfile.tsx";
+import {SidebarContainer, SideBarList} from "../../global_styles/sidebar/sidebar.style.ts";
 
 export function Sidebar() {
+    const [activeIndex, setActiveIndex] = useState<number | null>(null);
     const iconsLabels = [
         {
             icon: HiOutlineSquares2X2,
@@ -42,18 +46,14 @@ export function Sidebar() {
 
     return (
        <SidebarContainer>
-           <GlobalTitle />
+           <SidebarTitle />
            <SideBarList>
                {iconsLabels.map((item, index) => (
-                   <li key={index}>
-                       <SidebarButton icon={item.icon} label={item.label} />
-                   </li>
+                   <SidebarButton key={index} icon={item.icon} label={item.label} clicked={activeIndex === index} onClick={() => setActiveIndex(index)} />
                ))}
            </SideBarList>
-           <div>
-               <MdOutlineLogout />
-               <span>Sair</span>
-           </div>
+           <LogoutButton />
+           <SidebarProfile userName="Lucas"/>
        </SidebarContainer>
     )
 }

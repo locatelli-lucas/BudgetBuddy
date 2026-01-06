@@ -1,4 +1,4 @@
-import {FormButton} from "../global_styles/style.ts";
+import {FormButton} from "../../global_styles/buttons/buttons.style.ts";
 
 interface Props {
     text: string

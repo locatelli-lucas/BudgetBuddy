@@ -1,14 +1,13 @@
-import {
-    GlobalForm,
-    GlobalFormContainer,
-    GlobalFormLink,
-    GlobalInput,
-    GlobalInputContainer, GlobalLabel
-} from "../../global_styles/style.ts";
-import {Title} from "../../components/Title.tsx";
+import {Title} from "../../components/global/Title.tsx";
 import {ForgotPasswordContainer, ForgotPasswordSpan} from "./style.ts";
 import {useRef} from "react";
-import {GlobalFormButton} from "../../components/GlobalFormButton.tsx";
+import {GlobalFormButton} from "../../components/buttons/GlobalFormButton.tsx";
+import {
+    GlobalForm,
+    GlobalFormContainer, GlobalFormLink, GlobalInput,
+    GlobalInputContainer,
+    GlobalLabel
+} from "../../global_styles/forms/forms.style.ts";
 
 export function ForgotPassword() {
     const emailInput = useRef<HTMLInputElement>(null);

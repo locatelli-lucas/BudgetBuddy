@@ -1,4 +1,4 @@
-import {Sidebar} from "../../components/Sidebar.tsx";
+import {Sidebar} from "../../components/sidebar/Sidebar.tsx";
 import {DashboardContainer, DashboardContent} from "./style.ts";
 
 export function Dashboard() {

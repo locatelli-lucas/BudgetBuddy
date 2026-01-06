@@ -1,5 +1,11 @@
 @font-face {
     font-family: 'Montserrat';
-    src: url("../assets/fonts/Montserrat-VariableFont_wght.ttf") format("ttf-variations");
+    src: url("../assets/fonts/Montserrat-VariableFont_wght.ttf") format("truetype");
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Roboto";
+    src: url("../assets/fonts/Roboto-VariableFont_wdth,wght.ttf") format("truetype");
     font-style: normal;
 }

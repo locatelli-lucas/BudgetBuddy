@@ -5,3 +5,10 @@ Content-Type: application/json
 ### find User by id
 GET http://localhost:8080/users/1
 Content-Type: application/json
+
+### find User by email
+@email = test@test.com
+@token = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJCdWRnZXRCdWRkeS9zZWN1cml0eSIsInN1YiI6InRlc3RAdGVzdC5jb20iLCJleHAiOjE3NjY0NTMwMDB9.aUiInlsEZdVq84wQ6gASYGXCAXdzLbew6yYRg0GeZj4
+GET http://localhost:8080/users/{{email}}
+Content-Type: application/json
+Authorization: {{token}}

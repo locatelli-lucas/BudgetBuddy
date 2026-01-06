@@ -19,8 +19,6 @@ public record UserDTOReq(
         @NotBlank(message = "Password is required")
         String password,
 
-        String profilePicture,
-
         double monthlyIncome,
 
         Role role
@@ -31,7 +29,6 @@ public record UserDTOReq(
                 this.name(),
                 this.email(),
                 this.password(),
-                this.profilePicture(),
                 this.monthlyIncome(),
                 roles
         );
@@ -44,7 +41,6 @@ public record UserDTOReq(
                 this.name(),
                 this.email(),
                 this.password(),
-                this.profilePicture(),
                 this.monthlyIncome(),
                 roles
         );

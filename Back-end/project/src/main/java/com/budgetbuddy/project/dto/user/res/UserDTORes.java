@@ -6,16 +6,14 @@ public record UserDTORes(
        Long id,
        String name,
        String email,
-       String password,
-       String profilePicture
+       String password
 ) {
     public static UserDTORes userToDto(User user) {
         return new UserDTORes(
                 user.getId(),
                 user.getName(),
                 user.getEmail(),
-                user.getPassword(),
-                user.getProfilePicture()
+                user.getPassword()
         );
     }
 }

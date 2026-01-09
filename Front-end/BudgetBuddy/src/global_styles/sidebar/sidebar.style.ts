@@ -42,7 +42,7 @@ export const SideBarTitle = styled.h2`
     margin: 0 0 2rem 0;
     font-family: ${fontFamily};
 `
-export const LogoutButtonContainer = styled.div`
+export const LogoutButtonContainer = styled.button`
     border-radius: 4px;
     background: #262626;
     width: 80%;
@@ -56,6 +56,7 @@ export const LogoutButtonContainer = styled.div`
     padding-left: 0.7rem;
     margin: 0 0 2rem 10%;
     cursor: pointer;
+    color: ${sidebarColor};
     
     &:hover {
         background: #333333;

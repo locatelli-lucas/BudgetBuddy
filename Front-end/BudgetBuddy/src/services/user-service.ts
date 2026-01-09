@@ -1,5 +1,5 @@
-import type {Login, Page, User} from "../types/Types.ts";
-import {API, configAPI} from "./API.ts";
+import type {LoginType, Page, User} from "../types/Types.ts";
+import {API} from "./API.ts";
 
 export async function createUser (user : User) {
     try {
@@ -12,14 +12,17 @@ export async function createUser (user : User) {
     }
 }
 
-export async function loginUser(login : Login) {
+export async function loginUser(login : LoginType) {
     try {
         return await API.post("/users/login", login)
             .then(res => {
                 if (res.data.token) {
-                    localStorage.setItem("tokenType", res.data.type);
-                    localStorage.setItem("tokenValue", res.data.token);
-                    configAPI();
+                    localStorage.setItem("user", JSON.stringify({
+                        id: res.data.id,
+                        name: res.data.name,
+                    }))
+
+                    return res.data as User;
                 }
             });
     } catch(error) {

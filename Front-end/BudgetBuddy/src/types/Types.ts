@@ -20,7 +20,7 @@ export type UserContextType = {
     setMonthlyIncome: Dispatch<SetStateAction<number>>
 }
 
-export type Login = {
+export type LoginType = {
     email: string,
     password: string
 }
@@ -28,4 +28,9 @@ export type Login = {
 export type Page = {
     pageNumber: number,
     size: number
+}
+
+export type TokenType = {
+    type: string,
+    token: string
 }

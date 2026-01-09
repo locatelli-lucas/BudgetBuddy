@@ -57,7 +57,7 @@ export function Sidebar() {
 
     const handleButtonClick = (route: string, index: number) => {
         setActiveIndex(index);
-        navigate(`${id}/${route}`);
+        navigate(`/${id}${route}`);
     }
 
     return (

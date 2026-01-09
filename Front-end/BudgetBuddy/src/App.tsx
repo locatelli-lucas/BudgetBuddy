@@ -7,25 +7,36 @@ import {Dashboard} from "./pages/dashboard/Dashboard.tsx";
 import {Configuration} from "./pages/configuration/Configuration.tsx";
 import {UserContext} from "./contexts/UserContext.tsx";
 import {useState} from "react";
-import type {UserContextType} from "./types/Types.ts";
 
 function App() {
-  const [user, setUser] = useState<UserContextType | null>(null);
+  const [id, setId] = useState<number>(0);
+  const [username, setUsername] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const [monthlyIncome, setMonthlyIncome] = useState<number>(0);
 
   return (
-      <BrowserRouter>
-        <Routes>
-          <Route path="*" element={<h1>Page not found</h1>}/>
-          <Route path="/login" element={<Login />}/>
-          <Route path="/register" element={<Register />}/>
-          <Route path="/forgotpassword" element={<ForgotPassword />}/>
+      <UserContext.Provider value={{
+        id,
+        username,
+        email,
+        monthlyIncome,
+        setId,
+        setUsername,
+        setEmail,
+        setMonthlyIncome
+      }}>
+          <BrowserRouter>
+              <Routes>
+                  <Route path="*" element={<h1>Page not found</h1>}/>
+                  <Route path="/login" element={<Login />}/>
+                  <Route path="/register" element={<Register />}/>
+                  <Route path="/forgotpassword" element={<ForgotPassword />}/>
+                  <Route path="/:id/dashboard" element={<Dashboard />}/>
+                  <Route path="/:id/configuracoes" element={<Configuration />}/>
+              </Routes>
+          </BrowserRouter>
+      </UserContext.Provider>
 
-          <UserContext.Provider value={{user, setUser} as unknown as UserContextType}>
-              <Route path="/:id/dashboard" element={<Dashboard />}/>
-              <Route path="/:id/configuracoes" element={<Configuration />}/>
-          </UserContext.Provider>
-        </Routes>
-      </BrowserRouter>
   )
 }
 

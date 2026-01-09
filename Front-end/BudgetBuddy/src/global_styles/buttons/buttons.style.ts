@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import {googleColor, hiddenGray, mainColor} from "../style.ts";
+import {googleColor, hiddenGray, mainColor, robotoFontFamily} from "../style.ts";
 
 export const Visibility = styled.button`
     transform: scale(1.4);
@@ -38,5 +38,15 @@ export const GoogleButton = styled.button`
     & span {
         position: relative;
         color: ${hiddenGray};
+    }
+`
+export const ChangePageButton = styled.button`
+    width: 50%;
+    font-family: ${robotoFontFamily};
+    
+    &:hover {
+        cursor: pointer;
+        border-bottom: 2px solid ${mainColor};
+        color: ${mainColor};
     }
 `

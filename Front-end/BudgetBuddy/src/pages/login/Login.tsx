@@ -4,7 +4,7 @@ import { GoEyeClosed } from "react-icons/go";
 import { FcGoogle } from "react-icons/fc";
 import {usePasswordVisibility} from "../../hooks/Hooks.tsx";
 import {GlobalFormButton} from "../../components/buttons/GlobalFormButton.tsx";
-import {useRef, useState} from "react";
+import {useContext, useRef, useState} from "react";
 import {getUserByEmail} from "../../services/user-service.ts";
 import * as React from "react";
 import {useNavigate} from "react-router-dom";
@@ -17,6 +17,7 @@ import {
 } from "../../global_styles/forms/forms.style.ts";
 import {GoogleButton, Visibility} from "../../global_styles/buttons/buttons.style.ts";
 import {GoogleIcon, GoogleLoginSpan} from "../../global_styles/google/google.style.ts";
+import {UserContext} from "../../contexts/UserContext.tsx";
 
 
 export function Login() {
@@ -24,6 +25,7 @@ export function Login() {
     const {inputType, passwordVisibility, handlePasswordVisibility} = usePasswordVisibility();
     const emailInput = useRef<HTMLInputElement>(null);
     const passwordInput = useRef<HTMLInputElement>(null);
+    const {setId, setUsername, setEmail, setMonthlyIncome} = useContext(UserContext);
     const [loginData, setLoginData] = useState({
         email: "",
         password: ""
@@ -33,6 +35,10 @@ export function Login() {
         e.preventDefault();
         try {
             await getUserByEmail(loginData.email).then(res => {
+                setId(res.id!);
+                setUsername(res.name);
+                setEmail(res.email);
+                setMonthlyIncome(res.monthlyIncome);
                 navigate(`/${res.id}/dashboard`);
             })
         } catch (error) {

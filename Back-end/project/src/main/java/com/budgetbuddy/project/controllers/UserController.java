@@ -1,11 +1,11 @@
 package com.budgetbuddy.project.controllers;
 
 import com.budgetbuddy.project.dto.login.req.LoginDTOReq;
-import com.budgetbuddy.project.dto.login.res.LoginDTORes;
 import com.budgetbuddy.project.dto.user.req.UserDTOPatchReq;
 import com.budgetbuddy.project.dto.user.req.UserDTOReq;
 import com.budgetbuddy.project.dto.user.res.UserDTORes;
 import com.budgetbuddy.project.services.UserService;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -66,9 +66,9 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    private ResponseEntity<LoginDTORes> login(@RequestBody LoginDTOReq body) {
-        LoginDTORes login = this.userService.login(body);
-        return ResponseEntity.ok(login);
+    private ResponseEntity<Void> login(@RequestBody LoginDTOReq body, HttpServletResponse response) {
+        this.userService.login(body, response);
+        return ResponseEntity.ok().build();
     }
 }
 

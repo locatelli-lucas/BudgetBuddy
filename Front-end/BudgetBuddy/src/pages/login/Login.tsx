@@ -5,7 +5,7 @@ import { FcGoogle } from "react-icons/fc";
 import {usePasswordVisibility} from "../../hooks/Hooks.tsx";
 import {GlobalFormButton} from "../../components/buttons/GlobalFormButton.tsx";
 import {useRef, useState} from "react";
-import {loginUser} from "../../services/user-service.ts";
+import {getUserByEmail, loginUser} from "../../services/user-service.ts";
 import * as React from "react";
 import {useNavigate} from "react-router-dom";
 import {ForgotPasswordLink, LabelLinkContainer, LoginPasswordContainer} from "./style.ts";
@@ -17,7 +17,7 @@ import {
 } from "../../global_styles/forms/forms.style.ts";
 import {GoogleButton, Visibility} from "../../global_styles/buttons/buttons.style.ts";
 import {GoogleIcon, GoogleLoginSpan} from "../../global_styles/google/google.style.ts";
-import type {LoginType} from "../../types/Types.ts";
+import type {LoginType, User} from "../../types/Types.ts";
 
 export function Login() {
     const navigate = useNavigate();
@@ -33,19 +33,11 @@ export function Login() {
     const handleLoginButtonClick = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            // await getUserByEmail(loginData.email).then(res => {
-            //     // setId(res.id!);
-            //     // setUsername(res.name);
-            //     // setEmail(res.email);
-            //     // setMonthlyIncome(res.monthlyIncome);
-            //
-            // })
+            const user : User = await getUserByEmail(loginData.email);
             await loginUser(loginData).then(res => {
-                console.log("Logged in user:", loginData);
+                console.log("Logged in user:", res);
 
-                console.log(localStorage.getItem("username"))
-
-                navigate(`/${res!.id}/dashboard`);
+                navigate(`/${user.id}/dashboard`);
             })
         } catch (error) {
             console.error("Error logging in:", error);

@@ -22,6 +22,8 @@ export async function loginUser(login : LoginType) {
                         name: res.data.name,
                     }))
 
+                    console.log("User logged in:", res.data);
+
                     return res.data as User;
                 }
             });

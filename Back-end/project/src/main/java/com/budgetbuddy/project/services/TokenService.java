@@ -2,7 +2,6 @@ package com.budgetbuddy.project.services;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.budgetbuddy.project.dto.login.res.LoginDTORes;
 import com.budgetbuddy.project.entities.User;
 import org.springframework.stereotype.Service;
 
@@ -15,17 +14,17 @@ public class TokenService {
 
     private final String secret = "my_secret";
 
-    public LoginDTORes generateToken(User user) {
+    public String generateToken(User user) {
         Algorithm algorithm = Algorithm.HMAC256(secret);
         Instant expirationDate = getExpirationDate();
 
-        String token = JWT.create()
+        return JWT.create()
                 .withIssuer("BudgetBuddy/security")
                 .withSubject(user.getEmail())
                 .withExpiresAt(expirationDate)
                 .sign(algorithm);
 
-        return new LoginDTORes("Bearer", token, expirationDate.toEpochMilli());
+//        return new LoginDTORes("Bearer", token, expirationDate.toEpochMilli());
     }
 
     private Instant getExpirationDate() {

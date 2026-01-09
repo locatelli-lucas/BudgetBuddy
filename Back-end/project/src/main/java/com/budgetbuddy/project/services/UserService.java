@@ -1,7 +1,6 @@
 package com.budgetbuddy.project.services;
 
 import com.budgetbuddy.project.dto.login.req.LoginDTOReq;
-import com.budgetbuddy.project.dto.login.res.LoginDTORes;
 import com.budgetbuddy.project.dto.user.req.UserDTOPatchReq;
 import com.budgetbuddy.project.dto.user.req.UserDTOReq;
 import com.budgetbuddy.project.dto.user.res.UserDTORes;
@@ -9,18 +8,21 @@ import com.budgetbuddy.project.entities.User;
 import com.budgetbuddy.project.exceptions.BadRequestException;
 import com.budgetbuddy.project.exceptions.EntityNotFoundException;
 import com.budgetbuddy.project.repositories.UserRepository;
-import lombok.extern.java.Log;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -30,11 +32,11 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-//    @Autowired
-//    private PasswordEncoder passwordEncoder;
-//
-//    @Autowired
-//    private AuthenticationManager authenticationManager;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
 
     @Autowired
     private TokenService tokenService;
@@ -45,10 +47,10 @@ public class UserService {
         if(userDTOReq == null) throw new BadRequestException("Invalid user data provided");
         if(findByEmail(userDTOReq.email()) != null) throw new BadRequestException("User with email " + userDTOReq.email() + " already exists");
 
-//        String encodedPassword = passwordEncoder.encode(userDTOReq.password());
+        String encodedPassword = passwordEncoder.encode(userDTOReq.password());
 
         User user = userDTOReq.dtoToUser();
-//        user.setPassword(encodedPassword);
+        user.setPassword(encodedPassword);
 
         this.userRepository.save(user);
         return UserDTORes.userToDto(user);
@@ -91,11 +93,11 @@ public class UserService {
 
         User user = findByIdEntity(id);
 
-//        String encodedPassword = passwordEncoder.encode(body.password());
+        String encodedPassword = passwordEncoder.encode(body.password());
 
         if(!Objects.equals(body.name(), user.getName())) user.setName(body.name());
         if(!Objects.equals(body.email(), user.getEmail())) user.setEmail(body.email());
-//        if(!Objects.equals(encodedPassword, user.getPassword())) user.setPassword(encodedPassword);
+        if(!Objects.equals(encodedPassword, user.getPassword())) user.setPassword(encodedPassword);
         if(!Objects.equals(body.monthlyIncome(), user.getMonthlyIncome())) user.setMonthlyIncome(body.monthlyIncome());
 
         this.userRepository.save(user);
@@ -115,16 +117,26 @@ public class UserService {
         this.userRepository.deleteById(id);
     }
 
-    public LoginDTORes login(LoginDTOReq loginDTOReq) {
+    public void login(LoginDTOReq loginDTOReq, HttpServletResponse response) {
         Optional<User> optionalUser = this.userRepository.findByEmail(loginDTOReq.email());
 
         if(optionalUser.isEmpty()) throw new EntityNotFoundException("User with email " + loginDTOReq.email() + " not found");
         User user = optionalUser.get();
 
-        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(loginDTOReq.email(), loginDTOReq.password());
+        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(loginDTOReq.email(), loginDTOReq.password());
 
-//        authenticationManager.authenticate(token);
+        authenticationManager.authenticate(usernamePasswordAuthenticationToken);
 
-        return tokenService.generateToken(user);
+        String token = tokenService.generateToken(user);
+
+        ResponseCookie cookie = ResponseCookie.from("access_token", token)
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("Lax")
+                .path("/")
+                .maxAge(Duration.ofMinutes(15))
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 }

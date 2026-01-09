@@ -4,3 +4,5 @@ export const fontFamily = "Montserrat, sans-serif";
 export const robotoFontFamily = "Roboto, sans-serif"
 export const googleColor = "#E4E7EB";
 export const darkTextColor = "#191d24";
+export const windowsBgColor = "#ffffff";
+export const bodyBgColor = "#f5f6f7";

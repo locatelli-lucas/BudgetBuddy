@@ -104,6 +104,7 @@ public class UserService {
         return UserDTORes.userToDto(user);
     }
 
+
     public UserDTORes put(Long id, UserDTOReq body) {
         if(id == null) throw new BadRequestException("No id provided");
         if(body == null) throw new BadRequestException("No user data provided");

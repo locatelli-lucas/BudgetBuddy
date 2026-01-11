@@ -6,3 +6,4 @@ export const googleColor = "#E4E7EB";
 export const darkTextColor = "#191d24";
 export const windowsBgColor = "#ffffff";
 export const bodyBgColor = "#f5f6f7";
+export const inputLabelColor = "#525257"

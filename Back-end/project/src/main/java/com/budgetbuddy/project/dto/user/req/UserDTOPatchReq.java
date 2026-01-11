@@ -19,8 +19,6 @@ public record UserDTOPatchReq(
         @NotBlank(message = "Password is required")
         String password,
 
-        @NotNull
-        @NotBlank
         String profilePicture,
 
         @NotNull

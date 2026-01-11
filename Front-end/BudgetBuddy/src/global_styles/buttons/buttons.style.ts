@@ -1,5 +1,13 @@
 import styled from "styled-components";
-import {googleColor, hiddenGray, mainColor, robotoFontFamily} from "../style.ts";
+import {googleColor, hiddenGray, inputLabelColor, mainColor, robotoFontFamily} from "../style.ts";
+
+type FormButtonProps = {
+    marginTop?: string;
+}
+
+type ChangePageButtonProps = {
+    isClicked: boolean;
+}
 
 export const Visibility = styled.button`
     transform: scale(1.4);
@@ -9,7 +17,7 @@ export const Visibility = styled.button`
     color: ${hiddenGray};
     padding: 1rem 0 0 0.5rem;
 `
-export const FormButton = styled.button`
+export const FormButton = styled.button<FormButtonProps>`
     color: #ffffff;
     background-color: ${mainColor};
     font-weight: 600;
@@ -18,6 +26,7 @@ export const FormButton = styled.button`
     border-radius: 0.5em;
     border: none;
     cursor: pointer;
+    margin-top: ${props => props.marginTop};
 `
 export const GoogleButton = styled.button`
     display: flex;
@@ -40,13 +49,14 @@ export const GoogleButton = styled.button`
         color: ${hiddenGray};
     }
 `
-export const ChangePageButton = styled.button`
+export const ChangePageButton = styled.button<ChangePageButtonProps>`
     width: 50%;
     font-family: ${robotoFontFamily};
+    color: ${props => props.isClicked ? `${mainColor}` : `${inputLabelColor}`};
+    border-bottom: ${props => props.isClicked ? `2px solid ${mainColor}` : `none`};
+    transition: 0.1s ease-in-out;
     
     &:hover {
         cursor: pointer;
-        border-bottom: 2px solid ${mainColor};
-        color: ${mainColor};
     }
 `

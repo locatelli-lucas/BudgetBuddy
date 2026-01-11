@@ -24,7 +24,6 @@ export function Login() {
     const {inputType, passwordVisibility, handlePasswordVisibility} = usePasswordVisibility();
     const emailInput = useRef<HTMLInputElement>(null);
     const passwordInput = useRef<HTMLInputElement>(null);
-    // const {setId, setUsername, setEmail, setMonthlyIncome} = useContext(UserContext);
     const [loginData, setLoginData] = useState<LoginType>({
         email: "",
         password: ""

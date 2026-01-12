@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
@@ -48,8 +49,9 @@ public class UserController {
     }
 
     @PatchMapping("/{id}")
-    private ResponseEntity<UserDTORes> update(@PathVariable Long id, @Valid @RequestBody UserDTOPatchReq body) {
-        UserDTORes user = this.userService.update(id, body);
+    private ResponseEntity<UserDTORes> update(@PathVariable Long id, @Valid @RequestBody UserDTOPatchReq body, @RequestParam(value = "image", required = false)
+    MultipartFile image) {
+        UserDTORes user = this.userService.update(id, body, image);
         return ResponseEntity.ok(user);
     }
 

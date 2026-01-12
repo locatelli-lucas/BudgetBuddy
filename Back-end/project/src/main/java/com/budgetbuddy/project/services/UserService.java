@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.util.Objects;
 import java.util.Optional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class UserService {
@@ -40,6 +41,9 @@ public class UserService {
 
     @Autowired
     private TokenService tokenService;
+
+    @Autowired
+        private StorageService storageService;
 
     Logger logger = LogManager.getLogger(UserService.class);
 
@@ -87,7 +91,7 @@ public class UserService {
         return user.map(UserDTORes::userToDto).orElse(null);
     }
 
-    public UserDTORes update(Long id, UserDTOPatchReq body) {
+    public UserDTORes update(Long id, UserDTOPatchReq body, MultipartFile image) {
         if(id == null) throw new BadRequestException("No id provided");
         if(body == null) throw new BadRequestException("No user data provided");
 
@@ -99,11 +103,14 @@ public class UserService {
         if(!Objects.equals(body.email(), user.getEmail())) user.setEmail(body.email());
         if(!Objects.equals(encodedPassword, user.getPassword())) user.setPassword(encodedPassword);
         if(!Objects.equals(body.monthlyIncome(), user.getMonthlyIncome())) user.setMonthlyIncome(body.monthlyIncome());
+        if(image != null && !image.isEmpty()) {
+          String filename = storageService.save(image);
+          user.setProfilePicture(filename);
+        }
 
         this.userRepository.save(user);
         return UserDTORes.userToDto(user);
     }
-
 
     public UserDTORes put(Long id, UserDTOReq body) {
         if(id == null) throw new BadRequestException("No id provided");

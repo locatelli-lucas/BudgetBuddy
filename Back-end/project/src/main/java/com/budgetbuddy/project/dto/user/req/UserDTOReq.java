@@ -21,6 +21,8 @@ public record UserDTOReq(
 
         double monthlyIncome,
 
+        String profilePicture,
+
         Role role
 ) {
     public User dtoToUser() {
@@ -30,6 +32,7 @@ public record UserDTOReq(
                 this.email(),
                 this.password(),
                 this.monthlyIncome(),
+                this.profilePicture(),
                 roles
         );
     }
@@ -42,6 +45,7 @@ public record UserDTOReq(
                 this.email(),
                 this.password(),
                 this.monthlyIncome(),
+                this.profilePicture(),
                 roles
         );
     }

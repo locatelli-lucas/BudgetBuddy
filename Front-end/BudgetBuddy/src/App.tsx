@@ -15,6 +15,7 @@ function App() {
   const [username, setUsername] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [monthlyIncome, setMonthlyIncome] = useState<number>(0);
+  const [profilePicture, setProfilePicture] = useState<string>("");
 
   return (
       <UserContext.Provider value={{
@@ -22,10 +23,12 @@ function App() {
         username,
         email,
         monthlyIncome,
+        profilePicture,
         setId,
         setUsername,
         setEmail,
-        setMonthlyIncome
+        setMonthlyIncome,
+          setProfilePicture
       }}>
           <BrowserRouter>
               <Routes>

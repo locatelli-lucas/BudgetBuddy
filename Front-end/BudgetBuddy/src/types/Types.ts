@@ -32,8 +32,3 @@ export type Page = {
     pageNumber: number,
     size: number
 }
-
-export type TokenType = {
-    type: string,
-    token: string
-}

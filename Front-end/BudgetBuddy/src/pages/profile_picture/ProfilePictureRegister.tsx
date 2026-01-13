@@ -15,7 +15,7 @@ import {Subtitle} from "../register/style.ts";
 export function ProfilePictureRegister() {
     const navigate = useNavigate();
     const profilePictureInput = useRef<HTMLInputElement>(null);
-    const {profilePicture, setProfilePicture} = useContext(UserContext);
+    const {username, email profilePicture, setProfilePicture} = useContext(UserContext);
 
     const handleFormSubmit = () => {
         if(!profilePicture) {

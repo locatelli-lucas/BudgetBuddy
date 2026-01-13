@@ -24,7 +24,6 @@ public class TokenService {
                 .withExpiresAt(expirationDate)
                 .sign(algorithm);
 
-//        return new LoginDTORes("Bearer", token, expirationDate.toEpochMilli());
     }
 
     private Instant getExpirationDate() {

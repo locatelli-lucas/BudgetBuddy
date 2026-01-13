@@ -7,6 +7,8 @@ import {Dashboard} from "./pages/dashboard/Dashboard.tsx";
 import {Configuration} from "./pages/configuration/Configuration.tsx";
 import {UserContext} from "./contexts/UserContext.tsx";
 import {useState} from "react";
+import {MonthlyIncomeRegister} from "./pages/monthly_income_register/MonthlyIncomeRegister.tsx";
+import {ProfilePictureRegister} from "./pages/profile_picture/ProfilePictureRegister.tsx";
 
 function App() {
   const [id, setId] = useState<number>(0);
@@ -30,6 +32,8 @@ function App() {
                   <Route path="*" element={<h1>Page not found</h1>}/>
                   <Route path="/login" element={<Login />}/>
                   <Route path="/register" element={<Register />}/>
+                  <Route path="/register/monthlyincome" element={<MonthlyIncomeRegister />}/>
+                  <Route path="/register/profilepicture" element={<ProfilePictureRegister />}/>
                   <Route path="/forgotpassword" element={<ForgotPassword />}/>
                   <Route path="/:id/dashboard" element={<Dashboard />}/>
                   <Route path="/:id/configuracoes" element={<Configuration />}/>

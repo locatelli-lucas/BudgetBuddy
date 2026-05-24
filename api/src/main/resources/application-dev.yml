@@ -1,0 +1,22 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/budgetbuddy
+    username: budgetbuddy
+    password: budgetbuddy
+
+  jpa:
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: false
+
+  flyway:
+    clean-on-validation-error: false
+
+logging:
+  level:
+    com.budgetbuddy: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql: TRACE

@@ -1,0 +1,9 @@
+CREATE TABLE categories (
+    id UUID PRIMARY KEY,
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    name VARCHAR(100) NOT NULL,
+    icon VARCHAR(100) NOT NULL,
+    color VARCHAR(10) NOT NULL,
+    type VARCHAR(20) NOT NULL,
+    is_default BOOLEAN NOT NULL DEFAULT FALSE
+);

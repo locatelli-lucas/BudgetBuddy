@@ -1,3 +1,0 @@
-### DELETE User By Id
-DELETE http://localhost:8080/users/1
-###

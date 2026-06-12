@@ -22,9 +22,10 @@ interface Props {
   visible: boolean;
   onClose: () => void;
   onGenerated: (pdfUri: string) => void;
+  onCustomDate?: () => void;
 }
 
-export function ExportReportSheet({ visible, onClose, onGenerated }: Props) {
+export function ExportReportSheet({ visible, onClose, onGenerated, onCustomDate }: Props) {
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodKey>('thisMonth');
   const [includeCharts, setIncludeCharts] = useState(true);
   const [includeAi, setIncludeAi] = useState(true);
@@ -103,7 +104,14 @@ export function ExportReportSheet({ visible, onClose, onGenerated }: Props) {
                     <TouchableOpacity
                       key={p.key}
                       className={`flex-row items-center justify-between p-4 ${!isLast ? 'border-b border-surface-variant' : ''} ${isSelected ? 'bg-surface-container-high/50' : ''}`}
-                      onPress={() => setSelectedPeriod(p.key)}
+                      onPress={() => {
+                        if (p.key === 'custom' && onCustomDate) {
+                          onCustomDate();
+                          onClose();
+                        } else {
+                          setSelectedPeriod(p.key);
+                        }
+                      }}
                     >
                       <Text className={`text-body-md ${isSelected ? 'text-on-surface font-medium' : 'text-on-surface'}`}>
                         {p.label}
@@ -135,7 +143,7 @@ export function ExportReportSheet({ visible, onClose, onGenerated }: Props) {
                   checked={includeAi}
                   onToggle={() => setIncludeAi(!includeAi)}
                   trailingIcon="auto-awesome"
-                  trailingIconColor={Colors.tertiaryFixedDim}
+                  trailingIconColor={Colors.tertiary}
                 />
                 <CheckboxRow
                   label="Incluir categorias"

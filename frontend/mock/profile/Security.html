@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR" style="">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Segurança - BudgetBuddy</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet">
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "error-container": "#93000a",
+                        "background": "#11131b",
+                        "on-tertiary-container": "#ffede6",
+                        "on-surface-variant": "#c3c6d7",
+                        "surface-dim": "#11131b",
+                        "surface-variant": "#32343d",
+                        "surface-container-lowest": "#0c0e16",
+                        "surface": "#11131b",
+                        "on-error-container": "#ffdad6",
+                        "inverse-on-surface": "#2e3039",
+                        "on-secondary-fixed": "#0d1c2f",
+                        "primary": "#b4c5ff",
+                        "surface-container-low": "#191b23",
+                        "surface-bright": "#373942",
+                        "inverse-primary": "#0053db",
+                        "on-tertiary-fixed-variant": "#7d2d00",
+                        "on-secondary-container": "#abb9d2",
+                        "on-surface": "#e1e2ed",
+                        "secondary-container": "#3c4a5e",
+                        "on-secondary": "#233144",
+                        "tertiary-fixed": "#ffdbcd",
+                        "surface-container-highest": "#32343d",
+                        "error": "#ffb4ab",
+                        "surface-container": "#1d1f27",
+                        "on-primary": "#002a78",
+                        "on-background": "#e1e2ed",
+                        "secondary-fixed-dim": "#b9c7e0",
+                        "primary-fixed-dim": "#b4c5ff",
+                        "tertiary-fixed-dim": "#ffb596",
+                        "on-tertiary": "#581e00",
+                        "inverse-surface": "#e1e2ed",
+                        "outline-variant": "#434655",
+                        "on-secondary-fixed-variant": "#3a485c",
+                        "primary-fixed": "#dbe1ff",
+                        "on-primary-fixed": "#00174b",
+                        "on-error": "#690005",
+                        "secondary": "#b9c7e0",
+                        "on-primary-fixed-variant": "#003ea8",
+                        "surface-tint": "#b4c5ff",
+                        "on-tertiary-fixed": "#360f00",
+                        "tertiary-container": "#bc4800",
+                        "primary-container": "#2563eb",
+                        "on-primary-container": "#eeefff",
+                        "surface-container-high": "#282a32",
+                        "tertiary": "#ffb596",
+                        "secondary-fixed": "#d5e3fd",
+                        "outline": "#8d90a0"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-sm": "8px",
+                        "stack-lg": "24px",
+                        "gutter": "16px",
+                        "stack-md": "16px",
+                        "container-padding-mobile": "20px",
+                        "base": "8px",
+                        "container-padding-desktop": "32px",
+                        "section-gap": "40px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "numeric-display": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "display": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "body-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "numeric-display": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "500" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "display": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom toggle styles to match the minimalist corporate theme */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: transparent;
+        }
+
+        .toggle-checkbox:checked+.toggle-label {
+            background-color: var(--tw-colors-primary-container);
+        }
+
+        .toggle-label {
+            transition: all 0.3s ease-in-out;
+        }
+    </style>
+</head>
+
+<body
+    class="text-on-background font-body-md min-h-screen flex flex-col selection:bg-primary-container selection:text-on-primary-container bg-surface">
+    <!-- TopAppBar -->
+    <header class="w-full top-0 sticky z-40 transition-colors bg-surface">
+        <div class="flex items-center justify-between px-gutter py-stack-md w-full max-w-7xl mx-auto">
+            <button aria-label="Voltar"
+                class="text-primary dark:text-primary hover:bg-surface-variant transition-colors active:opacity-80 transition-opacity p-2 rounded-full -ml-2">
+                <span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+            </button>
+            <h1 class="font-headline-md text-headline-md font-bold text-primary flex-1 text-center truncate px-4">
+                Segurança</h1>
+            <button aria-label="Notificações"
+                class="text-primary dark:text-primary hover:bg-surface-variant transition-colors active:opacity-80 transition-opacity p-2 rounded-full -mr-2">
+                <span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+            </button>
+        </div>
+    </header>
+    <!-- Main Content Canvas -->
+    <main
+        class="flex-1 px-container-padding-mobile md:px-container-padding-desktop pb-[92px] pt-stack-md max-w-3xl mx-auto w-full">
+        <div class="mb-section-gap">
+            <p class="font-body-md text-on-surface-variant mb-stack-lg">
+                Gerencie as opções de proteção da sua conta e controle como você acessa o BudgetBuddy.
+            </p>
+            <!-- Security Settings Group -->
+            <div
+                class="bg-surface-container-low rounded-xl overflow-hidden shadow-[0_4px_12px_rgba(0,0,0,0.1)] border border-surface-variant">
+                <!-- Alterar Senha -->
+                <button
+                    class="w-full flex items-center justify-between p-stack-md hover:bg-surface-variant transition-colors group border-b border-surface-variant">
+                    <div class="flex items-center gap-4">
+                        <div
+                            class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container">
+                            <span class="material-symbols-outlined" data-icon="password">password</span>
+                        </div>
+                        <div class="text-left">
+                            <span class="block font-label-md text-label-md text-on-surface">Alterar Senha</span>
+                            <span class="block font-label-sm text-label-sm text-on-surface-variant mt-1">Atualizada há 3
+                                meses</span>
+                        </div>
+                    </div>
+                    <span
+                        class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors"
+                        data-icon="chevron_right">chevron_right</span>
+                </button>
+                <!-- Autenticação em Duas Etapas -->
+                <div
+                    class="w-full flex items-center justify-between p-stack-md hover:bg-surface-variant transition-colors border-b border-surface-variant">
+                    <div class="flex items-center gap-4">
+                        <div
+                            class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container">
+                            <span class="material-symbols-outlined" data-icon="verified_user">verified_user</span>
+                        </div>
+                        <div class="text-left">
+                            <span class="block font-label-md text-label-md text-on-surface">Autenticação em Duas
+                                Etapas</span>
+                            <span class="block font-label-sm text-label-sm text-on-surface-variant mt-1">Via aplicativo
+                                de autenticação</span>
+                        </div>
+                    </div>
+                    <!-- Toggle Switch -->
+                    <div
+                        class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+                        <input checked=""
+                            class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-on-primary-container border-4 border-surface-container appearance-none cursor-pointer z-10 transition-transform duration-300 ease-in-out translate-x-6"
+                            id="2fa-toggle" name="toggle" type="checkbox">
+                        <label
+                            class="toggle-label block overflow-hidden h-6 rounded-full bg-primary-container cursor-pointer"
+                            for="2fa-toggle"></label>
+                    </div>
+                </div>
+                <!-- Biometria/Digital -->
+                <div
+                    class="w-full flex items-center justify-between p-stack-md hover:bg-surface-variant transition-colors border-b border-surface-variant">
+                    <div class="flex items-center gap-4">
+                        <div
+                            class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container">
+                            <span class="material-symbols-outlined" data-icon="fingerprint">fingerprint</span>
+                        </div>
+                        <div class="text-left">
+                            <span class="block font-label-md text-label-md text-on-surface">Biometria/Digital</span>
+                            <span class="block font-label-sm text-label-sm text-on-surface-variant mt-1">Login rápido
+                                usando Face ID ou Digital</span>
+                        </div>
+                    </div>
+                    <!-- Toggle Switch -->
+                    <div
+                        class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+                        <input checked=""
+                            class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-on-primary-container border-4 border-surface-container appearance-none cursor-pointer z-10 transition-transform duration-300 ease-in-out translate-x-6"
+                            id="biometrics-toggle" name="toggle" type="checkbox">
+                        <label
+                            class="toggle-label block overflow-hidden h-6 rounded-full bg-primary-container cursor-pointer"
+                            for="biometrics-toggle"></label>
+                    </div>
+                </div>
+                <!-- Dispositivos Conectados -->
+
+            </div>
+        </div>
+        <!-- Danger Zone (Optional but good for real-world app) -->
+        <div class="mt-section-gap">
+            <h2 class="font-label-md text-label-md text-error mb-stack-sm px-2">Zona de Perigo</h2>
+            <div class="bg-surface-container-low rounded-xl overflow-hidden border border-error/20">
+                <button
+                    class="w-full flex items-center justify-between p-stack-md hover:bg-error/10 transition-colors group">
+                    <div class="flex items-center gap-4">
+                        <div
+                            class="w-10 h-10 rounded-full bg-error-container flex items-center justify-center text-on-error-container">
+                            <span class="material-symbols-outlined" data-icon="delete_forever">delete_forever</span>
+                        </div>
+                        <div class="text-left">
+                            <span class="block font-label-md text-label-md text-error">Encerrar Conta</span>
+                            <span class="block font-label-sm text-label-sm text-on-surface-variant mt-1">Apagar
+                                permanentemente seus dados</span>
+                        </div>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </main>
+    <!-- BottomNavBar -->
+    <nav
+        class="md:hidden bg-surface-container dark:bg-surface-container fixed bottom-0 w-full z-50 rounded-t-xl shadow-[0_-4px_12px_rgba(0,0,0,0.2)] pb-safe">
+        <div class="flex justify-around items-center h-[72px] px-2 w-full max-w-md mx-auto">
+            <a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all scale-95 active:scale-90 transition-transform w-16 group"
+                href="#">
+                <span class="material-symbols-outlined mb-1 group-hover:scale-110 transition-transform"
+                    data-icon="home">home</span>
+                <span class="font-label-sm text-label-sm">Início</span>
+            </a>
+            <a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all scale-95 active:scale-90 transition-transform w-16 group"
+                href="#">
+                <span class="material-symbols-outlined mb-1 group-hover:scale-110 transition-transform"
+                    data-icon="account_balance_wallet">account_balance_wallet</span>
+                <span class="font-label-sm text-label-sm">Transações</span>
+            </a>
+            <a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all scale-95 active:scale-90 transition-transform w-16 group"
+                href="#">
+                <span class="material-symbols-outlined mb-1 group-hover:scale-110 transition-transform"
+                    data-icon="pie_chart">pie_chart</span>
+                <span class="font-label-sm text-label-sm">Orçamentos</span>
+            </a>
+            <a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all scale-95 active:scale-90 transition-transform w-16 group"
+                href="#">
+                <span class="material-symbols-outlined mb-1 group-hover:scale-110 transition-transform"
+                    data-icon="trending_up">trending_up</span>
+                <span class="font-label-sm text-label-sm">Investir</span>
+            </a>
+            <!-- Active Tab -->
+            <a class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-4 py-1 scale-95 active:scale-90 transition-transform w-16 group"
+                href="#">
+                <span class="material-symbols-outlined mb-1" data-icon="person"
+                    style="font-variation-settings: 'FILL' 1;">person</span>
+                <span class="font-label-sm text-label-sm font-semibold">Perfil</span>
+            </a>
+        </div>
+    </nav>
+    <script>
+        // Simple script to handle toggle visual states if needed beyond CSS
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggles = document.querySelectorAll('.toggle-checkbox');
+
+            toggles.forEach(toggle => {
+                toggle.addEventListener('change', function () {
+                    if (this.checked) {
+                        this.classList.add('translate-x-6');
+                        this.classList.remove('translate-x-0');
+                    } else {
+                        this.classList.remove('translate-x-6');
+                        this.classList.add('translate-x-0');
+                    }
+                });
+            });
+        });
+    </script>
+
+
+
+
+</body>
+
+</html>

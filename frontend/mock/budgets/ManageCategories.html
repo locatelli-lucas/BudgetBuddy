@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap"
+        rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet">
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "background": "#11131b",
+                        "primary-fixed": "#dbe1ff",
+                        "outline-variant": "#434655",
+                        "surface-bright": "#373942",
+                        "on-tertiary": "#581e00",
+                        "surface-tint": "#b4c5ff",
+                        "surface": "#11131b",
+                        "surface-dim": "#11131b",
+                        "on-error-container": "#ffdad6",
+                        "on-surface": "#e1e2ed",
+                        "tertiary-fixed-dim": "#ffb596",
+                        "on-background": "#e1e2ed",
+                        "inverse-primary": "#0053db",
+                        "on-tertiary-fixed": "#360f00",
+                        "surface-container-lowest": "#0c0e16",
+                        "primary-container": "#2563eb",
+                        "surface-container-highest": "#32343d",
+                        "tertiary": "#ffb596",
+                        "on-tertiary-container": "#ffede6",
+                        "on-surface-variant": "#c3c6d7",
+                        "primary": "#b4c5ff",
+                        "on-secondary-fixed-variant": "#3a485c",
+                        "on-secondary": "#233144",
+                        "tertiary-fixed": "#ffdbcd",
+                        "secondary-fixed": "#d5e3fd",
+                        "on-error": "#690005",
+                        "on-primary-fixed-variant": "#003ea8",
+                        "secondary": "#b9c7e0",
+                        "primary-fixed-dim": "#b4c5ff",
+                        "surface-container": "#1d1f27",
+                        "surface-container-low": "#191b23",
+                        "on-primary-fixed": "#00174b",
+                        "on-tertiary-fixed-variant": "#7d2d00",
+                        "error-container": "#93000a",
+                        "on-primary-container": "#eeefff",
+                        "tertiary-container": "#bc4800",
+                        "outline": "#8d90a0",
+                        "on-primary": "#002a78",
+                        "surface-variant": "#32343d",
+                        "error": "#ffb4ab",
+                        "surface-container-high": "#282a32",
+                        "inverse-surface": "#e1e2ed",
+                        "on-secondary-container": "#abb9d2",
+                        "secondary-fixed-dim": "#b9c7e0",
+                        "on-secondary-fixed": "#0d1c2f",
+                        "inverse-on-surface": "#2e3039",
+                        "secondary-container": "#3c4a5e"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-md": "16px",
+                        "base": "8px",
+                        "gutter": "16px",
+                        "container-padding-desktop": "32px",
+                        "stack-lg": "24px",
+                        "stack-sm": "8px",
+                        "section-gap": "40px",
+                        "container-padding-mobile": "20px"
+                    },
+                    "fontFamily": {
+                        "numeric-display": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "display": ["Inter"],
+                        "label-md": ["Inter"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "numeric-display": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "500" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "display": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .drag-ghost {
+            opacity: 0.4;
+            background: #1e293b;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #11131b;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #32343d;
+            border-radius: 10px;
+        }
+    </style>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+
+<body class="text-on-background min-h-screen font-body-md flex flex-col bg-surface">
+    <!-- TopAppBar -->
+    <header
+        class="w-full sticky top-0 z-50 flex justify-between items-center px-container-padding-mobile py-stack-md transition-colors duration-200 bg-surface">
+        <div class="flex items-center gap-4">
+            <button aria-label="Voltar"
+                class="flex items-center justify-center w-10 h-10 rounded-full hover:bg-surface-container transition-colors">
+                <span class="material-symbols-outlined text-primary">arrow_back</span>
+            </button>
+            <h1 class="text-primary font-headline-md text-headline-md font-semibold">Gerenciar categorias</h1>
+        </div>
+        <div class="flex items-center">
+            <span
+                class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary transition-colors">more_vert</span>
+        </div>
+    </header>
+    <main class="flex-1 px-container-padding-mobile pb-32">
+        <!-- Search & Filter Section -->
+        <div class="mt-stack-sm mb-stack-lg">
+            <div class="relative group">
+                <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                    <span
+                        class="material-symbols-outlined text-on-surface-variant group-focus-within:text-primary transition-colors">search</span>
+                </div>
+                <input
+                    class="w-full bg-surface-container border-none focus:ring-2 focus:ring-primary rounded-xl py-4 pl-12 pr-4 text-on-surface placeholder:text-on-surface-variant transition-all font-body-md shadow-sm"
+                    placeholder="Filtrar categorias..." type="text">
+            </div>
+        </div>
+        <!-- Section Title & Info -->
+        <div class="flex justify-between items-end mb-stack-md px-1">
+            <p class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Suas Categorias</p>
+            <p class="font-label-sm text-label-sm text-primary">6 ativos</p>
+        </div>
+        <!-- Categories List - Bento/Modern Card Layout -->
+        <div class="space-y-3" id="category-list">
+            <!-- Item 1: Alimentação -->
+            <div class="group flex items-center bg-surface-container rounded-xl p-4 transition-all hover:bg-surface-container-high cursor-grab active:cursor-grabbing border border-transparent hover:border-outline-variant/30 shadow-sm"
+                draggable="true">
+                <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-primary-container/20 mr-4">
+                    <span class="material-symbols-outlined text-primary text-[28px]"
+                        data-icon="restaurant">restaurant</span>
+                </div>
+                <div class="flex-1">
+                    <h3 class="font-label-md text-label-md text-on-surface font-semibold">Alimentação</h3>
+                    <p class="font-label-sm text-label-sm text-on-surface-variant">Restaurantes, mercado, delivery</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button class="p-2 text-on-surface-variant hover:text-primary transition-colors">
+                        <span class="material-symbols-outlined">edit</span>
+                    </button>
+                    <span class="material-symbols-outlined text-outline-variant/50 select-none">drag_indicator</span>
+                </div>
+            </div>
+            <!-- Item 2: Transporte -->
+            <div class="group flex items-center bg-surface-container rounded-xl p-4 transition-all hover:bg-surface-container-high cursor-grab active:cursor-grabbing border border-transparent hover:border-outline-variant/30 shadow-sm"
+                draggable="true">
+                <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-tertiary-container/20 mr-4">
+                    <span class="material-symbols-outlined text-tertiary text-[28px]"
+                        data-icon="directions_car">directions_car</span>
+                </div>
+                <div class="flex-1">
+                    <h3 class="font-label-md text-label-md text-on-surface font-semibold">Transporte</h3>
+                    <p class="font-label-sm text-label-sm text-on-surface-variant">Combustível, Uber, manutenção</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button class="p-2 text-on-surface-variant hover:text-primary transition-colors">
+                        <span class="material-symbols-outlined">edit</span>
+                    </button>
+                    <span class="material-symbols-outlined text-outline-variant/50 select-none">drag_indicator</span>
+                </div>
+            </div>
+            <!-- Item 3: Moradia -->
+            <div class="group flex items-center bg-surface-container rounded-xl p-4 transition-all hover:bg-surface-container-high cursor-grab active:cursor-grabbing border border-transparent hover:border-outline-variant/30 shadow-sm"
+                draggable="true">
+                <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-secondary-container/20 mr-4">
+                    <span class="material-symbols-outlined text-secondary text-[28px]" data-icon="home">home</span>
+                </div>
+                <div class="flex-1">
+                    <h3 class="font-label-md text-label-md text-on-surface font-semibold">Moradia</h3>
+                    <p class="font-label-sm text-label-sm text-on-surface-variant">Aluguel, luz, internet, água</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button class="p-2 text-on-surface-variant hover:text-primary transition-colors">
+                        <span class="material-symbols-outlined">edit</span>
+                    </button>
+                    <span class="material-symbols-outlined text-outline-variant/50 select-none">drag_indicator</span>
+                </div>
+            </div>
+            <!-- Item 4: Saúde -->
+            <div class="group flex items-center bg-surface-container rounded-xl p-4 transition-all hover:bg-surface-container-high cursor-grab active:cursor-grabbing border border-transparent hover:border-outline-variant/30 shadow-sm"
+                draggable="true">
+                <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-error-container/20 mr-4">
+                    <span class="material-symbols-outlined text-error text-[28px]"
+                        data-icon="medical_services">medical_services</span>
+                </div>
+                <div class="flex-1">
+                    <h3 class="font-label-md text-label-md text-on-surface font-semibold">Saúde</h3>
+                    <p class="font-label-sm text-label-sm text-on-surface-variant">Farmácia, consultas, plano</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button class="p-2 text-on-surface-variant hover:text-primary transition-colors">
+                        <span class="material-symbols-outlined">edit</span>
+                    </button>
+                    <span class="material-symbols-outlined text-outline-variant/50 select-none">drag_indicator</span>
+                </div>
+            </div>
+            <!-- Item 5: Lazer -->
+            <div class="group flex items-center bg-surface-container rounded-xl p-4 transition-all hover:bg-surface-container-high cursor-grab active:cursor-grabbing border border-transparent hover:border-outline-variant/30 shadow-sm"
+                draggable="true">
+                <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-primary-fixed-dim/10 mr-4">
+                    <span class="material-symbols-outlined text-primary-fixed-dim text-[28px]"
+                        data-icon="sports_esports">sports_esports</span>
+                </div>
+                <div class="flex-1">
+                    <h3 class="font-label-md text-label-md text-on-surface font-semibold">Lazer</h3>
+                    <p class="font-label-sm text-label-sm text-on-surface-variant">Cinema, streaming, viagens</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button class="p-2 text-on-surface-variant hover:text-primary transition-colors">
+                        <span class="material-symbols-outlined">edit</span>
+                    </button>
+                    <span class="material-symbols-outlined text-outline-variant/50 select-none">drag_indicator</span>
+                </div>
+            </div>
+            <!-- Item 6: Educação -->
+            <div class="group flex items-center bg-surface-container rounded-xl p-4 transition-all hover:bg-surface-container-high cursor-grab active:cursor-grabbing border border-transparent hover:border-outline-variant/30 shadow-sm"
+                draggable="true">
+                <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-on-tertiary-fixed-variant/20 mr-4">
+                    <span class="material-symbols-outlined text-tertiary-fixed-dim text-[28px]"
+                        data-icon="school">school</span>
+                </div>
+                <div class="flex-1">
+                    <h3 class="font-label-md text-label-md text-on-surface font-semibold">Educação</h3>
+                    <p class="font-label-sm text-label-sm text-on-surface-variant">Cursos, livros, mensalidades</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button class="p-2 text-on-surface-variant hover:text-primary transition-colors">
+                        <span class="material-symbols-outlined">edit</span>
+                    </button>
+                    <span class="material-symbols-outlined text-outline-variant/50 select-none">drag_indicator</span>
+                </div>
+            </div>
+        </div>
+        <!-- Add Category Prompting empty state - subtle visual interest -->
+        <div class="mt-12 flex flex-col items-center justify-center text-center opacity-40">
+            <div
+                class="w-16 h-16 rounded-full border-2 border-dashed border-outline-variant flex items-center justify-center mb-4">
+                <span class="material-symbols-outlined text-[32px]">add</span>
+            </div>
+            <p class="font-body-md text-body-md">Organize seu orçamento personalizando categorias</p>
+        </div>
+    </main>
+    <!-- FAB Action Area -->
+    <div class="fixed bottom-24 right-container-padding-mobile z-40">
+        <button
+            class="flex items-center gap-3 bg-primary-container text-on-primary-container px-6 py-4 rounded-2xl shadow-xl hover:scale-105 active:scale-95 transition-all duration-150">
+            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">add</span>
+            <span class="font-label-md text-label-md font-bold">Adicionar categoria</span>
+        </button>
+    </div>
+    <!-- BottomNavBar -->
+    <nav
+        class="fixed bottom-0 w-full z-50 rounded-t-xl bg-surface-container flex justify-around items-center px-2 py-3 shadow-sm">
+        <a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant p-2 hover:bg-surface-container-high transition-all active:scale-95 duration-150"
+            href="#">
+            <span class="material-symbols-outlined">home</span>
+            <span class="font-label-sm text-label-sm mt-1">Início</span>
+        </a>
+        <a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant p-2 hover:bg-surface-container-high transition-all active:scale-95 duration-150"
+            href="#">
+            <span class="material-symbols-outlined">receipt_long</span>
+            <span class="font-label-sm text-label-sm mt-1">Transações</span>
+        </a>
+        <a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-xl p-2 active:scale-95 duration-150"
+            href="#">
+            <span class="material-symbols-outlined"
+                style="font-variation-settings: 'FILL' 1;">account_balance_wallet</span>
+            <span class="font-label-sm text-label-sm mt-1">Orçamentos</span>
+        </a>
+        <a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant p-2 hover:bg-surface-container-high transition-all active:scale-95 duration-150"
+            href="#">
+            <span class="material-symbols-outlined">trending_up</span>
+            <span class="font-label-sm text-label-sm mt-1">Investir</span>
+        </a>
+        <a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant p-2 hover:bg-surface-container-high transition-all active:scale-95 duration-150"
+            href="#">
+            <span class="material-symbols-outlined">person</span>
+            <span class="font-label-sm text-label-sm mt-1">Perfil</span>
+        </a>
+    </nav>
+    <script>
+        // Micro-interaction: Simple Drag & Drop feedback
+        const list = document.getElementById('category-list');
+        let draggingEle;
+
+        list.addEventListener('dragstart', (e) => {
+            draggingEle = e.target;
+            e.target.classList.add('drag-ghost');
+        });
+
+        list.addEventListener('dragend', (e) => {
+            e.target.classList.remove('drag-ghost');
+        });
+
+        list.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            const afterElement = getDragAfterElement(list, e.clientY);
+            if (afterElement == null) {
+                list.appendChild(draggingEle);
+            } else {
+                list.insertBefore(draggingEle, afterElement);
+            }
+        });
+
+        function getDragAfterElement(container, y) {
+            const draggableElements = [...container.querySelectorAll('[draggable="true"]:not(.drag-ghost)')];
+
+            return draggableElements.reduce((closest, child) => {
+                const box = child.getBoundingClientRect();
+                const offset = y - box.top - box.height / 2;
+                if (offset < 0 && offset > closest.offset) {
+                    return { offset: offset, element: child };
+                } else {
+                    return closest;
+                }
+            }, { offset: Number.NEGATIVE_INFINITY }).element;
+        }
+
+        // Search highlight interaction
+        const searchInput = document.querySelector('input[type="text"]');
+        searchInput.addEventListener('input', (e) => {
+            const val = e.target.value.toLowerCase();
+            const items = list.querySelectorAll('.group');
+            items.forEach(item => {
+                const text = item.querySelector('h3').textContent.toLowerCase();
+                if (text.includes(val)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    </script>
+
+
+
+
+
+
+
+
+</body>
+
+</html>

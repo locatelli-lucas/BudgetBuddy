@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap"
+        rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .bottom-sheet-transition {
+            transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+    </style>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-container": "#abb9d2",
+                        "surface-container-low": "#191b23",
+                        "surface-container-highest": "#32343d",
+                        "secondary-fixed-dim": "#b9c7e0",
+                        "primary-container": "#2563eb",
+                        "on-secondary": "#233144",
+                        "surface-container-high": "#282a32",
+                        "on-tertiary-fixed": "#360f00",
+                        "on-background": "#e1e2ed",
+                        "primary-fixed-dim": "#b4c5ff",
+                        "surface": "#11131b",
+                        "on-tertiary": "#581e00",
+                        "tertiary-container": "#bc4800",
+                        "secondary": "#b9c7e0",
+                        "on-secondary-fixed": "#0d1c2f",
+                        "outline": "#8d90a0",
+                        "on-error": "#690005",
+                        "on-surface-variant": "#c3c6d7",
+                        "background": "#11131b",
+                        "secondary-fixed": "#d5e3fd",
+                        "error": "#ffb4ab",
+                        "tertiary-fixed-dim": "#ffb596",
+                        "inverse-on-surface": "#2e3039",
+                        "inverse-primary": "#0053db",
+                        "outline-variant": "#434655",
+                        "on-tertiary-fixed-variant": "#7d2d00",
+                        "inverse-surface": "#e1e2ed",
+                        "on-primary-fixed": "#00174b",
+                        "surface-bright": "#373942",
+                        "on-primary-container": "#eeefff",
+                        "on-primary": "#002a78",
+                        "surface-container-lowest": "#0c0e16",
+                        "primary-fixed": "#dbe1ff",
+                        "on-error-container": "#ffdad6",
+                        "on-tertiary-container": "#ffede6",
+                        "surface-variant": "#32343d",
+                        "on-primary-fixed-variant": "#003ea8",
+                        "tertiary": "#ffb596",
+                        "secondary-container": "#3c4a5e",
+                        "error-container": "#93000a",
+                        "on-surface": "#e1e2ed",
+                        "on-secondary-fixed-variant": "#3a485c",
+                        "surface-tint": "#b4c5ff",
+                        "surface-dim": "#11131b",
+                        "primary": "#b4c5ff",
+                        "surface-container": "#1d1f27",
+                        "tertiary-fixed": "#ffdbcd"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-md": "16px",
+                        "container-padding-mobile": "20px",
+                        "base": "8px",
+                        "stack-sm": "8px",
+                        "container-padding-desktop": "32px",
+                        "stack-lg": "24px",
+                        "section-gap": "40px",
+                        "gutter": "16px"
+                    },
+                    "fontFamily": {
+                        "display": ["Inter"],
+                        "body-md": ["Inter"],
+                        "label-md": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "numeric-display": ["Inter"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "display": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "numeric-display": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "500" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+
+<body class="bg-background text-on-background font-body-md min-h-screen overflow-x-hidden">
+    <!-- Top App Bar -->
+    <header class="bg-surface text-primary font-headline-md text-headline-md docked full-width top-0 z-40 fixed">
+        <div class="flex justify-between items-center w-full px-container-padding-mobile py-4">
+            <div class="flex items-center gap-3">
+                <button
+                    class="material-symbols-outlined text-primary hover:bg-surface-container-high transition-colors p-2 rounded-full md:hidden">
+                    arrow_back
+                </button>
+                <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-primary-container">
+                    <img class="w-full h-full object-cover"
+                        data-alt="A professional headshot of a young male executive with a confident smile, set against a blurred modern office background. The lighting is soft and cinematic, emphasizing a clean and premium fintech aesthetic. The overall mood is trustworthy and approachable, using a palette of deep blues and subtle metallic tones to align with a luxury digital banking interface."
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuCPUK78lv_21Au8KXUE761lhB0CPXzRlZa2rS4kFalMpEjoCUMl_-JLKEpmo8UILF9uBIBXbiH0nxZFF748ZjgELgUjmqX_8HpyRpmBKgQujmr2h_LXgLno3rxyZtfWd8wGzUXfAmZtAJyGZzbERgEDsXB_gcrwBq91ZDh4bIqZQH00010rI7YlRVSbekoNp6mvrSWgjYUXr4ImwmtA0DVHUF-XPCHKJPpVwGO9_jSMZGjutP47A92AbipIKvbHdaKpUoCLMt7XUa4">
+                </div>
+                <h1 class="font-headline-md text-headline-md font-bold text-primary">Orçamentos</h1>
+            </div>
+            <div class="flex items-center">
+                <button
+                    class="material-symbols-outlined text-primary hover:bg-surface-container-high transition-colors p-2 rounded-full"
+                    onclick="toggleBottomSheet()">
+                    calendar_month
+                </button>
+            </div>
+        </div>
+    </header>
+    <!-- Main Content Canvas (Background page content) -->
+    <main class="pt-24 pb-32 px-container-padding-mobile">
+        <!-- Budget Progress Section -->
+        <section class="mb-stack-lg">
+            <div class="bg-surface-container rounded-xl p-stack-md border border-outline-variant/30">
+                <div class="flex justify-between items-end mb-4">
+                    <div>
+                        <p class="font-label-sm text-label-sm text-on-surface-variant mb-1">Gasto total do mês</p>
+                        <p class="font-numeric-display text-numeric-display text-on-surface">R$ 2.450,00</p>
+                    </div>
+                    <p class="font-label-md text-label-md text-primary">65%</p>
+                </div>
+                <div class="w-full h-2 bg-surface-container-highest rounded-full overflow-hidden">
+                    <div class="h-full bg-primary w-[65%] rounded-full shadow-[0_0_12px_rgba(37,99,235,0.4)]"></div>
+                </div>
+            </div>
+        </section>
+        <!-- Category Grid (Bento Style) -->
+        <div class="grid grid-cols-2 gap-4">
+            <!-- Food Card -->
+            <div
+                class="bg-surface-container p-4 rounded-xl border border-outline-variant/20 flex flex-col justify-between aspect-square">
+                <span class="material-symbols-outlined text-tertiary text-3xl">restaurant</span>
+                <div>
+                    <h3 class="font-label-md text-label-md text-on-surface">Alimentação</h3>
+                    <p class="font-label-sm text-label-sm text-on-surface-variant">R$ 850 / 1.200</p>
+                </div>
+            </div>
+            <!-- Transport Card -->
+            <div
+                class="bg-surface-container p-4 rounded-xl border border-outline-variant/20 flex flex-col justify-between aspect-square">
+                <span class="material-symbols-outlined text-primary text-3xl">directions_car</span>
+                <div>
+                    <h3 class="font-label-md text-label-md text-on-surface">Transporte</h3>
+                    <p class="font-label-sm text-label-sm text-on-surface-variant">R$ 320 / 500</p>
+                </div>
+            </div>
+            <!-- Entertainment Card -->
+            <div
+                class="bg-surface-container p-4 rounded-xl border border-outline-variant/20 flex flex-col justify-between aspect-square">
+                <span class="material-symbols-outlined text-error text-3xl">movie</span>
+                <div>
+                    <h3 class="font-label-md text-label-md text-on-surface">Lazer</h3>
+                    <p class="font-label-sm text-label-sm text-on-surface-variant">R$ 600 / 400</p>
+                </div>
+            </div>
+            <!-- Shopping Card -->
+            <div
+                class="bg-surface-container p-4 rounded-xl border border-outline-variant/20 flex flex-col justify-between aspect-square">
+                <span class="material-symbols-outlined text-secondary text-3xl">shopping_bag</span>
+                <div>
+                    <h3 class="font-label-md text-label-md text-on-surface">Compras</h3>
+                    <p class="font-label-sm text-label-sm text-on-surface-variant">R$ 680 / 1.000</p>
+                </div>
+            </div>
+        </div>
+        <!-- Floating Trigger (Internal Demo Use) -->
+        <div class="mt-10 flex justify-center">
+            <button
+                class="bg-primary-container text-on-primary-container px-6 py-3 rounded-full font-label-md text-label-md flex items-center gap-2 active:scale-95 transition-transform"
+                onclick="openBottomSheet()">
+                <span class="material-symbols-outlined">settings</span>
+                Ajustes de Orçamento
+            </button>
+        </div>
+    </main>
+    <!-- Navigation Shell -->
+    <nav
+        class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 pb-4 pt-2 bg-surface-container dark:bg-surface-container border-t border-outline-variant shadow-sm rounded-t-xl">
+        <!-- Início -->
+        <div
+            class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:text-on-surface transition-transform duration-200 active:scale-90 cursor-pointer">
+            <span class="material-symbols-outlined">home</span>
+            <span class="font-label-sm text-label-sm">Início</span>
+        </div>
+        <!-- Transações -->
+        <div
+            class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:text-on-surface transition-transform duration-200 active:scale-90 cursor-pointer">
+            <span class="material-symbols-outlined">receipt_long</span>
+            <span class="font-label-sm text-label-sm">Transações</span>
+        </div>
+        <!-- Orçamentos -->
+        <div
+            class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-4 py-1 transition-transform duration-200 active:scale-90 cursor-pointer">
+            <span class="material-symbols-outlined"
+                style="font-variation-settings: &quot;FILL&quot; 1;">account_balance_wallet</span>
+            <span class="font-label-sm text-label-sm">Orçamentos</span>
+        </div>
+        <!-- Investir -->
+        <div
+            class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:text-on-surface transition-transform duration-200 active:scale-90 cursor-pointer">
+            <span class="material-symbols-outlined">trending_up</span>
+            <span class="font-label-sm text-label-sm">Investir</span>
+        </div>
+        <!-- Perfil -->
+        <div
+            class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:text-on-surface transition-transform duration-200 active:scale-90 cursor-pointer">
+            <span class="material-symbols-outlined">person</span>
+            <span class="font-label-sm text-label-sm">Perfil</span>
+        </div>
+    </nav>
+    <!-- BOTTOM SHEET OVERLAY -->
+    <div class="fixed inset-0 bg-black/60 z-[60] opacity-0 transition-opacity duration-300 backdrop-blur-sm opacity-100"
+        id="bottomSheetBackdrop" onclick="closeBottomSheet()"></div>
+    <!-- BOTTOM SHEET MENU -->
+    <div class="fixed bottom-0 left-0 right-0 z-[70] bg-surface-container-high rounded-t-[32px] transform bottom-sheet-transition p-container-padding-mobile pb-12 shadow-[0_-8px_40px_rgba(0,0,0,0.5)]"
+        id="bottomSheet">
+        <!-- Handle -->
+        <div class="w-12 h-1.5 bg-outline-variant/50 rounded-full mx-auto mb-8 cursor-grab active:cursor-grabbing">
+        </div>
+        <div class="mb-6">
+            <h2 class="font-headline-md text-headline-md text-on-surface mb-2">Opções de Orçamento</h2>
+            <p class="font-body-md text-body-md text-on-surface-variant">Personalize como você gerencia seus gastos
+                mensais.</p>
+        </div>
+        <div class="space-y-3">
+            <!-- Menu Item 1 -->
+            <button
+                class="w-full flex items-center justify-between p-4 rounded-2xl bg-surface-variant/40 hover:bg-surface-variant transition-colors group">
+                <div class="flex items-center gap-4">
+                    <div
+                        class="w-12 h-12 rounded-xl bg-primary-container/20 flex items-center justify-center text-primary transition-transform group-active:scale-90">
+                        <span class="material-symbols-outlined">category</span>
+                    </div>
+                    <span class="font-body-lg text-body-lg text-on-surface">Gerenciar categorias</span>
+                </div>
+                <span class="material-symbols-outlined text-outline">chevron_right</span>
+            </button>
+            <!-- Menu Item 2 -->
+            <button
+                class="w-full flex items-center justify-between p-4 rounded-2xl bg-surface-variant/40 hover:bg-surface-variant transition-colors group">
+                <div class="flex items-center gap-4">
+                    <div
+                        class="w-12 h-12 rounded-xl bg-tertiary-container/20 flex items-center justify-center text-tertiary transition-transform group-active:scale-90">
+                        <span class="material-symbols-outlined">adjust</span>
+                    </div>
+                    <span class="font-body-lg text-body-lg text-on-surface">Redefinir limites</span>
+                </div>
+                <span class="material-symbols-outlined text-outline">chevron_right</span>
+            </button>
+            <!-- Menu Item 3 -->
+            <button
+                class="w-full flex items-center justify-between p-4 rounded-2xl bg-surface-variant/40 hover:bg-surface-variant transition-colors group">
+                <div class="flex items-center gap-4">
+                    <div
+                        class="w-12 h-12 rounded-xl bg-secondary-container/20 flex items-center justify-center text-secondary transition-transform group-active:scale-90">
+                        <span class="material-symbols-outlined">history</span>
+                    </div>
+                    <span class="font-body-lg text-body-lg text-on-surface">Histórico de orçamentos</span>
+                </div>
+                <span class="material-symbols-outlined text-outline">chevron_right</span>
+            </button>
+        </div>
+        <button
+            class="w-full mt-8 py-4 rounded-xl border border-outline-variant font-label-md text-label-md text-on-surface-variant active:bg-surface-variant transition-all"
+            onclick="closeBottomSheet()">
+            Cancelar
+        </button>
+    </div>
+    <script>
+        const sheet = document.getElementById('bottomSheet');
+        const backdrop = document.getElementById('bottomSheetBackdrop');
+
+        function openBottomSheet() {
+            backdrop.classList.remove('hidden');
+            setTimeout(() => {
+                backdrop.classList.add('opacity-100');
+                sheet.classList.remove('translate-y-full');
+            }, 10);
+        }
+
+        function closeBottomSheet() {
+            sheet.classList.add('translate-y-full');
+            backdrop.classList.remove('opacity-100');
+            setTimeout(() => {
+                backdrop.classList.add('hidden');
+            }, 300);
+        }
+
+        // Auto-open for demo purpose after a small delay
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(openBottomSheet, 800);
+        });
+
+        // Toggle function for the calendar icon
+        function toggleBottomSheet() {
+            if (sheet.classList.contains('translate-y-full')) {
+                openBottomSheet();
+            } else {
+                closeBottomSheet();
+            }
+        }
+    </script>
+
+
+
+
+
+
+</body>
+
+</html>

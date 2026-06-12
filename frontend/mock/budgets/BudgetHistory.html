@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap"
+        rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #11131b;
+            color: #e1e2ed;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "background": "#11131b",
+                        "primary-fixed": "#dbe1ff",
+                        "outline-variant": "#434655",
+                        "surface-bright": "#373942",
+                        "on-tertiary": "#581e00",
+                        "surface-tint": "#b4c5ff",
+                        "surface": "#11131b",
+                        "surface-dim": "#11131b",
+                        "on-error-container": "#ffdad6",
+                        "on-surface": "#e1e2ed",
+                        "tertiary-fixed-dim": "#ffb596",
+                        "on-background": "#e1e2ed",
+                        "inverse-primary": "#0053db",
+                        "on-tertiary-fixed": "#360f00",
+                        "surface-container-lowest": "#0c0e16",
+                        "primary-container": "#2563eb",
+                        "surface-container-highest": "#32343d",
+                        "tertiary": "#ffb596",
+                        "on-tertiary-container": "#ffede6",
+                        "on-surface-variant": "#c3c6d7",
+                        "primary": "#b4c5ff",
+                        "on-secondary-fixed-variant": "#3a485c",
+                        "on-secondary": "#233144",
+                        "tertiary-fixed": "#ffdbcd",
+                        "secondary-fixed": "#d5e3fd",
+                        "on-error": "#690005",
+                        "on-primary-fixed-variant": "#003ea8",
+                        "secondary": "#b9c7e0",
+                        "primary-fixed-dim": "#b4c5ff",
+                        "surface-container": "#1d1f27",
+                        "surface-container-low": "#191b23",
+                        "on-primary-fixed": "#00174b",
+                        "on-tertiary-fixed-variant": "#7d2d00",
+                        "error-container": "#93000a",
+                        "on-primary-container": "#eeefff",
+                        "tertiary-container": "#bc4800",
+                        "outline": "#8d90a0",
+                        "on-primary": "#002a78",
+                        "surface-variant": "#32343d",
+                        "error": "#ffb4ab",
+                        "surface-container-high": "#282a32",
+                        "inverse-surface": "#e1e2ed",
+                        "on-secondary-container": "#abb9d2",
+                        "secondary-fixed-dim": "#b9c7e0",
+                        "on-secondary-fixed": "#0d1c2f",
+                        "inverse-on-surface": "#2e3039",
+                        "secondary-container": "#3c4a5e"
+                    },
+                    "spacing": {
+                        "stack-md": "16px",
+                        "base": "8px",
+                        "gutter": "16px",
+                        "container-padding-desktop": "32px",
+                        "stack-lg": "24px",
+                        "stack-sm": "8px",
+                        "section-gap": "40px",
+                        "container-padding-mobile": "20px"
+                    },
+                    "fontFamily": {
+                        "numeric-display": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "display": ["Inter"],
+                        "label-md": ["Inter"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "numeric-display": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "500" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "display": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+
+<body class="text-on-surface bg-surface">
+    <!-- TopAppBar -->
+    <header
+        class="w-full sticky top-0 z-50 flex justify-between items-center px-container-padding-mobile py-stack-md bg-surface">
+        <div class="flex items-center gap-4">
+            <button
+                class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors">
+                <span class="material-symbols-outlined text-primary" data-icon="arrow_back">arrow_back</span>
+            </button>
+            <h1 class="font-headline-md text-headline-md font-semibold text-primary">Histórico</h1>
+        </div>
+        <div class="flex items-center gap-2">
+            <button
+                class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors">
+                <span class="material-symbols-outlined text-on-surface-variant"
+                    data-icon="calendar_month">calendar_month</span>
+            </button>
+            <div class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant">
+                <img alt="User Profile" class="w-full h-full object-cover"
+                    data-alt="A professional high-resolution avatar of a modern fintech user with a minimalist aesthetic. The character is styled with a sleek, clean-cut appearance, set against a soft dark-mode background that complements the deep navy and primary blue color palette. The lighting is subtle and directional, conveying a sense of financial expertise and tech-savvy confidence."
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuD5XxHJQLjHyQW7-I0Kxslv6GnB9nkuIDDQJKJ1xvxy3GEr2XghZyz8PBaQikhr4L94wzHt_RX8n-FeGhUTc8nrN84zK_UXY9KdAugtw28hBL57n5Z-AzwsjErodaD1kVxrYmISlqAClBexUzSbDNigGPD9CUqotDqPbG3BCSU5ct2zomVqSzxYCGild2ZQMDz1YGGfTD8sVkFBCvWLtMSZenp8Dj_JPkyx_EdQBja0sT9DWN4AA0qUK-DW9ysoOzkLPwX5zc3XOTY">
+            </div>
+        </div>
+    </header>
+    <main class="px-container-padding-mobile pb-32">
+        <!-- Month Selector -->
+        <section class="mt-4 overflow-x-auto hide-scrollbar -mx-container-padding-mobile px-container-padding-mobile">
+            <div class="flex gap-3 mb-stack-lg">
+                <button
+                    class="flex-none px-6 py-2.5 rounded-full bg-primary-container text-on-primary-container font-label-md text-label-md">Jun
+                    2024</button>
+                <button
+                    class="flex-none px-6 py-2.5 rounded-full bg-surface-container text-on-surface-variant font-label-md text-label-md hover:bg-surface-container-high transition-all">Mai
+                    2024</button>
+                <button
+                    class="flex-none px-6 py-2.5 rounded-full bg-surface-container text-on-surface-variant font-label-md text-label-md hover:bg-surface-container-high transition-all">Abr
+                    2024</button>
+                <button
+                    class="flex-none px-6 py-2.5 rounded-full bg-surface-container text-on-surface-variant font-label-md text-label-md hover:bg-surface-container-high transition-all">Mar
+                    2024</button>
+                <button
+                    class="flex-none px-6 py-2.5 rounded-full bg-surface-container text-on-surface-variant font-label-md text-label-md hover:bg-surface-container-high transition-all">Fev
+                    2024</button>
+            </div>
+        </section>
+        <!-- Summary Cards (Bento Style) -->
+        <div class="grid grid-cols-2 gap-4 mb-stack-lg">
+            <div class="col-span-2 glass-card rounded-xl p-5 relative overflow-hidden"
+                style="opacity: 1; transform: translateY(0px); transition: 0.5s ease-out;">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-primary/10 blur-3xl -mr-16 -mt-16"></div>
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Total
+                            Gasto em Junho</p>
+                        <h2 class="font-numeric-display text-numeric-display mt-1">R$ 4.250,00</h2>
+                    </div>
+                    <span class="p-2 bg-secondary-container/50 text-on-secondary-container rounded-lg">
+                        <span class="material-symbols-outlined"
+                            data-icon="account_balance_wallet">account_balance_wallet</span>
+                    </span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="h-2 flex-grow bg-surface-container rounded-full overflow-hidden">
+                        <div class="h-full bg-primary w-[85%] rounded-full"></div>
+                    </div>
+                    <span class="font-label-sm text-label-sm text-primary">85%</span>
+                </div>
+                <p class="font-label-sm text-label-sm text-on-surface-variant mt-3">Meta: R$ 5.000,00</p>
+            </div>
+            <div class="glass-card rounded-xl p-4 flex flex-col justify-between"
+                style="opacity: 1; transform: translateY(0px); transition: 0.5s ease-out 0.1s;">
+                <div>
+                    <span class="material-symbols-outlined text-tertiary text-xl" data-icon="savings">savings</span>
+                    <p class="font-label-sm text-label-sm text-on-surface-variant mt-2">Economizou</p>
+                </div>
+                <h3 class="font-headline-md text-headline-md text-tertiary mt-1">R$ 750,00</h3>
+            </div>
+            <div class="glass-card rounded-xl p-4 flex flex-col justify-between"
+                style="opacity: 1; transform: translateY(0px); transition: 0.5s ease-out 0.2s;">
+                <div>
+                    <span class="material-symbols-outlined text-error text-xl"
+                        data-icon="trending_up">trending_up</span>
+                    <p class="font-label-sm text-label-sm text-on-surface-variant mt-2">Diferença/Meta</p>
+                </div>
+                <h3 class="font-headline-md text-headline-md text-on-surface mt-1">-15,0%</h3>
+            </div>
+        </div>
+        <!-- Categories Comparison List -->
+        <section class="space-y-stack-md">
+            <div class="flex justify-between items-center px-1">
+                <h3 class="font-label-md text-label-md font-semibold text-on-surface uppercase tracking-widest">
+                    Desempenho por Categoria</h3>
+                <span class="font-label-sm text-label-sm text-on-surface-variant">Junho 2024</span>
+            </div>
+            <!-- Category Item 1 -->
+            <div class="glass-card rounded-xl p-4 flex flex-col gap-3"
+                style="opacity: 1; transform: translateY(0px); transition: 0.5s ease-out 0.3s;">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-surface-container-high flex items-center justify-center">
+                            <span class="material-symbols-outlined text-primary"
+                                data-icon="restaurant">restaurant</span>
+                        </div>
+                        <div>
+                            <p class="font-label-md text-label-md font-semibold">Alimentação</p>
+                            <p class="font-label-sm text-label-sm text-tertiary">Economizou R$ 120,00</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-label-md text-label-md font-bold">R$ 880,00</p>
+                        <p class="font-label-sm text-label-sm text-on-surface-variant">de R$ 1.000</p>
+                    </div>
+                </div>
+                <div class="h-1.5 w-full bg-surface-container rounded-full overflow-hidden">
+                    <div class="h-full bg-tertiary w-[88%] rounded-full"></div>
+                </div>
+            </div>
+            <!-- Category Item 2 -->
+            <div class="glass-card rounded-xl p-4 flex flex-col gap-3"
+                style="opacity: 1; transform: translateY(0px); transition: 0.5s ease-out 0.4s;">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-surface-container-high flex items-center justify-center">
+                            <span class="material-symbols-outlined text-error"
+                                data-icon="directions_car">directions_car</span>
+                        </div>
+                        <div>
+                            <p class="font-label-md text-label-md font-semibold">Transporte</p>
+                            <p class="font-label-sm text-label-sm text-error">Excedeu R$ 45,00</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-label-md text-label-md font-bold text-error">R$ 545,00</p>
+                        <p class="font-label-sm text-label-sm text-on-surface-variant">de R$ 500</p>
+                    </div>
+                </div>
+                <div class="h-1.5 w-full bg-surface-container rounded-full overflow-hidden">
+                    <div class="h-full bg-error w-full rounded-full"></div>
+                </div>
+            </div>
+            <!-- Category Item 3 -->
+            <div class="glass-card rounded-xl p-4 flex flex-col gap-3"
+                style="opacity: 1; transform: translateY(0px); transition: 0.5s ease-out 0.5s;">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-surface-container-high flex items-center justify-center">
+                            <span class="material-symbols-outlined text-secondary" data-icon="home">home</span>
+                        </div>
+                        <div>
+                            <p class="font-label-md text-label-md font-semibold">Moradia</p>
+                            <p class="font-label-sm text-label-sm text-on-surface-variant">No limite exato</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-label-md text-label-md font-bold">R$ 1.800,00</p>
+                        <p class="font-label-sm text-label-sm text-on-surface-variant">de R$ 1.800</p>
+                    </div>
+                </div>
+                <div class="h-1.5 w-full bg-surface-container rounded-full overflow-hidden">
+                    <div class="h-full bg-primary w-full rounded-full"></div>
+                </div>
+            </div>
+            <!-- Category Item 4 -->
+            <div class="glass-card rounded-xl p-4 flex flex-col gap-3"
+                style="opacity: 1; transform: translateY(0px); transition: 0.5s ease-out 0.6s;">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-surface-container-high flex items-center justify-center">
+                            <span class="material-symbols-outlined text-primary"
+                                data-icon="shopping_bag">shopping_bag</span>
+                        </div>
+                        <div>
+                            <p class="font-label-md text-label-md font-semibold">Lazer</p>
+                            <p class="font-label-sm text-label-sm text-tertiary">Economizou R$ 200,00</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-label-md text-label-md font-bold">R$ 300,00</p>
+                        <p class="font-label-sm text-label-sm text-on-surface-variant">de R$ 500</p>
+                    </div>
+                </div>
+                <div class="h-1.5 w-full bg-surface-container rounded-full overflow-hidden">
+                    <div class="h-full bg-tertiary w-[60%] rounded-full"></div>
+                </div>
+            </div>
+        </section>
+        <!-- Insights Section -->
+        <section class="mt-stack-lg">
+            <div class="bg-primary-container/10 border border-primary/20 rounded-2xl p-5 flex items-start gap-4">
+                <span class="material-symbols-outlined text-primary" data-icon="insights">insights</span>
+                <div>
+                    <h4 class="font-label-md text-label-md font-bold text-primary">Dica de Orçamento</h4>
+                    <p class="font-body-md text-body-md text-on-surface-variant mt-1">Em Junho, você economizou mais em
+                        Alimentação do que nos últimos 3 meses. Continue assim para atingir sua meta de reserva de
+                        emergência 2 meses antes do previsto!</p>
+                </div>
+            </div>
+        </section>
+    </main>
+    <!-- BottomNavBar -->
+    <nav
+        class="fixed bottom-0 w-full z-50 rounded-t-xl bg-surface-container flex justify-around items-center px-2 py-3 shadow-sm">
+        <a class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-surface-container-high transition-all active:scale-95 duration-150"
+            href="#">
+            <span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+            <span class="font-label-sm text-label-sm mt-1">Início</span>
+        </a>
+        <a class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-surface-container-high transition-all active:scale-95 duration-150"
+            href="#">
+            <span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
+            <span class="font-label-sm text-label-sm mt-1">Transações</span>
+        </a>
+        <a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-xl p-2 active:scale-95 duration-150"
+            href="#">
+            <span class="material-symbols-outlined" data-icon="account_balance_wallet"
+                style="font-variation-settings: 'FILL' 1;">account_balance_wallet</span>
+            <span class="font-label-sm text-label-sm mt-1">Orçamentos</span>
+        </a>
+        <a class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-surface-container-high transition-all active:scale-95 duration-150"
+            href="#">
+            <span class="material-symbols-outlined" data-icon="monitoring">trending_up</span>
+            <span class="font-label-sm text-label-sm mt-1">Investir</span>
+        </a>
+        <a class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-surface-container-high transition-all active:scale-95 duration-150"
+            href="#">
+            <span class="material-symbols-outlined" data-icon="person">person</span>
+            <span class="font-label-sm text-label-sm mt-1">Perfil</span>
+        </a>
+    </nav>
+    <script>
+        // Micro-interactions for month selection
+        const monthButtons = document.querySelectorAll('section div button');
+        monthButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                monthButtons.forEach(b => {
+                    b.classList.remove('bg-primary-container', 'text-on-primary-container');
+                    b.classList.add('bg-surface-container', 'text-on-surface-variant');
+                });
+                btn.classList.add('bg-primary-container', 'text-on-primary-container');
+                btn.classList.remove('bg-surface-container', 'text-on-surface-variant');
+
+                // Subtle haptic-like effect or visual pop could be added here
+                btn.style.transform = 'scale(0.95)';
+                setTimeout(() => btn.style.transform = 'scale(1)', 100);
+            });
+        });
+
+        // Entrance animation logic
+        document.addEventListener('DOMContentLoaded', () => {
+            const cards = document.querySelectorAll('.glass-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                card.style.transition = `all 0.5s ease-out ${index * 0.1}s`;
+
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, 100);
+            });
+        });
+    </script>
+
+
+
+
+
+
+</body>
+
+</html>

@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Colors } from '../constants/colors';
+import { formatCurrency } from '../utils/currency';
 
 export interface CategoryProgressProps {
   id: string;
@@ -18,7 +19,7 @@ export function CategoryProgress({ name, spent, limit, icon }: CategoryProgressP
   
   let progressColor = 'bg-[#4ade80]'; // emerald-500
   let iconBgColor = 'bg-primary-container/20';
-  let iconColor = Colors.primary;
+  let iconColor: string = Colors.primary;
   
   if (isOverBudget) {
     progressColor = 'bg-error';
@@ -43,17 +44,17 @@ export function CategoryProgress({ name, spent, limit, icon }: CategoryProgressP
               <Text className="text-label-sm text-error font-medium italic">Acima do limite</Text>
             ) : (
               <Text className="text-label-sm text-on-surface-variant">
-                R$ {remaining.toFixed(2).replace('.', ',')} restantes
+                {formatCurrency(remaining)} restantes
               </Text>
             )}
           </View>
         </View>
         <View className="items-end">
           <Text className={`text-label-md font-bold ${isOverBudget ? 'text-error' : 'text-on-surface'}`}>
-            R$ {spent.toFixed(2).replace('.', ',')}
+            {formatCurrency(spent)}
           </Text>
           <Text className="text-label-sm text-on-surface-variant">
-            de R$ {limit.toFixed(2).replace('.', ',')}
+            de {formatCurrency(limit)}
           </Text>
         </View>
       </View>

@@ -97,44 +97,56 @@ public class BudgetService {
     public List<BudgetStatusResponse> getBudgetStatus(String email, int month, int year) {
         User user = userService.getUserByEmail(email);
         List<Budget> budgets = budgetRepository.findByUserIdAndMonthAndYear(user.getId(), month, year);
-        
+        List<Category> allCategories = categoryService.getAllCategoryEntities(user.getId());
+
         LocalDate startDate = LocalDate.of(year, month, 1);
         LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
-        
-        return budgets.stream().map(budget -> {
-            // Find total spent for this category in the given month
-            // We need a specific query for this or use JPA specification
-            // For now, doing a simpler query - in a real scenario we'd add this to the repository
-            BigDecimal spent = calculateSpentForCategory(user.getId(), budget.getCategory().getId(), startDate, endDate);
-            
-            BigDecimal remaining = budget.getLimitAmount().subtract(spent);
-            BigDecimal percentUsed = BigDecimal.ZERO;
-            
-            if (budget.getLimitAmount().compareTo(BigDecimal.ZERO) > 0) {
-                percentUsed = spent.divide(budget.getLimitAmount(), 4, RoundingMode.HALF_UP)
-                                   .multiply(new BigDecimal("100"));
-            }
-            
-            BudgetStatus status = BudgetStatus.ON_TRACK;
-            if (percentUsed.compareTo(new BigDecimal("100")) >= 0) {
-                status = BudgetStatus.EXCEEDED;
-            } else if (percentUsed.compareTo(new BigDecimal("80")) >= 0) {
-                status = BudgetStatus.WARNING;
-            }
-            
-            return BudgetStatusResponse.builder()
-                    .id(budget.getId())
-                    .categoryId(budget.getCategory().getId())
-                    .categoryName(budget.getCategory().getName())
-                    .categoryIcon(budget.getCategory().getIcon())
-                    .categoryColor(budget.getCategory().getColor())
-                    .limit(budget.getLimitAmount())
-                    .spent(spent)
-                    .remaining(remaining)
-                    .percentUsed(percentUsed)
-                    .status(status)
-                    .build();
-        }).collect(Collectors.toList());
+
+        // Build status for each category that has a budget OR has spending
+        return allCategories.stream()
+            .filter(cat -> cat.getType() == Category.CategoryType.EXPENSE
+                        || cat.getType() == Category.CategoryType.BOTH)
+            .map(cat -> {
+                BigDecimal spent = calculateSpentForCategory(user.getId(), cat.getId(), startDate, endDate);
+
+                // Find matching budget if it exists
+                Budget budget = budgets.stream()
+                    .filter(b -> b.getCategory().getId().equals(cat.getId()))
+                    .findFirst().orElse(null);
+
+                BigDecimal limit = budget != null ? budget.getLimitAmount() : BigDecimal.ZERO;
+                UUID budgetId = budget != null ? budget.getId() : null;
+
+                BigDecimal remaining = limit.subtract(spent);
+                BigDecimal percentUsed = BigDecimal.ZERO;
+
+                if (limit.compareTo(BigDecimal.ZERO) > 0) {
+                    percentUsed = spent.divide(limit, 4, RoundingMode.HALF_UP)
+                                       .multiply(new BigDecimal("100"));
+                }
+
+                BudgetStatus status = BudgetStatus.ON_TRACK;
+                if (percentUsed.compareTo(new BigDecimal("100")) >= 0) {
+                    status = BudgetStatus.EXCEEDED;
+                } else if (percentUsed.compareTo(new BigDecimal("80")) >= 0) {
+                    status = BudgetStatus.WARNING;
+                }
+
+                return BudgetStatusResponse.builder()
+                        .id(budgetId)
+                        .categoryId(cat.getId())
+                        .categoryName(cat.getName())
+                        .categoryIcon(cat.getIcon())
+                        .categoryColor(cat.getColor())
+                        .limit(limit)
+                        .spent(spent)
+                        .remaining(remaining)
+                        .percentUsed(percentUsed)
+                        .status(status)
+                        .build();
+            })
+            .filter(r -> r.getSpent().compareTo(BigDecimal.ZERO) > 0 || r.getLimit().compareTo(BigDecimal.ZERO) > 0)
+            .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)

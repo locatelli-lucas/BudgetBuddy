@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>BudgetBuddy - Nova Categoria</title>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com" rel="preconnect">
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+    <!-- Material Symbols -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <!-- Tailwind Theme Configuration -->
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-lowest": "#0c0e16",
+                        "on-tertiary-fixed-variant": "#7d2d00",
+                        "outline-variant": "#434655",
+                        "error": "#ffb4ab",
+                        "on-secondary-container": "#abb9d2",
+                        "surface-container-high": "#282a32",
+                        "on-tertiary-fixed": "#360f00",
+                        "on-background": "#e1e2ed",
+                        "surface-container-low": "#191b23",
+                        "on-primary-fixed-variant": "#003ea8",
+                        "inverse-primary": "#0053db",
+                        "on-surface-variant": "#c3c6d7",
+                        "on-primary": "#002a78",
+                        "surface-container-highest": "#32343d",
+                        "on-tertiary": "#581e00",
+                        "surface-bright": "#373942",
+                        "on-secondary-fixed-variant": "#3a485c",
+                        "surface-dim": "#11131b",
+                        "on-error": "#690005",
+                        "tertiary": "#ffb596",
+                        "surface-container": "#1d1f27",
+                        "secondary-fixed": "#d5e3fd",
+                        "on-secondary": "#233144",
+                        "on-primary-container": "#eeefff",
+                        "on-secondary-fixed": "#0d1c2f",
+                        "surface-variant": "#32343d",
+                        "primary-container": "#2563eb",
+                        "tertiary-container": "#bc4800",
+                        "secondary-fixed-dim": "#b9c7e0",
+                        "background": "#11131b",
+                        "on-primary-fixed": "#00174b",
+                        "secondary-container": "#3c4a5e",
+                        "primary-fixed-dim": "#b4c5ff",
+                        "outline": "#8d90a0",
+                        "tertiary-fixed-dim": "#ffb596",
+                        "on-error-container": "#ffdad6",
+                        "primary": "#b4c5ff",
+                        "tertiary-fixed": "#ffdbcd",
+                        "surface-tint": "#b4c5ff",
+                        "on-surface": "#e1e2ed",
+                        "inverse-surface": "#e1e2ed",
+                        "inverse-on-surface": "#2e3039",
+                        "error-container": "#93000a",
+                        "surface": "#11131b",
+                        "secondary": "#b9c7e0",
+                        "on-tertiary-container": "#ffede6",
+                        "primary-fixed": "#dbe1ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-lg": "24px",
+                        "stack-sm": "8px",
+                        "base": "8px",
+                        "stack-md": "16px",
+                        "section-gap": "40px",
+                        "container-padding-mobile": "20px",
+                        "gutter": "16px",
+                        "container-padding-desktop": "32px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Inter"],
+                        "numeric-display": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "label-md": ["Inter"],
+                        "display": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "headline-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "numeric-display": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "500" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500" }],
+                        "display": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom scrollbar for horizontal lists if needed */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+
+<body
+    class="text-on-background font-body-md text-body-md h-screen w-full overflow-x-hidden flex flex-col antialiased bg-surface">
+    <!-- 
+      TopAppBar 
+      Translating JSON keys:
+      style_component_shape: fixed top-0 w-full
+      style_shell_layout: flex items-center justify-between px-container-padding-mobile h-16 w-full z-50
+      style_bg_color: bg-surface dark:bg-surface
+      style_separation_logic: bg-surface dark:bg-surface
+      style_shadows_and_elevation: flat no shadows
+    -->
+    <header
+        class="fixed top-0 w-full flex items-center justify-between px-container-padding-mobile h-16 z-50 dark:bg-surface transition-colors bg-surface">
+        <div class="flex items-center gap-4">
+            <!-- Leading Icon -->
+            <button aria-label="Back"
+                class="w-10 h-10 flex items-center justify-center text-primary dark:text-primary active:scale-95 duration-150 rounded-full focus:outline-none">
+                <span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+            </button>
+            <!-- Left-aligned Headline -->
+            <h1 class="font-headline-md text-headline-md font-bold text-on-surface truncate">
+                Nova Categoria
+            </h1>
+        </div>
+        <!-- Trailing Action Area -->
+        <div class="flex items-center">
+            <button aria-label="More options"
+                class="w-10 h-10 flex items-center justify-end text-on-surface-variant hover:text-on-surface transition-colors active:scale-95 duration-150 focus:outline-none">
+            </button>
+        </div>
+    </header>
+    <!-- Main Content Canvas -->
+    <!-- Added pt-24 to clear the 16h (64px) app bar + spacing, pb-32 to clear the fixed button -->
+    <main class="flex-1 overflow-y-auto pt-[88px] px-container-padding-mobile flex flex-col gap-section-gap pb-24">
+        <!-- Input Section -->
+        <section class="flex flex-col gap-stack-sm">
+            <label class="font-label-md text-label-md text-on-surface-variant ml-1" for="category-name">
+                Nome da categoria
+            </label>
+            <div class="relative">
+                <input autocomplete="off"
+                    class="w-full h-14 bg-surface-container-low text-on-surface font-body-lg text-body-lg rounded-xl px-4 focus:outline-none focus:ring-1 focus:ring-primary border-none placeholder-on-surface-variant/50 transition-shadow"
+                    id="category-name" placeholder="Ex: Academia" type="text">
+            </div>
+        </section>
+        <!-- Icon Selection Section (Bento Grid Style) -->
+        <section class="flex flex-col gap-stack-sm">
+            <div class="flex items-center justify-between ml-1 mb-1">
+                <label class="font-label-md text-label-md text-on-surface-variant">
+                    Ícone
+                </label>
+            </div>
+            <div class="bg-surface-container-low rounded-xl p-4">
+                <div class="grid grid-cols-4 sm:grid-cols-6 gap-gutter">
+                    <!-- Active Icon -->
+                    <button
+                        class="aspect-square rounded-xl bg-primary-container text-on-primary-container flex flex-col items-center justify-center active:scale-95 transition-all shadow-sm">
+                        <span class="material-symbols-outlined" data-icon="fitness_center" data-weight="fill"
+                            style="font-variation-settings: &quot;FILL&quot; 1;">fitness_center</span>
+                    </button>
+                    <!-- Inactive Icons -->
+                    <button
+                        class="aspect-square rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface flex flex-col items-center justify-center active:scale-95 transition-all">
+                        <span class="material-symbols-outlined" data-icon="restaurant">restaurant</span>
+                    </button>
+                    <button
+                        class="aspect-square rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface flex flex-col items-center justify-center active:scale-95 transition-all">
+                        <span class="material-symbols-outlined" data-icon="directions_car">directions_car</span>
+                    </button>
+                    <button
+                        class="aspect-square rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface flex flex-col items-center justify-center active:scale-95 transition-all">
+                        <span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
+                    </button>
+                    <button
+                        class="aspect-square rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface flex flex-col items-center justify-center active:scale-95 transition-all">
+                        <span class="material-symbols-outlined" data-icon="home">home</span>
+                    </button>
+                    <button
+                        class="aspect-square rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface flex flex-col items-center justify-center active:scale-95 transition-all">
+                        <span class="material-symbols-outlined" data-icon="flight_takeoff">flight_takeoff</span>
+                    </button>
+                    <button
+                        class="aspect-square rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface flex flex-col items-center justify-center active:scale-95 transition-all">
+                        <span class="material-symbols-outlined" data-icon="pets">pets</span>
+                    </button>
+                    <button
+                        class="aspect-square rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface flex flex-col items-center justify-center active:scale-95 transition-all">
+                        <span class="material-symbols-outlined" data-icon="local_hospital">local_hospital</span>
+                    </button>
+                    <button
+                        class="aspect-square rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface flex flex-col items-center justify-center active:scale-95 transition-all">
+                        <span class="material-symbols-outlined" data-icon="school">school</span>
+                    </button>
+                    <button
+                        class="aspect-square rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface flex flex-col items-center justify-center active:scale-95 transition-all">
+                        <span class="material-symbols-outlined" data-icon="checkroom">checkroom</span>
+                    </button>
+                    <button
+                        class="aspect-square rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface flex flex-col items-center justify-center active:scale-95 transition-all">
+                        <span class="material-symbols-outlined" data-icon="sports_esports">sports_esports</span>
+                    </button>
+                    <button
+                        class="aspect-square rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface flex flex-col items-center justify-center active:scale-95 transition-all">
+                        <span class="material-symbols-outlined" data-icon="more_horiz">more_horiz</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+        <!-- Color Picker Section -->
+        <section class="flex flex-col gap-stack-sm">
+            <label class="font-label-md text-label-md text-on-surface-variant ml-1">
+                Cor temática
+            </label>
+            <div class="flex gap-4 overflow-x-auto hide-scrollbar pb-2 pt-1 px-1">
+                <!-- Using named theme colors from config to maintain system integrity -->
+                <!-- Active Color (Primary) -->
+                <button aria-label="Select primary color"
+                    class="shrink-0 w-12 h-12 rounded-full bg-primary flex items-center justify-center ring-2 ring-primary ring-offset-2 ring-offset-background transition-all">
+                    <span class="material-symbols-outlined text-on-primary text-xl" data-icon="check">check</span>
+                </button>
+                <button aria-label="Select red color"
+                    class="shrink-0 w-12 h-12 rounded-full bg-error hover:scale-110 active:scale-95 transition-all"></button>
+                <button aria-label="Select orange color"
+                    class="shrink-0 w-12 h-12 rounded-full bg-tertiary hover:scale-110 active:scale-95 transition-all"></button>
+                <button aria-label="Select deep blue color"
+                    class="shrink-0 w-12 h-12 rounded-full bg-inverse-primary hover:scale-110 active:scale-95 transition-all"></button>
+                <button aria-label="Select light blue color"
+                    class="shrink-0 w-12 h-12 rounded-full bg-secondary-fixed hover:scale-110 active:scale-95 transition-all"></button>
+                <button aria-label="Select brown color"
+                    class="shrink-0 w-12 h-12 rounded-full bg-on-tertiary-fixed-variant hover:scale-110 active:scale-95 transition-all"></button>
+            </div>
+        </section>
+    </main>
+    <nav
+        class="fixed bottom-0 left-0 w-full h-16 bg-surface-container border-t border-outline-variant flex items-center justify-around z-50 px-2">
+        <button
+            class="flex flex-col items-center justify-center gap-1 flex-1 text-on-surface-variant hover:text-primary transition-colors">
+            <span class="material-symbols-outlined">home</span>
+            <span class="text-label-sm font-label-sm">Início</span>
+        </button>
+        <button
+            class="flex flex-col items-center justify-center gap-1 flex-1 text-on-surface-variant hover:text-primary transition-colors">
+            <span class="material-symbols-outlined">receipt_long</span>
+            <span class="text-label-sm font-label-sm">Transações</span>
+        </button>
+        <button
+            class="flex flex-col items-center justify-center gap-1 flex-1 text-on-surface-variant hover:text-primary transition-colors">
+            <span class="material-symbols-outlined">account_balance_wallet</span>
+            <span class="text-label-sm font-label-sm">Orçamentos</span>
+        </button>
+        <button
+            class="flex flex-col items-center justify-center gap-1 flex-1 text-on-surface-variant hover:text-primary transition-colors">
+            <span class="material-symbols-outlined">trending_up</span>
+            <span class="text-label-sm font-label-sm">Investir</span>
+        </button>
+        <button
+            class="flex flex-col items-center justify-center gap-1 flex-1 text-on-surface-variant hover:text-primary transition-colors">
+            <span class="material-symbols-outlined">person</span>
+            <span class="text-label-sm font-label-sm">Perfil</span>
+        </button>
+    </nav>
+    <!-- Fixed Bottom Action Area -->
+    <!-- Using a subtle gradient mask to blend into the list seamlessly -->
+
+    <script>
+        // Simple JS for visual interaction on form elements
+        document.addEventListener('DOMContentLoaded', () => {
+            const iconButtons = document.querySelectorAll('.grid button');
+            const colorButtons = document.querySelectorAll('.overflow-x-auto button');
+
+            // Icon selection logic
+            iconButtons.forEach(btn => {
+                btn.addEventListener('click', function () {
+                    // Reset all
+                    iconButtons.forEach(b => {
+                        b.className = 'aspect-square rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface flex flex-col items-center justify-center active:scale-95 transition-all';
+                        const iconSpan = b.querySelector('span');
+                        iconSpan.removeAttribute('data-weight');
+                        iconSpan.style.fontVariationSettings = '';
+                    });
+
+                    // Set active
+                    this.className = 'aspect-square rounded-xl bg-primary-container text-on-primary-container flex flex-col items-center justify-center active:scale-95 transition-all shadow-sm';
+                    const activeSpan = this.querySelector('span');
+                    activeSpan.setAttribute('data-weight', 'fill');
+                    activeSpan.style.fontVariationSettings = "'FILL' 1";
+                });
+            });
+
+            // Color selection logic
+            colorButtons.forEach(btn => {
+                btn.addEventListener('click', function () {
+                    // Reset all
+                    colorButtons.forEach(b => {
+                        b.classList.remove('ring-2', 'ring-primary', 'ring-offset-2', 'ring-offset-background');
+                        b.classList.add('hover:scale-110');
+                        const check = b.querySelector('span');
+                        if (check) check.remove();
+                    });
+
+                    // Set active
+                    this.classList.add('ring-2', 'ring-primary', 'ring-offset-2', 'ring-offset-background');
+                    this.classList.remove('hover:scale-110');
+
+                    // Determine contrast color for checkmark (simplified logic for demo)
+                    const bgColor = window.getComputedStyle(this).backgroundColor;
+                    // In a real app, you'd calculate luminance to set text-on-primary or text-primary
+                    this.innerHTML = `<span class="material-symbols-outlined text-background text-xl" data-icon="check">check</span>`;
+                });
+            });
+        });
+    </script>
+
+
+
+
+
+
+
+
+
+
+</body>
+
+</html>

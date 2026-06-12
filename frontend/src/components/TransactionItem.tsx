@@ -2,13 +2,14 @@ import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Colors } from '../constants/colors';
+import { formatCurrency } from '../utils/currency';
 
 type TransactionType = 'INCOME' | 'EXPENSE';
 
 export interface TransactionItemProps {
   id: string;
   title: string;
-  subtitle: string; // e.g. "Alimentação • Hoje"
+  subtitle: string;
   amount: number;
   type: TransactionType;
   icon: keyof typeof MaterialIcons.glyphMap;
@@ -18,8 +19,8 @@ export interface TransactionItemProps {
 export function TransactionItem({ title, subtitle, amount, type, icon, onPress }: TransactionItemProps) {
   const isIncome = type === 'INCOME';
   const amountColor = isIncome ? 'text-[#4ade80]' : 'text-error';
-  const amountPrefix = isIncome ? '+' : '-';
-  const formattedAmount = `${amountPrefix} R$ ${amount.toFixed(2).replace('.', ',')}`;
+  const amountPrefix = isIncome ? '+ ' : '- ';
+  const formattedAmount = `${amountPrefix}${formatCurrency(Math.abs(amount))}`;
   
   const iconBgColor = isIncome ? 'bg-primary/20' : 'bg-surface-container-highest';
   const iconColor = isIncome ? Colors.primary : Colors.onSurfaceVariant;

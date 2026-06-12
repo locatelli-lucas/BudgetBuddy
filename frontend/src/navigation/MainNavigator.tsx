@@ -7,8 +7,43 @@ import { BudgetScreen } from '../screens/main/BudgetScreen';
 import { InvestmentsScreen } from '../screens/main/InvestmentsScreen';
 import { ProfileScreen } from '../screens/main/ProfileScreen';
 import { AiInsightsScreen } from '../screens/main/AiInsightsScreen';
+import { AiInsightDetailScreen } from '../screens/main/AiInsightDetailScreen';
 import { NewTransactionScreen } from '../screens/main/NewTransactionScreen';
 import { ReportPreviewScreen } from '../screens/main/ReportPreviewScreen';
+import { NotificationsScreen } from '../screens/main/NotificationsScreen';
+import { DatePickerScreen } from '../screens/main/DatePickerScreen';
+
+// Budget sub-screens
+import { CreateBudgetScreen } from '../screens/main/budgets/CreateBudgetScreen';
+import { BudgetHistoryScreen } from '../screens/main/budgets/BudgetHistoryScreen';
+import { DefineLimitScreen } from '../screens/main/budgets/DefineLimitScreen';
+import { BudgetOptionsScreen } from '../screens/main/budgets/BudgetOptionsScreen';
+import { RedefineLimitsScreen } from '../screens/main/budgets/RedefineLimitsScreen';
+import { ManageCategoriesScreen } from '../screens/main/budgets/ManageCategoriesScreen';
+import { AddCategoryScreen } from '../screens/main/budgets/AddCategoryScreen';
+import { IconGalleryScreen } from '../screens/main/budgets/IconGalleryScreen';
+
+// Investment sub-screens
+import { AddAssetScreen } from '../screens/main/investments/AddAssetScreen';
+import { RegisteredInstitutionsScreen } from '../screens/main/investments/RegisteredInstitutionsScreen';
+import { InvestmentOptionsScreen } from '../screens/main/investments/InvestmentOptionsScreen';
+
+// Profile sub-screens
+import { PersonalDataScreen } from '../screens/profile/PersonalDataScreen';
+import { SecurityScreen } from '../screens/profile/SecurityScreen';
+import { UpdatePasswordScreen } from '../screens/profile/UpdatePasswordScreen';
+import { TwoStepAuthScreen } from '../screens/profile/TwoStepAuthScreen';
+import { NotificationSettingsScreen } from '../screens/profile/NotificationSettingsScreen';
+import { NotificationOptionsScreen } from '../screens/profile/NotificationOptionsScreen';
+import { AppearanceScreen } from '../screens/profile/AppearanceScreen';
+import { DeleteAccountScreen } from '../screens/profile/DeleteAccountScreen';
+import { DeleteAccountConfirmScreen } from '../screens/profile/DeleteAccountConfirmScreen';
+import { DeletedAccountScreen } from '../screens/profile/DeletedAccountScreen';
+import { LeaveAccountScreen } from '../screens/profile/LeaveAccountScreen';
+
+// Report sub-screens
+import { CustomDateScreen } from '../screens/report/CustomDateScreen';
+
 import { Colors } from '../constants/colors';
 import { MaterialIcons } from '@expo/vector-icons';
 
@@ -82,9 +117,47 @@ export function MainNavigator() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="MainTabs" component={MainTabs} />
+      
+      {/* AI & Notifications */}
       <Stack.Screen name="AiInsights" component={AiInsightsScreen} />
+      <Stack.Screen name="AiInsightDetail" component={AiInsightDetailScreen} />
+      <Stack.Screen name="Notifications" component={NotificationsScreen} />
+      
+      {/* Transactions */}
       <Stack.Screen name="NewTransaction" component={NewTransactionScreen} />
+      <Stack.Screen name="DatePicker" component={DatePickerScreen} />
+      
+      {/* Reports */}
       <Stack.Screen name="ReportPreview" component={ReportPreviewScreen} />
+      <Stack.Screen name="CustomDate" component={CustomDateScreen} />
+      
+      {/* Budgets */}
+      <Stack.Screen name="CreateBudget" component={CreateBudgetScreen} />
+      <Stack.Screen name="BudgetHistory" component={BudgetHistoryScreen} />
+      <Stack.Screen name="DefineLimit" component={DefineLimitScreen} />
+      <Stack.Screen name="BudgetOptions" component={BudgetOptionsScreen} />
+      <Stack.Screen name="RedefineLimits" component={RedefineLimitsScreen} />
+      <Stack.Screen name="ManageCategories" component={ManageCategoriesScreen} />
+      <Stack.Screen name="AddCategory" component={AddCategoryScreen} />
+      <Stack.Screen name="IconGallery" component={IconGalleryScreen} />
+      
+      {/* Investments */}
+      <Stack.Screen name="AddAsset" component={AddAssetScreen} />
+      <Stack.Screen name="RegisteredInstitutions" component={RegisteredInstitutionsScreen} />
+      <Stack.Screen name="InvestmentOptions" component={InvestmentOptionsScreen} />
+      
+      {/* Profile */}
+      <Stack.Screen name="PersonalData" component={PersonalDataScreen} />
+      <Stack.Screen name="Security" component={SecurityScreen} />
+      <Stack.Screen name="UpdatePassword" component={UpdatePasswordScreen} />
+      <Stack.Screen name="TwoStepAuth" component={TwoStepAuthScreen} />
+      <Stack.Screen name="NotificationSettings" component={NotificationSettingsScreen} />
+      <Stack.Screen name="NotificationOptions" component={NotificationOptionsScreen} />
+      <Stack.Screen name="Appearance" component={AppearanceScreen} />
+      <Stack.Screen name="DeleteAccount" component={DeleteAccountScreen} />
+      <Stack.Screen name="DeleteAccountConfirm" component={DeleteAccountConfirmScreen} />
+      <Stack.Screen name="DeletedAccount" component={DeletedAccountScreen} />
+      <Stack.Screen name="LeaveAccount" component={LeaveAccountScreen} />
     </Stack.Navigator>
   );
 }

@@ -48,19 +48,6 @@ export function ReportPreviewScreen({ navigation, route }: Props) {
     }
   };
 
-  const handleDownload = async () => {
-    if (pdfUri) {
-      try {
-        const now = new Date();
-        const filename = `BudgetBuddy_Relatorio_${now.getMonth() + 1}_${now.getFullYear()}.pdf`;
-        await reportService.saveToDevice(pdfUri, filename);
-        Alert.alert('Sucesso', `Relatório salvo como ${filename}`);
-      } catch {
-        Alert.alert('Erro', 'Não foi possível salvar o arquivo.');
-      }
-    }
-  };
-
   const handleExportPdf = async () => {
     try {
       const now = new Date();
@@ -96,9 +83,7 @@ export function ReportPreviewScreen({ navigation, route }: Props) {
           <Text className="text-[18px] leading-6 font-bold text-on-surface">Relatório mensal</Text>
           <Text className="text-label-sm text-primary uppercase tracking-widest mt-0.5">{monthLabel}</Text>
         </View>
-        <TouchableOpacity className="w-10 h-10 items-center justify-center rounded-full">
-          <MaterialIcons name="more-vert" size={24} color={Colors.onSurfaceVariant} />
-        </TouchableOpacity>
+        <View className="w-10" />
       </View>
 
       {/* PDF Preview Card */}
@@ -241,28 +226,21 @@ export function ReportPreviewScreen({ navigation, route }: Props) {
       </ScrollView>
 
       {/* Bottom Action Bar */}
-      <View className="bg-surface-container-highest/80 border-t border-outline-variant/50 px-5 pt-4 pb-6 gap-3">
-        <TouchableOpacity
-          className="w-full h-14 bg-primary-container rounded-full flex-row items-center justify-center gap-2 active:scale-[0.98]"
-          onPress={handleExportPdf}
-        >
-          <MaterialIcons name="picture-as-pdf" size={20} color={Colors.onPrimaryContainer} style={{ fontVariationSettings: '"FILL" 1' }} />
-          <Text className="text-label-md text-on-primaryContainer font-bold">Exportar PDF</Text>
-        </TouchableOpacity>
+      <View className="bg-surface-container-highest/80 border-t border-outline-variant/50 px-5 pt-4 pb-6">
         <View className="flex-row gap-4">
+          <TouchableOpacity
+            className="flex-1 h-12 bg-primary-container rounded-full flex-row items-center justify-center gap-2 active:scale-[0.98]"
+            onPress={handleExportPdf}
+          >
+            <MaterialIcons name="picture-as-pdf" size={18} color={Colors.onPrimaryContainer} />
+            <Text className="text-label-md text-on-primaryContainer font-bold">Exportar PDF</Text>
+          </TouchableOpacity>
           <TouchableOpacity
             className="flex-1 h-12 bg-secondary-container rounded-full flex-row items-center justify-center gap-2 active:scale-[0.98]"
             onPress={handleShare}
           >
             <MaterialIcons name="share" size={18} color={Colors.onSecondaryContainer} />
             <Text className="text-label-md text-on-secondaryContainer">Compartilhar</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            className="flex-1 h-12 bg-secondary-container rounded-full flex-row items-center justify-center gap-2 active:scale-[0.98]"
-            onPress={handleDownload}
-          >
-            <MaterialIcons name="download" size={18} color={Colors.onSecondaryContainer} />
-            <Text className="text-label-md text-on-secondaryContainer">Baixar</Text>
           </TouchableOpacity>
         </View>
       </View>

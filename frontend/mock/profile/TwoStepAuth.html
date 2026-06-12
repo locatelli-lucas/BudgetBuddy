@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Autenticação em Duas Etapas</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet">
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-fixed": "#d5e3fd",
+                        "on-primary-container": "#eeefff",
+                        "inverse-surface": "#e1e2ed",
+                        "primary-fixed-dim": "#b4c5ff",
+                        "on-tertiary": "#581e00",
+                        "on-secondary": "#233144",
+                        "tertiary-fixed-dim": "#ffb596",
+                        "on-secondary-fixed-variant": "#3a485c",
+                        "error": "#ffb4ab",
+                        "outline-variant": "#434655",
+                        "background": "#11131b",
+                        "surface-container-high": "#282a32",
+                        "surface-container-low": "#191b23",
+                        "on-background": "#e1e2ed",
+                        "on-tertiary-fixed-variant": "#7d2d00",
+                        "surface-variant": "#32343d",
+                        "outline": "#8d90a0",
+                        "surface-bright": "#373942",
+                        "on-tertiary-fixed": "#360f00",
+                        "surface-container-highest": "#32343d",
+                        "primary-container": "#2563eb",
+                        "on-surface-variant": "#c3c6d7",
+                        "on-secondary-fixed": "#0d1c2f",
+                        "on-primary": "#002a78",
+                        "inverse-on-surface": "#2e3039",
+                        "error-container": "#93000a",
+                        "surface-dim": "#11131b",
+                        "on-surface": "#e1e2ed",
+                        "surface-container": "#1d1f27",
+                        "on-error-container": "#ffdad6",
+                        "on-error": "#690005",
+                        "primary": "#b4c5ff",
+                        "secondary-container": "#3c4a5e",
+                        "on-secondary-container": "#abb9d2",
+                        "surface": "#11131b",
+                        "on-tertiary-container": "#ffede6",
+                        "tertiary-container": "#bc4800",
+                        "surface-container-lowest": "#0c0e16",
+                        "surface-tint": "#b4c5ff",
+                        "secondary-fixed-dim": "#b9c7e0",
+                        "inverse-primary": "#0053db",
+                        "tertiary": "#ffb596",
+                        "tertiary-fixed": "#ffdbcd",
+                        "on-primary-fixed": "#00174b",
+                        "primary-fixed": "#dbe1ff",
+                        "on-primary-fixed-variant": "#003ea8",
+                        "secondary": "#b9c7e0"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-md": "16px",
+                        "gutter": "16px",
+                        "container-padding-desktop": "32px",
+                        "stack-sm": "8px",
+                        "base": "8px",
+                        "section-gap": "40px",
+                        "stack-lg": "24px",
+                        "container-padding-mobile": "20px"
+                    },
+                    "fontFamily": {
+                        "label-sm": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "display": ["Inter"],
+                        "body-md": ["Inter"],
+                        "numeric-display": ["Inter"],
+                        "label-md": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "headline-lg-mobile": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "display": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "numeric-display": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "500" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #11131b;
+        }
+
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(141, 144, 160, 0.1);
+        }
+
+        .option-card {
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+        }
+
+        .option-card:hover {
+            background-color: rgba(37, 99, 235, 0.1);
+            border-color: rgba(180, 197, 255, 0.3);
+        }
+
+        .option-card.selected {
+            background-color: rgba(37, 99, 235, 0.15);
+            border-color: #b4c5ff;
+        }
+
+        .radio-custom {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #8d90a0;
+            border-radius: 50%;
+            position: relative;
+            outline: none;
+        }
+
+        .radio-custom:checked {
+            border-color: #b4c5ff;
+        }
+
+        .radio-custom:checked::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #b4c5ff;
+        }
+    </style>
+</head>
+
+<body class="text-on-background min-h-screen flex flex-col pb-24 font-body-md bg-surface">
+    <!-- TopAppBar -->
+    <header class="w-full sticky top-0 bg-background flex items-center h-16 px-4 w-full z-40">
+        <button aria-label="Voltar"
+            class="w-10 h-10 flex items-center justify-center hover:opacity-80 transition-opacity active:scale-95 transition-transform text-primary">
+            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">arrow_back</span>
+        </button>
+        <h1 class="font-headline-md text-headline-md text-primary ml-2">Segurança</h1>
+    </header>
+    <!-- Main Content -->
+    <main
+        class="flex-1 px-container-padding-mobile md:px-container-padding-desktop max-w-3xl mx-auto w-full pt-stack-lg">
+        <!-- Hero Section -->
+        <div class="flex flex-col items-center text-center mb-section-gap">
+            <div
+                class="w-24 h-24 rounded-full bg-surface-container-high flex items-center justify-center mb-stack-lg relative overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-tr from-primary-container/20 to-transparent"></div>
+                <span class="material-symbols-outlined text-[48px] text-primary relative z-10"
+                    style="font-variation-settings: 'FILL' 1;">shield_person</span>
+            </div>
+            <h2
+                class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg mb-stack-sm text-on-surface">
+                Proteja sua conta</h2>
+            <p class="font-body-md text-body-md text-on-surface-variant max-w-md">
+                Adicione uma camada extra de segurança para manter seus dados financeiros protegidos.
+            </p>
+        </div>
+        <!-- Options Section -->
+        <div class="space-y-stack-md mb-section-gap">
+            <!-- Option 1: App -->
+            <label
+                class="option-card flex items-start p-stack-md rounded-xl bg-surface-container-low border border-outline/20 selected group">
+                <div class="mr-stack-md pt-1">
+                    <input checked="" class="radio-custom" name="2fa_method" type="radio" value="app">
+                </div>
+                <div class="flex-1">
+                    <div class="flex items-center mb-1">
+                        <span class="material-symbols-outlined text-primary mr-2"
+                            style="font-variation-settings: 'FILL' 0;">phonelink_lock</span>
+                        <span
+                            class="font-label-md text-label-md text-on-surface group-[.selected]:text-primary">Aplicativo
+                            de Autenticação</span>
+                    </div>
+                    <p class="font-body-md text-body-md text-on-surface-variant">Recomendado para maior segurança.</p>
+                </div>
+            </label>
+            <!-- Option 2: SMS -->
+            <label
+                class="option-card flex items-start p-stack-md rounded-xl bg-surface-container-low border border-outline/20 group">
+                <div class="mr-stack-md pt-1">
+                    <input class="radio-custom" name="2fa_method" type="radio" value="sms">
+                </div>
+                <div class="flex-1">
+                    <div class="flex items-center mb-1">
+                        <span
+                            class="material-symbols-outlined text-on-surface-variant mr-2 group-[.selected]:text-primary"
+                            style="font-variation-settings: 'FILL' 0;">sms</span>
+                        <span
+                            class="font-label-md text-label-md text-on-surface group-[.selected]:text-primary">Mensagem
+                            de Texto (SMS)</span>
+                    </div>
+                    <p class="font-body-md text-body-md text-on-surface-variant">Receba um código no seu celular.</p>
+                </div>
+            </label>
+        </div>
+        <!-- Action Button -->
+        <div class="flex justify-center mt-auto">
+            <button
+                class="w-full md:w-auto min-w-[200px] h-[56px] bg-primary text-on-primary font-label-md text-label-md rounded-full hover:opacity-90 active:scale-95 transition-all shadow-[0_4px_12px_rgba(37,99,235,0.2)]">
+                Ativar Autenticação
+            </button>
+        </div>
+    </main>
+    <!-- BottomNavBar -->
+    <nav class="fixed bottom-0 w-full z-50 bg-surface-container shadow-[0_-4px_12px_rgba(0,0,0,0.2)] md:hidden">
+        <div class="flex justify-around items-center h-20 px-4 pb-4">
+            <button
+                class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-secondary-container/50 transition-colors active:scale-90 transition-transform">
+                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">home</span>
+            </button>
+            <button
+                class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-secondary-container/50 transition-colors active:scale-90 transition-transform">
+                <span class="material-symbols-outlined"
+                    style="font-variation-settings: 'FILL' 0;">account_balance_wallet</span>
+            </button>
+            <button
+                class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-secondary-container/50 transition-colors active:scale-90 transition-transform">
+                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">swap_horiz</span>
+            </button>
+            <button
+                class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-xl p-2 hover:bg-secondary-container/50 transition-colors active:scale-90 transition-transform">
+                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">security</span>
+            </button>
+            <button
+                class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-secondary-container/50 transition-colors active:scale-90 transition-transform">
+                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">person</span>
+            </button>
+        </div>
+    </nav>
+    <script>
+        // Simple script to handle radio button selection styling
+        document.querySelectorAll('input[name="2fa_method"]').forEach(radio => {
+            radio.addEventListener('change', function () {
+                // Remove selected class from all cards
+                document.querySelectorAll('.option-card').forEach(card => {
+                    card.classList.remove('selected');
+                });
+
+                // Add selected class to parent card of checked radio
+                if (this.checked) {
+                    this.closest('.option-card').classList.add('selected');
+                }
+            });
+        });
+    </script>
+
+
+
+
+</body>
+
+</html>

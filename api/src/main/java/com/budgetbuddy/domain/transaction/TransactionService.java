@@ -86,7 +86,7 @@ public class TransactionService {
     }
 
     @Transactional
-    @CacheEvict(value = "userSummary", key = "#email")
+    @CacheEvict(value = {"userSummary", "budgetStatus"}, allEntries = true)
     public TransactionResponse createTransaction(String email, TransactionRequest request) {
         User user = userService.getUserByEmail(email);
         Category category = categoryService.getCategoryEntity(request.getCategoryId(), user.getId());
@@ -109,7 +109,7 @@ public class TransactionService {
     }
 
     @Transactional
-    @CacheEvict(value = "userSummary", key = "#email")
+    @CacheEvict(value = {"userSummary", "budgetStatus"}, allEntries = true)
     public TransactionResponse updateTransaction(String email, UUID id, TransactionRequest request) {
         User user = userService.getUserByEmail(email);
         Transaction transaction = transactionRepository.findByIdAndUserId(id, user.getId())
@@ -132,7 +132,7 @@ public class TransactionService {
     }
 
     @Transactional
-    @CacheEvict(value = "userSummary", key = "#email")
+    @CacheEvict(value = {"userSummary", "budgetStatus"}, allEntries = true)
     public void deleteTransaction(String email, UUID id) {
         User user = userService.getUserByEmail(email);
         Transaction transaction = transactionRepository.findByIdAndUserId(id, user.getId())

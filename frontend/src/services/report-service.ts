@@ -1,7 +1,8 @@
 // src/services/report-service.ts
 import { api } from './api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as FileSystem from 'expo-file-system';
+import { Platform } from 'react-native';
+import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 
 export interface CategoryBreakdown {
@@ -54,18 +55,38 @@ export const reportService = {
     const token = await AsyncStorage.getItem('accessToken');
     const url = `${api.defaults.baseURL}/api/v1/reports/monthly/pdf?month=${targetMonth}&year=${targetYear}`;
 
+    // On web, fetch the PDF as a blob and create a download
+    if (Platform.OS === 'web') {
+      const response = await fetch(url, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      return blobUrl;
+    }
+
+    // On native, download to cache
     const fileUri = `${FileSystem.cacheDirectory}budgetbuddy-report-${targetMonth}-${targetYear}.pdf`;
-
-    const downloadRes = await FileSystem.downloadAsync(url, fileUri, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+    await FileSystem.downloadAsync(url, fileUri, {
+      headers: { Authorization: `Bearer ${token}` },
     });
-
-    return downloadRes.uri;
+    return fileUri;
   },
 
   sharePdf: async (fileUri: string) => {
+    if (Platform.OS === 'web') {
+      // Web: trigger browser download
+      const a = document.createElement('a');
+      a.href = fileUri;
+      a.download = `BudgetBuddy_Relatorio.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(fileUri);
+      return;
+    }
+
+    // Native: use share sheet
     if (await Sharing.isAvailableAsync()) {
       await Sharing.shareAsync(fileUri, {
         mimeType: 'application/pdf',
@@ -75,11 +96,20 @@ export const reportService = {
   },
 
   saveToDevice: async (fileUri: string, filename: string) => {
+    if (Platform.OS === 'web') {
+      // Web: trigger browser download with the given filename
+      const a = document.createElement('a');
+      a.href = fileUri;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(fileUri);
+      return;
+    }
+
+    // Native: move from cache to documents directory
     const destination = `${FileSystem.documentDirectory}${filename}`;
-    await FileSystem.moveAsync({
-      from: fileUri,
-      to: destination,
-    });
-    return destination;
+    await FileSystem.moveAsync({ from: fileUri, to: destination });
   },
 };

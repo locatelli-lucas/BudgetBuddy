@@ -3,15 +3,22 @@ spring:
     url: jdbc:postgresql://localhost:5432/budgetbuddy
     username: budgetbuddy
     password: budgetbuddy
+    driver-class-name: org.postgresql.Driver
 
   jpa:
     properties:
       hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
     show-sql: false
 
   flyway:
     clean-on-validation-error: false
+
+  cache:
+    type: redis
+    redis:
+      time-to-live: 300000
 
 logging:
   level:

@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+    <title>Exportar Relatório - BudgetBuddy</title>
+    <!-- Material Symbols -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet">
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-secondary": "#233144",
+                        "on-background": "#e1e2ed",
+                        "on-error": "#690005",
+                        "outline": "#8d90a0",
+                        "surface-container-lowest": "#0c0e16",
+                        "inverse-surface": "#e1e2ed",
+                        "on-primary": "#002a78",
+                        "tertiary-fixed": "#ffdbcd",
+                        "inverse-on-surface": "#2e3039",
+                        "primary-fixed-dim": "#b4c5ff",
+                        "primary-container": "#2563eb",
+                        "on-tertiary-fixed": "#360f00",
+                        "secondary": "#b9c7e0",
+                        "on-tertiary-fixed-variant": "#7d2d00",
+                        "surface-tint": "#b4c5ff",
+                        "surface-container-high": "#282a32",
+                        "surface-bright": "#373942",
+                        "primary-fixed": "#dbe1ff",
+                        "on-secondary-fixed": "#0d1c2f",
+                        "on-secondary-container": "#abb9d2",
+                        "surface-container": "#1d1f27",
+                        "on-error-container": "#ffdad6",
+                        "tertiary-fixed-dim": "#ffb596",
+                        "on-surface": "#e1e2ed",
+                        "error-container": "#93000a",
+                        "surface-container-low": "#191b23",
+                        "error": "#ffb4ab",
+                        "surface-dim": "#11131b",
+                        "secondary-fixed-dim": "#b9c7e0",
+                        "on-tertiary-container": "#ffede6",
+                        "primary": "#b4c5ff",
+                        "tertiary": "#ffb596",
+                        "on-tertiary": "#581e00",
+                        "on-primary-fixed": "#00174b",
+                        "surface": "#11131b",
+                        "on-surface-variant": "#c3c6d7",
+                        "tertiary-container": "#bc4800",
+                        "secondary-container": "#3c4a5e",
+                        "surface-variant": "#32343d",
+                        "outline-variant": "#434655",
+                        "on-secondary-fixed-variant": "#3a485c",
+                        "on-primary-fixed-variant": "#003ea8",
+                        "background": "#11131b",
+                        "on-primary-container": "#eeefff",
+                        "secondary-fixed": "#d5e3fd",
+                        "inverse-primary": "#0053db",
+                        "surface-container-highest": "#32343d"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    spacing: {
+                        "stack-lg": "24px",
+                        "stack-sm": "8px",
+                        "container-padding-mobile": "20px",
+                        "base": "8px",
+                        "stack-md": "16px",
+                        "section-gap": "40px",
+                        "gutter": "16px",
+                        "container-padding-desktop": "32px"
+                    },
+                    fontFamily: {
+                        "body-md": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "display": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "numeric-display": ["Inter"],
+                        "label-md": ["Inter"]
+                    },
+                    fontSize: {
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "display": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "numeric-display": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "500" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .icon-fill {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        /* Modal animation */
+        @keyframes slideUp {
+            from {
+                transform: translateY(100%);
+            }
+
+            to {
+                transform: translateY(0);
+            }
+        }
+
+        .animate-slide-up {
+            animation: slideUp 0.3s cubic-bezier(0.2, 0, 0, 1) forwards;
+        }
+    </style>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+
+<body class="text-on-surface font-body-md min-h-screen overflow-hidden relative bg-surface">
+    <!-- Background App Context (Blurred/Inactive) -->
+    <div class="h-full w-full flex flex-col blur-sm opacity-60 pointer-events-none select-none">
+        <!-- TopAppBar -->
+        <header
+            class="w-full sticky top-0 flex items-center justify-between px-container-padding-mobile h-16 bg-surface">
+            <button class="text-on-surface-variant dark:text-on-surface-variant flex items-center justify-center">
+                <span class="material-symbols-outlined">menu</span>
+            </button>
+            <h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary">BudgetBuddy</h1>
+            <button class="text-on-surface-variant dark:text-on-surface-variant flex items-center justify-center">
+                <span class="material-symbols-outlined">notifications</span>
+            </button>
+        </header>
+        <!-- Dummy Content -->
+        <main class="flex-1 p-container-padding-mobile flex flex-col gap-stack-lg">
+            <div class="h-32 bg-surface-container rounded-xl"></div>
+            <div class="h-64 bg-surface-container rounded-xl"></div>
+        </main>
+        <!-- BottomNavBar -->
+        <nav
+            class="fixed bottom-0 w-full z-50 flex justify-around items-center px-4 py-3 pb-safe bg-surface-container dark:bg-surface-container border-t border-outline-variant shadow-sm rounded-t-xl hidden md:hidden">
+            <a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant"
+                href="#"><span class="material-symbols-outlined">home</span>
+                <span class="font-label-sm text-label-sm mt-1">Incio</span></a>
+            <a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant"
+                href="#"><span class="material-symbols-outlined">receipt_long</span>
+                <span class="font-label-sm text-label-sm mt-1">Transaes</span></a>
+            <a class="flex flex-col items-center justify-center bg-secondary-container dark:bg-secondary-container text-on-secondary-container dark:text-on-secondary-container rounded-full px-4 py-1"
+                href="#"><span class="material-symbols-outlined icon-fill">account_balance_wallet</span>
+                <span class="font-label-sm text-label-sm mt-1">Oramentos</span></a>
+            <a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant"
+                href="#"><span class="material-symbols-outlined">trending_up</span>
+                <span class="font-label-sm text-label-sm mt-1">Investir</span></a>
+            <a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant"
+                href="#"><span class="material-symbols-outlined">person</span>
+                <span class="font-label-sm text-label-sm mt-1">Perfil</span></a>
+        </nav>
+    </div>
+    <!-- Scrim / Overlay -->
+    <div class="fixed inset-0 bg-black/70 z-40 transition-opacity duration-300"></div>
+    <!-- Bottom Sheet Modal -->
+    <div
+        class="fixed bottom-0 left-0 w-full bg-surface-container-highest dark:bg-surface-container-highest rounded-t-[24px] z-50 flex flex-col animate-slide-up shadow-2xl max-h-[795px] overflow-y-auto pb-8 md:w-[480px] md:left-1/2 md:-translate-x-1/2">
+        <!-- Drag Handle Affordance -->
+        <div class="w-full flex justify-center pt-4 pb-2">
+            <div class="w-12 h-1.5 bg-outline-variant rounded-full opacity-50"></div>
+        </div>
+        <!-- Content Container -->
+        <div class="px-container-padding-mobile flex flex-col gap-stack-lg mt-2">
+            <!-- Header -->
+            <div class="flex items-center justify-between h-14">
+                <h2 class="font-headline-md text-headline-md text-on-surface font-semibold">Exportar relatório
+                    financeiro</h2>
+                <button
+                    class="w-10 h-10 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-variant transition-colors">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <!-- Period Selector Section -->
+            <section class="flex flex-col gap-stack-sm">
+                <h3 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider mb-1">Período
+                </h3>
+                <div
+                    class="flex flex-col bg-surface-container rounded-xl overflow-hidden border border-surface-variant">
+                    <!-- Option 1 -->
+                    <label
+                        class="flex items-center justify-between p-4 border-b border-surface-variant cursor-pointer hover:bg-surface-container-high transition-colors">
+                        <span class="font-body-md text-body-md text-on-surface">Últimos 7 dias</span>
+                        <span
+                            class="material-symbols-outlined text-outline-variant text-[22px]">radio_button_unchecked</span>
+                    </label>
+                    <!-- Option 2 (Selected) -->
+                    <label
+                        class="flex items-center justify-between p-4 border-b border-surface-variant cursor-pointer bg-surface-container-high/50">
+                        <span class="font-body-md text-body-md text-on-surface font-medium">Este mês</span>
+                        <span
+                            class="material-symbols-outlined text-primary-container icon-fill text-[22px]">radio_button_checked</span>
+                    </label>
+                    <!-- Option 3 -->
+                    <label
+                        class="flex items-center justify-between p-4 border-b border-surface-variant cursor-pointer hover:bg-surface-container-high transition-colors">
+                        <span class="font-body-md text-body-md text-on-surface">Mês anterior</span>
+                        <span
+                            class="material-symbols-outlined text-outline-variant text-[22px]">radio_button_unchecked</span>
+                    </label>
+                    <!-- Option 4 -->
+                    <label
+                        class="flex items-center justify-between p-4 border-b border-surface-variant cursor-pointer hover:bg-surface-container-high transition-colors">
+                        <span class="font-body-md text-body-md text-on-surface">Este ano</span>
+                        <span
+                            class="material-symbols-outlined text-outline-variant text-[22px]">radio_button_unchecked</span>
+                    </label>
+                    <!-- Option 5 -->
+                    <label
+                        class="flex items-center justify-between p-4 cursor-pointer hover:bg-surface-container-high transition-colors">
+                        <span class="font-body-md text-body-md text-on-surface">Personalizado</span>
+                        <span class="material-symbols-outlined text-outline-variant text-[22px]">chevron_right</span>
+                    </label>
+                </div>
+            </section>
+            <!-- Content Options Section -->
+            <section class="flex flex-col gap-stack-sm mt-2">
+                <h3 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider mb-1">Opções de
+                    conteúdo</h3>
+                <div class="flex flex-col gap-1">
+                    <!-- Checkbox 1 -->
+                    <label
+                        class="flex items-center justify-between p-3 rounded-lg hover:bg-surface-container transition-colors cursor-pointer -mx-3">
+                        <div class="flex items-center gap-3">
+                            <span
+                                class="material-symbols-outlined text-primary-container icon-fill text-[24px]">check_box</span>
+                            <span class="font-body-md text-body-md text-on-surface">Incluir gráficos</span>
+                        </div>
+                    </label>
+                    <!-- Checkbox 2 -->
+                    <label
+                        class="flex items-center justify-between p-3 rounded-lg hover:bg-surface-container transition-colors cursor-pointer -mx-3">
+                        <div class="flex items-center gap-3">
+                            <span
+                                class="material-symbols-outlined text-primary-container icon-fill text-[24px]">check_box</span>
+                            <span class="font-body-md text-body-md text-on-surface">Incluir resumo da IA</span>
+                        </div>
+                        <span class="material-symbols-outlined text-tertiary-fixed-dim text-[16px]">auto_awesome</span>
+                    </label>
+                    <!-- Checkbox 3 -->
+                    <label
+                        class="flex items-center justify-between p-3 rounded-lg hover:bg-surface-container transition-colors cursor-pointer -mx-3">
+                        <div class="flex items-center gap-3">
+                            <span
+                                class="material-symbols-outlined text-primary-container icon-fill text-[24px]">check_box</span>
+                            <span class="font-body-md text-body-md text-on-surface">Incluir categorias</span>
+                        </div>
+                    </label>
+                    <!-- Checkbox 4 (Unchecked) -->
+                    <label
+                        class="flex items-center justify-between p-3 rounded-lg hover:bg-surface-container transition-colors cursor-pointer -mx-3">
+                        <div class="flex items-center gap-3">
+                            <span
+                                class="material-symbols-outlined text-outline-variant text-[24px]">check_box_outline_blank</span>
+                            <span class="font-body-md text-body-md text-on-surface">Incluir comparativo com mês
+                                anterior</span>
+                        </div>
+                    </label>
+                </div>
+            </section>
+            <!-- Action Buttons -->
+            <div class="flex flex-col gap-3 mt-4">
+                <button
+                    class="w-full h-[56px] rounded-full bg-primary-container text-on-primary-container font-label-md text-label-md flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] transition-all shadow-md">
+                    <span class="material-symbols-outlined text-[20px]">picture_as_pdf</span>
+                    Gerar PDF
+                </button>
+                <button
+                    class="w-full h-[56px] rounded-full bg-transparent border border-outline-variant text-on-surface font-label-md text-label-md flex items-center justify-center hover:bg-surface-container active:scale-[0.98] transition-all">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+</body>
+
+</html>

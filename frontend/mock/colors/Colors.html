@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR" style="">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet">
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary": "#002a78",
+                        "on-secondary-container": "#abb9d2",
+                        "surface-bright": "#373942",
+                        "surface-container": "#1d1f27",
+                        "surface-variant": "#32343d",
+                        "secondary-container": "#3c4a5e",
+                        "tertiary-fixed": "#ffdbcd",
+                        "surface-dim": "#11131b",
+                        "inverse-surface": "#e1e2ed",
+                        "inverse-on-surface": "#2e3039",
+                        "background": "#11131b",
+                        "primary-fixed": "#dbe1ff",
+                        "on-error": "#690005",
+                        "surface-container-high": "#282a32",
+                        "secondary-fixed": "#d5e3fd",
+                        "on-surface": "#e1e2ed",
+                        "surface": "#11131b",
+                        "on-tertiary-fixed-variant": "#7d2d00",
+                        "on-error-container": "#ffdad6",
+                        "tertiary-container": "#bc4800",
+                        "surface-container-low": "#191b23",
+                        "primary-fixed-dim": "#b4c5ff",
+                        "on-tertiary": "#581e00",
+                        "surface-container-lowest": "#0c0e16",
+                        "surface-container-highest": "#32343d",
+                        "secondary-fixed-dim": "#b9c7e0",
+                        "inverse-primary": "#0053db",
+                        "primary": "#b4c5ff",
+                        "on-primary-fixed-variant": "#003ea8",
+                        "on-tertiary-container": "#ffede6",
+                        "error-container": "#93000a",
+                        "outline-variant": "#434655",
+                        "on-background": "#e1e2ed",
+                        "outline": "#8d90a0",
+                        "primary-container": "#2563eb",
+                        "error": "#ffb4ab",
+                        "tertiary": "#ffb596",
+                        "on-tertiary-fixed": "#360f00",
+                        "surface-tint": "#b4c5ff",
+                        "on-secondary-fixed": "#0d1c2f",
+                        "on-surface-variant": "#c3c6d7",
+                        "on-secondary-fixed-variant": "#3a485c",
+                        "on-primary-container": "#eeefff",
+                        "on-primary-fixed": "#00174b",
+                        "tertiary-fixed-dim": "#ffb596",
+                        "secondary": "#b9c7e0",
+                        "on-secondary": "#233144"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-sm": "8px",
+                        "section-gap": "40px",
+                        "container-padding-mobile": "20px",
+                        "stack-md": "16px",
+                        "base": "8px",
+                        "stack-lg": "24px",
+                        "gutter": "16px",
+                        "container-padding-desktop": "32px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "numeric-display": ["Inter"],
+                        "label-md": ["Inter"],
+                        "display": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "body-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "numeric-display": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "500" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500" }],
+                        "display": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .swatch-shadow {
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+
+<body class="bg-background text-on-background min-h-screen pb-24">
+    <!-- TopAppBar -->
+    <header
+        class="fixed top-0 w-full z-50 bg-background flex items-center justify-between px-gutter h-16 w-full max-w-7xl mx-auto">
+        <div class="flex items-center gap-4">
+            <button
+                class="hover:bg-surface-container transition-colors p-2 rounded-full active:scale-95 transition-transform">
+
+            </button>
+
+        </div>
+        <div class="md:hidden">
+
+        </div>
+    </header>
+    <main class="pt-24 px-container-padding-mobile md:px-container-padding-desktop max-w-7xl mx-auto">
+        <div class="mb-section-gap">
+
+
+        </div>
+        <!-- Bento Grid Layout for Sections -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-stack-lg">
+            <!-- Dark Mode Section (Current Theme) -->
+            <section class="bg-surface-container rounded-xl p-stack-lg border border-outline-variant/20">
+                <div class="flex items-center gap-stack-sm mb-stack-lg">
+                    <span class="material-symbols-outlined text-primary">dark_mode</span>
+                    <h3 class="font-headline-md text-headline-md text-on-surface">Dark Mode</h3>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-stack-md">
+                    <!-- Primary -->
+                    <div class="flex flex-col gap-2">
+                        <div class="h-24 w-full rounded-lg bg-primary-container swatch-shadow flex items-end p-2">
+                            <span
+                                class="text-[10px] font-mono text-on-primary-container bg-white/10 px-1 rounded">#2563EB</span>
+                        </div>
+                        <span class="font-label-md text-label-md text-on-surface">Primary</span>
+                    </div>
+                    <!-- Background -->
+                    <div class="flex flex-col gap-2">
+                        <div
+                            class="h-24 w-full rounded-lg bg-background border border-outline-variant/30 swatch-shadow flex items-end p-2">
+                            <span
+                                class="text-[10px] font-mono text-on-surface/50 bg-white/10 px-1 rounded">#11131B</span>
+                        </div>
+                        <span class="font-label-md text-label-md text-on-surface">Background</span>
+                    </div>
+                    <!-- Surface -->
+                    <div class="flex flex-col gap-2">
+                        <div class="h-24 w-full rounded-lg bg-surface-container-high swatch-shadow flex items-end p-2">
+                            <span
+                                class="text-[10px] font-mono text-on-surface/50 bg-white/10 px-1 rounded">#282A32</span>
+                        </div>
+                        <span class="font-label-md text-label-md text-on-surface">Surface High</span>
+                    </div>
+                    <!-- Success -->
+                    <div class="flex flex-col gap-2">
+                        <div class="h-24 w-full rounded-lg bg-secondary swatch-shadow flex items-end p-2">
+                            <span
+                                class="text-[10px] font-mono text-on-secondary bg-white/10 px-1 rounded">#B9C7E0</span>
+                        </div>
+                        <span class="font-label-md text-label-md text-on-surface">Success (Tonal)</span>
+                    </div>
+                    <!-- Error -->
+                    <div class="flex flex-col gap-2">
+                        <div class="h-24 w-full rounded-lg bg-error-container swatch-shadow flex items-end p-2">
+                            <span
+                                class="text-[10px] font-mono text-on-error-container bg-white/10 px-1 rounded">#93000A</span>
+                        </div>
+                        <span class="font-label-md text-label-md text-on-surface">Error</span>
+                    </div>
+                    <!-- On Surface -->
+                    <div class="flex flex-col gap-2">
+                        <div class="h-24 w-full rounded-lg bg-on-surface swatch-shadow flex items-end p-2">
+                            <span class="text-[10px] font-mono text-background bg-black/10 px-1 rounded">#E1E2ED</span>
+                        </div>
+                        <span class="font-label-md text-label-md text-on-surface">On Surface</span>
+                    </div>
+                </div>
+            </section>
+            <!-- Light Mode Section (Proposed Theme) -->
+            <section class="bg-white rounded-xl p-stack-lg border border-slate-200">
+                <div class="flex items-center gap-stack-sm mb-stack-lg">
+                    <span class="material-symbols-outlined text-blue-600">light_mode</span>
+                    <h3 class="font-headline-md text-headline-md text-slate-900">Light Mode</h3>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-stack-md">
+                    <!-- Primary -->
+                    <div class="flex flex-col gap-2">
+                        <div class="h-24 w-full rounded-lg bg-[#2563EB] swatch-shadow flex items-end p-2">
+                            <span class="text-[10px] font-mono text-white bg-black/10 px-1 rounded">#2563EB</span>
+                        </div>
+                        <span class="font-label-md text-label-md text-slate-700">Primary</span>
+                    </div>
+                    <!-- Background -->
+                    <div class="flex flex-col gap-2">
+                        <div
+                            class="h-24 w-full rounded-lg bg-[#F8FAFC] border border-slate-200 swatch-shadow flex items-end p-2">
+                            <span class="text-[10px] font-mono text-slate-400 bg-black/5 px-1 rounded">#F8FAFC</span>
+                        </div>
+                        <span class="font-label-md text-label-md text-slate-700">Background</span>
+                    </div>
+                    <!-- Surface -->
+                    <div class="flex flex-col gap-2">
+                        <div
+                            class="h-24 w-full rounded-lg bg-[#FFFFFF] border border-slate-200 swatch-shadow flex items-end p-2">
+                            <span class="text-[10px] font-mono text-slate-400 bg-black/5 px-1 rounded">#FFFFFF</span>
+                        </div>
+                        <span class="font-label-md text-label-md text-slate-700">Surface</span>
+                    </div>
+                    <!-- Success -->
+                    <div class="flex flex-col gap-2">
+                        <div class="h-24 w-full rounded-lg bg-[#16A34A] swatch-shadow flex items-end p-2">
+                            <span class="text-[10px] font-mono text-white bg-black/10 px-1 rounded">#16A34A</span>
+                        </div>
+                        <span class="font-label-md text-label-md text-slate-700">Success</span>
+                    </div>
+                    <!-- Error -->
+                    <div class="flex flex-col gap-2">
+                        <div class="h-24 w-full rounded-lg bg-[#DC2626] swatch-shadow flex items-end p-2">
+                            <span class="text-[10px] font-mono text-white bg-black/10 px-1 rounded">#DC2626</span>
+                        </div>
+                        <span class="font-label-md text-label-md text-slate-700">Error</span>
+                    </div>
+                    <!-- On Surface -->
+                    <div class="flex flex-col gap-2">
+                        <div class="h-24 w-full rounded-lg bg-[#0F172A] swatch-shadow flex items-end p-2">
+                            <span class="text-[10px] font-mono text-white bg-white/10 px-1 rounded">#0F172A</span>
+                        </div>
+                        <span class="font-label-md text-label-md text-slate-700">Text Primary</span>
+                    </div>
+                </div>
+            </section>
+        </div>
+        <!-- Additional Guidance Card -->
+        <div class="mt-stack-lg bg-surface-container rounded-xl overflow-hidden relative group">
+
+            <div class="absolute right-0 top-0 h-full w-1/3 opacity-20 pointer-events-none overflow-hidden">
+                <div
+                    class="w-full h-full bg-gradient-to-br from-primary to-transparent rotate-12 transform translate-x-12 translate-y-8">
+                </div>
+            </div>
+        </div>
+        <!-- Decorative Illustration Grid -->
+        <div class="mt-section-gap grid grid-cols-1 md:grid-cols-3 gap-stack-md">
+            <div class="h-40 rounded-xl overflow-hidden">
+
+            </div>
+            <div class="h-40 rounded-xl overflow-hidden">
+
+            </div>
+            <div class="h-40 rounded-xl overflow-hidden">
+
+            </div>
+        </div>
+    </main>
+    <!-- BottomNavBar -->
+
+    <script>
+        // Simple micro-interaction for swatches
+        document.querySelectorAll('.swatch-shadow').forEach(swatch => {
+            swatch.addEventListener('click', () => {
+                const hex = swatch.querySelector('span').innerText;
+                navigator.clipboard.writeText(hex);
+
+                const originalText = swatch.querySelector('span').innerText;
+                swatch.querySelector('span').innerText = 'Copied!';
+                setTimeout(() => {
+                    swatch.querySelector('span').innerText = originalText;
+                }, 1000);
+            });
+        });
+    </script>
+
+
+</body>
+
+</html>

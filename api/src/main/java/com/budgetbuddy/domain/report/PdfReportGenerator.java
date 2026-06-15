@@ -2,6 +2,7 @@ package com.budgetbuddy.domain.report;
 
 import com.budgetbuddy.domain.report.dto.MonthlyReportResponse;
 import com.itextpdf.html2pdf.HtmlConverter;
+import com.budgetbuddy.shared.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,7 +27,7 @@ public class PdfReportGenerator {
             return target.toByteArray();
         } catch (IOException e) {
             log.error("Error generating PDF report", e);
-            throw new RuntimeException("Failed to generate PDF report", e);
+            throw new BusinessException("Failed to generate PDF report");
         }
     }
     

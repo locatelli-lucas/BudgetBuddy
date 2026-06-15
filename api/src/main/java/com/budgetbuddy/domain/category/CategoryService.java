@@ -34,6 +34,11 @@ public class CategoryService {
                 .orElseThrow(() -> new EntityNotFoundException("Category", categoryId.toString()));
     }
 
+    @Transactional(readOnly = true)
+    public List<Category> getAllCategoryEntities(UUID userId) {
+        return categoryRepository.findByUserIdOrIsDefaultTrue(userId);
+    }
+
     @Transactional
     public CategoryResponse createCategory(String email, CategoryRequest request) {
         User user = userService.getUserByEmail(email);

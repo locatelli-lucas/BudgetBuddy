@@ -50,6 +50,13 @@ public class User implements UserDetails {
     @Column(name = "fcm_token", length = 500)
     private String fcmToken;
 
+    @Column(name = "two_factor_secret", length = 64)
+    private String twoFactorSecret;
+
+    @Builder.Default
+    @Column(name = "two_factor_enabled", nullable = false)
+    private boolean twoFactorEnabled = false;
+
     @Builder.Default
     @Column(nullable = false)
     private boolean premium = false;

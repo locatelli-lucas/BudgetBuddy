@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Notificações - BudgetBuddy</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet">
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-container": "#ffede6",
+                        "error-container": "#93000a",
+                        "surface-container-low": "#191b23",
+                        "on-secondary-fixed": "#0d1c2f",
+                        "on-secondary-container": "#abb9d2",
+                        "inverse-on-surface": "#2e3039",
+                        "surface-bright": "#373942",
+                        "surface-container-high": "#282a32",
+                        "secondary-fixed-dim": "#b9c7e0",
+                        "on-error-container": "#ffdad6",
+                        "secondary-container": "#3c4a5e",
+                        "on-primary-fixed": "#00174b",
+                        "on-primary-container": "#eeefff",
+                        "on-surface": "#e1e2ed",
+                        "surface-container-highest": "#32343d",
+                        "surface-container-lowest": "#0c0e16",
+                        "on-primary": "#002a78",
+                        "on-secondary-fixed-variant": "#3a485c",
+                        "background": "#11131b",
+                        "tertiary-fixed": "#ffdbcd",
+                        "surface-container": "#1d1f27",
+                        "tertiary-fixed-dim": "#ffb596",
+                        "primary-fixed": "#dbe1ff",
+                        "primary-container": "#2563eb",
+                        "on-secondary": "#233144",
+                        "tertiary": "#ffb596",
+                        "on-surface-variant": "#c3c6d7",
+                        "on-error": "#690005",
+                        "surface-tint": "#b4c5ff",
+                        "on-tertiary-fixed": "#360f00",
+                        "on-tertiary": "#581e00",
+                        "primary-fixed-dim": "#b4c5ff",
+                        "primary": "#b4c5ff",
+                        "tertiary-container": "#bc4800",
+                        "outline": "#8d90a0",
+                        "surface-dim": "#11131b",
+                        "on-tertiary-fixed-variant": "#7d2d00",
+                        "error": "#ffb4ab",
+                        "on-background": "#e1e2ed",
+                        "secondary": "#b9c7e0",
+                        "surface": "#11131b",
+                        "secondary-fixed": "#d5e3fd",
+                        "inverse-surface": "#e1e2ed",
+                        "on-primary-fixed-variant": "#003ea8",
+                        "surface-variant": "#32343d",
+                        "outline-variant": "#434655",
+                        "inverse-primary": "#0053db"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-lg": "24px",
+                        "section-gap": "40px",
+                        "stack-sm": "8px",
+                        "stack-md": "16px",
+                        "gutter": "16px",
+                        "container-padding-mobile": "20px",
+                        "container-padding-desktop": "32px",
+                        "base": "8px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "label-md": ["Inter"],
+                        "display": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "numeric-display": ["Inter"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500" }],
+                        "display": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "numeric-display": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "500" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            background-color: theme('colors.background');
+            color: theme('colors.on-background');
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Custom scrollbar for web */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: theme('colors.surface-variant');
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: theme('colors.outline');
+        }
+
+        .notification-item {
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+
+        .notification-item:active {
+            transform: scale(0.98);
+        }
+    </style>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+
+<body class="antialiased min-h-screen flex flex-col pb-24 md:pb-0 bg-background" style="background-color: #11131b;">
+    <!-- TopAppBar -->
+    <header
+        class="w-full sticky top-0 flex items-center justify-between px-container-padding-mobile h-16 z-40 flat no shadows bg-surface-container-lowest">
+        <div class="flex items-center gap-4">
+            <button aria-label="Voltar"
+                class="text-on-surface-variant hover:opacity-80 transition-opacity active:scale-95 transition-transform">
+                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">arrow_back</span>
+            </button>
+            <h1 class="font-headline-md text-headline-md font-bold text-primary">Notificações</h1>
+        </div>
+        <div class="flex items-center">
+            <button
+                class="font-label-md text-label-md text-primary hover:opacity-80 transition-opacity active:scale-95 transition-transform">
+                Limpar
+            </button>
+        </div>
+    </header>
+    <!-- Main Content Canvas -->
+    <main
+        class="flex-1 w-full max-w-3xl mx-auto px-container-padding-mobile md:px-container-padding-desktop mt-stack-md flex flex-col gap-section-gap">
+        <!-- Section: Hoje -->
+        <section class="flex flex-col gap-stack-md">
+            <h2 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Hoje</h2>
+            <div class="flex flex-col gap-stack-sm">
+                <!-- Notification 1: Alerta de Orçamento -->
+                <div
+                    class="notification-item flex items-start gap-gutter p-stack-md bg-surface-container rounded-xl cursor-pointer">
+                    <div
+                        class="flex-shrink-0 w-12 h-12 rounded-full bg-error-container/20 flex items-center justify-center text-error">
+                        <span class="material-symbols-outlined"
+                            style="font-variation-settings: 'FILL' 1;">warning</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex justify-between items-baseline mb-1">
+                            <h3 class="font-label-md text-label-md text-on-surface truncate">Alerta de Orçamento</h3>
+                            <span
+                                class="font-label-sm text-label-sm text-on-surface-variant whitespace-nowrap ml-2">10:42</span>
+                        </div>
+                        <p class="font-body-md text-body-md text-on-surface-variant line-clamp-2">
+                            Você atingiu 80% do seu limite mensal para "Restaurantes". Faltam R$ 120,00 para o teto.
+                        </p>
+                    </div>
+                </div>
+                <!-- Notification 2: Transação Confirmada -->
+                <div
+                    class="notification-item flex items-start gap-gutter p-stack-md bg-surface-container rounded-xl cursor-pointer relative overflow-hidden">
+                    <!-- Unread indicator -->
+                    <div class="absolute top-4 left-4 w-2 h-2 rounded-full bg-primary"></div>
+                    <div
+                        class="flex-shrink-0 w-12 h-12 rounded-full bg-primary-container/20 flex items-center justify-center text-primary">
+                        <span class="material-symbols-outlined"
+                            style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex justify-between items-baseline mb-1">
+                            <h3 class="font-label-md text-label-md text-on-surface truncate font-semibold">Transação
+                                Confirmada</h3>
+                            <span class="font-label-sm text-label-sm text-primary whitespace-nowrap ml-2">08:15</span>
+                        </div>
+                        <p class="font-body-md text-body-md text-on-surface-variant line-clamp-2">
+                            Pagamento de R$ 45,90 no Uber confirmado e categorizado como "Transporte".
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Section: Anterior -->
+        <section class="flex flex-col gap-stack-md">
+            <h2 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Anterior</h2>
+            <div class="flex flex-col gap-stack-sm">
+                <!-- Notification 3: IA Insights -->
+                <div
+                    class="notification-item flex items-start gap-gutter p-stack-md bg-surface-container rounded-xl cursor-pointer">
+                    <div
+                        class="flex-shrink-0 w-12 h-12 rounded-full bg-tertiary-container/20 flex items-center justify-center text-tertiary">
+                        <span class="material-symbols-outlined"
+                            style="font-variation-settings: 'FILL' 1;">lightbulb</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex justify-between items-baseline mb-1">
+                            <h3 class="font-label-md text-label-md text-on-surface truncate">Insights de IA</h3>
+                            <span
+                                class="font-label-sm text-label-sm text-on-surface-variant whitespace-nowrap ml-2">Ontem</span>
+                        </div>
+                        <p class="font-body-md text-body-md text-on-surface-variant line-clamp-2">
+                            Notei que seus gastos com "Assinaturas" aumentaram 15% este mês. Que tal revisar seus planos
+                            ativos?
+                        </p>
+                    </div>
+                </div>
+                <!-- Notification 4: Meta Atingida -->
+                <div
+                    class="notification-item flex items-start gap-gutter p-stack-md bg-surface-container rounded-xl cursor-pointer">
+                    <div
+                        class="flex-shrink-0 w-12 h-12 rounded-full bg-secondary-container/20 flex items-center justify-center text-secondary">
+                        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">flag</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex justify-between items-baseline mb-1">
+                            <h3 class="font-label-md text-label-md text-on-surface truncate">Meta de Economia</h3>
+                            <span
+                                class="font-label-sm text-label-sm text-on-surface-variant whitespace-nowrap ml-2">Segunda</span>
+                        </div>
+                        <p class="font-body-md text-body-md text-on-surface-variant line-clamp-2">
+                            Parabéns! Você alcançou 50% da sua meta "Reserva de Emergência" este mês.
+                        </p>
+                    </div>
+                </div>
+                <!-- Notification 5: Fatura -->
+                <div
+                    class="notification-item flex items-start gap-gutter p-stack-md bg-surface-container rounded-xl cursor-pointer opacity-70">
+                    <div
+                        class="flex-shrink-0 w-12 h-12 rounded-full bg-outline-variant/30 flex items-center justify-center text-outline">
+                        <span class="material-symbols-outlined"
+                            style="font-variation-settings: 'FILL' 1;">receipt_long</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex justify-between items-baseline mb-1">
+                            <h3 class="font-label-md text-label-md text-on-surface truncate">Fatura Fechada</h3>
+                            <span class="font-label-sm text-label-sm text-on-surface-variant whitespace-nowrap ml-2">12
+                                Out</span>
+                        </div>
+                        <p class="font-body-md text-body-md text-on-surface-variant line-clamp-2">
+                            Sua fatura do cartão Nubank fechou em R$ 1.250,00. Vencimento em 5 dias.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <!-- Suppressed BottomNavBar for transactional/sub-page intent -->
+    <!-- According to "Automatic Suppression" rule, this page has a "Back" action, implying a temporary departure. Thus, nav shell is omitted. -->
+    <script>
+        // Simple script to handle 'Limpar tudo' interaction
+        document.querySelector('header button:last-child').addEventListener('click', function () {
+            const notifications = document.querySelectorAll('.notification-item');
+            notifications.forEach((item, index) => {
+                setTimeout(() => {
+                    item.style.transform = 'translateX(100%)';
+                    item.style.opacity = '0';
+                    setTimeout(() => {
+                        item.remove();
+                        // Hide section headers if empty
+                        document.querySelectorAll('section').forEach(sec => {
+                            if (sec.querySelectorAll('.notification-item').length === 0) {
+                                sec.style.display = 'none';
+                            }
+                        });
+
+                        // Show empty state if all gone
+                        if (document.querySelectorAll('.notification-item').length === 0) {
+                            const main = document.querySelector('main');
+                            main.innerHTML = `
+                                <div class="flex flex-col items-center justify-center h-64 opacity-50 mt-20">
+                                    <span class="material-symbols-outlined text-6xl mb-4" style="font-variation-settings: 'FILL' 0;">notifications_off</span>
+                                    <p class="font-body-md text-body-md text-center">Tudo limpo por aqui.</p>
+                                </div>
+                            `;
+                        }
+                    }, 300);
+                }, index * 100);
+            });
+        });
+    </script>
+
+
+
+
+    <nav
+        class="fixed bottom-0 left-0 right-0 bg-surface-container-lowest border-t border-outline-variant h-[72px] flex items-center justify-around px-2 z-50 md:hidden">
+        <button class="flex flex-col items-center justify-center gap-1 min-w-[64px] text-primary">
+            <span class="material-symbols-outlined text-[24px]">home</span>
+            <span class="text-[12px] font-medium">Início</span>
+        </button>
+        <button class="flex flex-col items-center justify-center gap-1 min-w-[64px] text-on-surface-variant">
+            <span class="material-symbols-outlined text-[24px]">receipt_long</span>
+            <span class="text-[12px] font-medium">Transações</span>
+        </button>
+        <button class="flex flex-col items-center justify-center gap-1 min-w-[64px] text-on-surface-variant">
+            <span class="material-symbols-outlined text-[24px]">account_balance_wallet</span>
+            <span class="text-[12px] font-medium">Orçamentos</span>
+        </button>
+        <button class="flex flex-col items-center justify-center gap-1 min-w-[64px] text-on-surface-variant">
+            <span class="material-symbols-outlined text-[24px]">trending_up</span>
+            <span class="text-[12px] font-medium">Investir</span>
+        </button>
+        <button class="flex flex-col items-center justify-center gap-1 min-w-[64px] text-on-surface-variant">
+            <span class="material-symbols-outlined text-[24px]">person</span>
+            <span class="text-[12px] font-medium">Perfil</span>
+        </button>
+    </nav>
+
+</body>
+
+</html>

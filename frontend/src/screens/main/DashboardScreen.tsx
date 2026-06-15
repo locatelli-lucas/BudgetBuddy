@@ -1,48 +1,154 @@
-import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, Image, RefreshControl, ActivityIndicator } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors } from '../../constants/colors';
 import { FloatingActionButton } from '../../components/FloatingActionButton';
 import { TransactionItem } from '../../components/TransactionItem';
-import { LineChart, PieChart } from 'react-native-gifted-charts';
+import { BarChart, LineChart, PieChart } from 'react-native-gifted-charts';
 import { ExportReportSheet } from './ExportReportSheet';
+import { useAuth } from '../../contexts/AuthContext';
+import { transactionService } from '../../services/transaction.service';
+import { budgetService } from '../../services/budget.service';
+import { Transaction, TransactionSummary } from '../../types/transaction';
+import { BudgetStatusResponse } from '../../types/budget';
+import { getErrorMessage, isNetworkError } from '../../utils/errors';
+import { useErrorToast } from '../../contexts/ErrorToastContext';
+import { formatCurrency } from '../../utils/currency';
+import { formatSmartDate } from '../../utils/dates';
 
 export function DashboardScreen({ navigation }: any) {
   const insets = useSafeAreaInsets();
+  const { user } = useAuth();
+  const { showError } = useErrorToast();
   const [showReportSheet, setShowReportSheet] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [summary, setSummary] = useState<TransactionSummary | null>(null);
+  const [recentTransactions, setRecentTransactions] = useState<Transaction[]>([]);
+  const [budgetStatus, setBudgetStatus] = useState<BudgetStatusResponse[]>([]);
 
-  const lineData = [
-    { value: 50, label: 'Jan' },
-    { value: 80, label: 'Fev' },
-    { value: 90, label: 'Mar' },
-    { value: 70, label: 'Abr' },
-    { value: 100, label: 'Mai' },
-    { value: 110, label: 'Jun' },
-  ];
+  const loadDashboardData = useCallback(async () => {
+    try {
+      setError(null);
+      const [summaryData, recentData, budgetData] = await Promise.all([
+        transactionService.getSummary(),
+        transactionService.getRecentTransactions(5),
+        budgetService.getBudgetStatus(),
+      ]);
+      setSummary(summaryData);
+      setRecentTransactions(recentData);
+      setBudgetStatus(budgetData);
+    } catch (err) {
+      const msg = getErrorMessage(err, 'Falha ao carregar dados do dashboard.');
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-  const pieData = [
-    { value: 48, color: Colors.primary },
-    { value: 30, color: '#4ade80' },
-    { value: 22, color: Colors.error },
-  ];
+  useFocusEffect(
+    useCallback(() => {
+      loadDashboardData();
+    }, [loadDashboardData])
+  );
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    setError(null);
+    try {
+      const [summaryData, recentData] = await Promise.all([
+        transactionService.getSummary(),
+        transactionService.getRecentTransactions(5),
+      ]);
+      setSummary(summaryData);
+      setRecentTransactions(recentData);
+    } catch (err) {
+      const msg = getErrorMessage(err);
+      setError(msg);
+      showError(err);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [showError]);
+
+  // Chart data — income vs expense for current month
+  const monthLabels = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'];
+  const barData = monthLabels.map((label, i) => ({
+    value: i === new Date().getMonth() ? (summary?.totalExpense || 0) : 0,
+    label,
+  }));
+  const lineChartData = monthLabels.map((label, i) => ({
+    value: i === new Date().getMonth() ? (summary?.totalIncome || 0) : 0,
+    label,
+  }));
+
+  if (loading) {
+    return (
+      <View className="flex-1 bg-background justify-center items-center">
+        <ActivityIndicator size="large" color={Colors.primary} />
+        <Text className="text-on-surface-variant text-body-md mt-4">Carregando...</Text>
+      </View>
+    );
+  }
+
+  if (error && !summary) {
+    return (
+      <View className="flex-1 bg-background">
+        <View
+          className="flex-row justify-between items-center px-5 h-20 bg-surface z-50"
+          style={{ paddingTop: insets.top }}
+        >
+          <Text className="text-headline-md font-bold text-on-surface">Dashboard</Text>
+        </View>
+        <View className="flex-1 justify-center items-center px-5 gap-4">
+          <View className="w-16 h-16 rounded-full bg-error/10 items-center justify-center">
+            <MaterialIcons name="cloud-off" size={32} color={Colors.error} />
+          </View>
+          <Text className="text-headline-md font-bold text-on-surface text-center">
+            Erro ao carregar
+          </Text>
+          <Text className="text-body-md text-on-surface-variant text-center">{error}</Text>
+          <TouchableOpacity
+            className="bg-primary-container px-6 py-3 rounded-xl mt-2"
+            onPress={() => {
+              setLoading(true);
+              loadDashboardData();
+            }}
+          >
+            <Text className="text-on-primary-container font-label-md font-bold">Tentar novamente</Text>
+          </TouchableOpacity>
+
+        </View>
+      </View>
+    );
+  }
+
+  const formatCurrency = (val: number) => {
+    return `R$ ${val.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  };
 
   return (
     <View className="flex-1 bg-background">
       {/* Top App Bar */}
-      <View 
-        className="flex-row justify-between items-center px-5 h-16 bg-surface z-50"
+      <View
+        className="flex-row justify-between items-center px-5 h-20 bg-surface z-50"
         style={{ paddingTop: insets.top }}
       >
         <View className="flex-row items-center gap-3">
-          <View className="w-10 h-10 rounded-full overflow-hidden bg-surface-container-high border border-outline-variant/30">
-            <Image 
-              source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD6cZcisaM0FEsmu5FK52FlImhbR1l8NknmkClMHrn_vyq8Xs1IfeC2If362TdpFqoLY66hku033afmEmYO6etPct6WRmjgNBStTyOjnXdImluVZ7dfzZ_QyQvZmzvj8qMOjWmRqYXnqSJdQYQu8c9rl4SmA3LyaGZKCj9MP9Kv08CztuMOX_ZrfxAWXhAT2hwT8FUr0LfywSqfyxmoD3rDx3tJJLWqgkPTh-Xtkf3e3b-cq1gWGeA4jl2eXvGFeeBnVMsHFpXnKz4' }}
-              className="w-full h-full"
-            />
+          <View className="w-10 h-10 rounded-full overflow-hidden bg-surface-container-high border border-outline-variant/30 mr-1">
+            {user?.avatarUrl ? (
+              <Image source={{ uri: user.avatarUrl }} className="w-full h-full" />
+            ) : (
+              <View className="w-full h-full bg-primary/20 items-center justify-center">
+                <MaterialIcons name="person" size={24} color={Colors.primary} />
+              </View>
+            )}
           </View>
           <View>
-            <Text className="text-headline-md font-bold text-on-surface">Olá, Lucas</Text>
+            <Text className="text-headline-md font-bold text-on-surface">Olá, {user?.name || 'Usuário'}</Text>
             <Text className="text-label-md text-on-surface-variant">Veja como estão suas finanças</Text>
           </View>
         </View>
@@ -53,25 +159,48 @@ export function DashboardScreen({ navigation }: any) {
           >
             <MaterialIcons name="description" size={24} color={Colors.primary} />
           </TouchableOpacity>
-          <TouchableOpacity className="w-10 h-10 items-center justify-center rounded-full">
+          <TouchableOpacity
+            className="w-10 h-10 items-center justify-center rounded-full"
+            onPress={() => navigation.navigate('Profile', { screen: 'Notifications' })}
+          >
             <MaterialIcons name="notifications" size={24} color={Colors.primary} />
           </TouchableOpacity>
         </View>
       </View>
 
-      <ScrollView 
+      <ScrollView
         className="flex-1 px-5 pt-4"
         contentContainerStyle={{ paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.primary} />
+        }
       >
+        {error && summary && (
+          <View className="bg-error/10 rounded-xl px-4 py-3 flex-row items-center gap-3 mb-4 border border-error/20">
+            <MaterialIcons name="error-outline" size={20} color={Colors.error} />
+            <Text className="text-body-sm text-error flex-1">{error}</Text>
+            <TouchableOpacity onPress={() => setError(null)}>
+              <MaterialIcons name="close" size={18} color={Colors.error} />
+            </TouchableOpacity>
+          </View>
+        )}
         {/* Main Balance Card */}
         <View className="bg-surface-variant rounded-xl p-6 shadow-md mb-6 relative overflow-hidden">
           <View className="absolute -right-10 -top-10 w-40 h-40 bg-primary/10 rounded-full" />
           <Text className="text-label-md text-on-surface-variant">Saldo atual</Text>
-          <Text className="text-numeric-display font-medium text-on-surface mt-1">R$ 8.420,50</Text>
+          <Text className="text-numeric-display font-medium text-on-surface mt-1">
+            {formatCurrency(summary?.netBalance || 0)}
+          </Text>
           <View className="flex-row items-center gap-1 mt-2">
-            <MaterialIcons name="trending-up" size={16} color="#4ade80" />
-            <Text className="text-[#4ade80] text-label-md">+12% vs mês passado</Text>
+            <MaterialIcons
+              name={(summary?.savingsRate || 0) >= 0 ? "trending-up" : "trending-down"}
+              size={16}
+              color={(summary?.savingsRate || 0) >= 0 ? "#4ade80" : Colors.error}
+            />
+            <Text className={`text-label-md ${(summary?.savingsRate || 0) >= 0 ? 'text-[#4ade80]' : 'text-error'}`}>
+              Taxa de poupança: {summary?.savingsRate?.toFixed(1) || '0'}%
+            </Text>
           </View>
         </View>
 
@@ -82,66 +211,112 @@ export function DashboardScreen({ navigation }: any) {
               <Text className="text-label-md text-on-surface-variant">Receitas</Text>
               <MaterialIcons name="arrow-downward" size={16} color="#4ade80" />
             </View>
-            <Text className="text-body-lg font-bold text-on-surface mt-2">R$ 12.500</Text>
+            <Text className="text-body-lg font-bold text-on-surface mt-2">
+              {formatCurrency(summary?.totalIncome || 0)}
+            </Text>
           </View>
           <View className="flex-1 bg-surface-variant rounded-xl p-4 shadow-sm">
             <View className="flex-row items-center justify-between">
               <Text className="text-label-md text-on-surface-variant">Despesas</Text>
               <MaterialIcons name="arrow-upward" size={16} color={Colors.error} />
             </View>
-            <Text className="text-body-lg font-bold text-on-surface mt-2">R$ 4.079</Text>
+            <Text className="text-body-lg font-bold text-on-surface mt-2">
+              {formatCurrency(summary?.totalExpense || 0)}
+            </Text>
           </View>
         </View>
+
+        {/* AI Assistant Banner */}
+        <TouchableOpacity
+          className="bg-primary/10 rounded-2xl p-4 flex-row items-center justify-between border border-primary/20 mb-8"
+          onPress={() => navigation.navigate('AiInsights')}
+        >
+          <View className="flex-row items-center gap-4 flex-1">
+            <View className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center text-primary">
+              <MaterialIcons name="auto-awesome" size={28} color={Colors.primary} />
+            </View>
+            <View className="flex-1">
+              <Text className="text-body-lg text-on-surface font-semibold">Conversar com IA</Text>
+              <Text className="text-label-sm text-on-surface-variant" numberOfLines={1}>
+                Obtenha insights personalizados sobre seus gastos
+              </Text>
+            </View>
+          </View>
+          <MaterialIcons name="chevron-right" size={24} color={Colors.primary} />
+        </TouchableOpacity>
 
         {/* Charts Section */}
-        <View className="mb-8">
-          <View className="bg-surface-variant rounded-xl p-5 shadow-sm mb-4">
-            <Text className="text-label-md text-on-surface-variant mb-4">Fluxo Mensal</Text>
-            <View className="items-center">
-              <LineChart
-                data={lineData}
-                width={250}
-                height={120}
-                thickness={3}
-                color={Colors.primary}
-                hideDataPoints
-                hideYAxisText
-                hideRules
-                hideAxesAndRules
-                xAxisLabelTextStyle={{ color: Colors.onSurfaceVariant, fontSize: 10 }}
-              />
-            </View>
-          </View>
-
-          <View className="bg-surface-variant rounded-xl p-5 shadow-sm flex-row items-center justify-between">
-            <View>
-              <Text className="text-label-md text-on-surface-variant mb-4">Gastos por Categoria</Text>
-              <PieChart
-                data={pieData}
-                donut
-                innerRadius={30}
-                radius={45}
-                centerLabelComponent={() => (
-                  <Text className="text-on-surface text-label-md font-bold">48%</Text>
-                )}
-              />
-            </View>
-            <View className="flex-col gap-2">
-              <View className="flex-row items-center gap-2">
-                <View className="w-3 h-3 rounded-full bg-primary" />
-                <Text className="text-label-sm text-on-surface">Alimentação</Text>
-              </View>
-              <View className="flex-row items-center gap-2">
-                <View className="w-3 h-3 rounded-full bg-[#4ade80]" />
-                <Text className="text-label-sm text-on-surface">Moradia</Text>
-              </View>
-              <View className="flex-row items-center gap-2">
-                <View className="w-3 h-3 rounded-full bg-error" />
-                <Text className="text-label-sm text-on-surface">Transporte</Text>
-              </View>
-            </View>
+        <View className="mb-8 rounded-xl p-5 shadow-sm" style={{ backgroundColor: 'rgb(50, 52, 61)' }}>
+          <Text className="text-label-md text-on-surface-variant mb-4">Fluxo Mensal</Text>
+          <View className="items-center">
+            <BarChart
+              data={barData.map((d) => ({ ...d, frontColor: Colors.primary + '60' }))}
+              lineData={lineChartData.map((d) => ({ ...d, dataPointColor: '#4ade80' }))}
+              width={250}
+              height={120}
+              barWidth={18}
+              spacing={20}
+              initialSpacing={10}
+              hideYAxisText
+              hideRules
+              hideAxesAndRules
+              xAxisLabelTextStyle={{ color: Colors.onSurfaceVariant, fontSize: 10 }}
+              lineBehindBars={false}
+              lineConfig={{
+                color: '#4ade80',
+                thickness: 2,
+                dataPointsColor: '#4ade80',
+                dataPointsRadius: 3,
+              }}
+            />
           </View>
         </View>
+
+        {/* Donut Chart — Gastos por Categoria */}
+        {budgetStatus.length > 0 && (
+          <View className="rounded-xl p-5 shadow-sm mb-8" style={{ backgroundColor: 'rgb(50, 52, 61)' }}>
+            <Text className="text-label-md text-on-surface-variant mb-4">Gastos por Categoria</Text>
+            <View className="flex-row items-center">
+              <View className="items-center justify-center mr-4">
+                <PieChart
+                  data={budgetStatus
+                    .filter((b) => b.spent > 0)
+                    .map((b, i) => ({
+                      value: b.spent,
+                      color: [Colors.primary, '#51ac6fff', Colors.error, Colors.tertiary, Colors.secondary, Colors.warning][i % 6],
+                    }))}
+                  donut
+                  radius={60}
+                  innerRadius={40}
+                  backgroundColor='#32343d'
+                  centerLabelComponent={() => {
+                    const total = budgetStatus.reduce((s, b) => s + b.spent, 0);
+                    return (
+                      <Text className="text-label-sm text-on-surface font-bold text-center">
+                        {formatCurrency(total).replace(' ', '')}
+                      </Text>
+                    );
+                  }}
+                />
+              </View>
+              <View className="flex-1 gap-2">
+                {budgetStatus.filter((b) => b.spent > 0).slice(0, 5).map((b, i) => (
+                  <View key={b.categoryId} className="flex-row items-center gap-2">
+                    <View
+                      className="w-3 h-3 rounded-full"
+                      style={{
+                        backgroundColor: [Colors.primary, '#4ade80', Colors.error, Colors.tertiary, Colors.secondary, Colors.warning][i % 6],
+                      }}
+                    />
+                    <Text className="text-label-sm text-on-surface">
+                      {b.categoryName} • {formatCurrency(b.spent)}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+          </View>
+        )}
 
         {/* Recent Transactions */}
         <View className="mb-4">
@@ -151,34 +326,28 @@ export function DashboardScreen({ navigation }: any) {
               <Text className="text-label-md text-primary">Ver todas</Text>
             </TouchableOpacity>
           </View>
-          
+
           <View className="bg-surface-variant rounded-xl p-2 shadow-sm">
-            <TransactionItem 
-              id="1"
-              title="Starbucks"
-              subtitle="Alimentação • Hoje"
-              amount={24.50}
-              type="EXPENSE"
-              icon="local-cafe"
-            />
-            <View className="h-[1px] bg-outline-variant/20 mx-3 my-1" />
-            <TransactionItem 
-              id="2"
-              title="Netflix"
-              subtitle="Entretenimento • Ontem"
-              amount={55.90}
-              type="EXPENSE"
-              icon="movie"
-            />
-            <View className="h-[1px] bg-outline-variant/20 mx-3 my-1" />
-            <TransactionItem 
-              id="3"
-              title="Salário"
-              subtitle="Renda • 05 Mai"
-              amount={12500.00}
-              type="INCOME"
-              icon="work"
-            />
+            {recentTransactions.length === 0 ? (
+              <View className="p-6 items-center">
+                <Text className="text-on-surface-variant text-body-md">Nenhuma transação encontrada</Text>
+              </View>
+            ) : (
+              recentTransactions.map((tx) => (
+                <View key={tx.id}>
+                  <TransactionItem
+                    id={tx.id}
+                    title={tx.description}
+                    subtitle={`${tx.category?.name || 'Outros'} • ${formatSmartDate(tx.date)}`}
+                    amount={tx.amount}
+                    type={tx.type}
+                    icon={(tx.category?.icon || 'help-outline') as any}
+                    onPress={() => { }}
+                  />
+                  <View className="h-[1px] bg-outline-variant/20 mx-3 my-1" />
+                </View>
+              ))
+            )}
           </View>
         </View>
       </ScrollView>
@@ -192,6 +361,7 @@ export function DashboardScreen({ navigation }: any) {
           setShowReportSheet(false);
           navigation.navigate('ReportPreview', { pdfUri });
         }}
+        onCustomDate={() => navigation.navigate('CustomDate')}
       />
     </View>
   );

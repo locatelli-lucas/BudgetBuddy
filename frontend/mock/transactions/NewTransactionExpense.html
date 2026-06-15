@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>BudgetBuddy - Nova transação</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet">
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-container": "#2563eb",
+                        "secondary-container": "#3c4a5e",
+                        "surface-container": "#1d1f27",
+                        "secondary-fixed-dim": "#b9c7e0",
+                        "surface-bright": "#373942",
+                        "on-error-container": "#ffdad6",
+                        "secondary-fixed": "#d5e3fd",
+                        "tertiary-fixed-dim": "#ffb596",
+                        "tertiary": "#ffb596",
+                        "on-surface": "#e1e2ed",
+                        "surface-container-high": "#282a32",
+                        "surface-variant": "#32343d",
+                        "outline": "#8d90a0",
+                        "on-error": "#690005",
+                        "secondary": "#b9c7e0",
+                        "on-primary-fixed": "#00174b",
+                        "on-surface-variant": "#c3c6d7",
+                        "on-secondary-container": "#abb9d2",
+                        "tertiary-container": "#bc4800",
+                        "primary-fixed": "#dbe1ff",
+                        "on-secondary-fixed": "#0d1c2f",
+                        "tertiary-fixed": "#ffdbcd",
+                        "surface-tint": "#b4c5ff",
+                        "on-primary-fixed-variant": "#003ea8",
+                        "error": "#ffb4ab",
+                        "on-background": "#e1e2ed",
+                        "background": "#0F172A", // Overridden as per request, standard is 11131b
+                        "on-tertiary-fixed": "#360f00",
+                        "inverse-primary": "#0053db",
+                        "primary-fixed-dim": "#b4c5ff",
+                        "surface": "#1E293B", // Overridden as per request, standard is 11131b
+                        "surface-container-highest": "#32343d",
+                        "on-secondary": "#233144",
+                        "surface-container-low": "#191b23",
+                        "inverse-on-surface": "#2e3039",
+                        "surface-dim": "#11131b",
+                        "on-secondary-fixed-variant": "#3a485c",
+                        "primary": "#b4c5ff",
+                        "outline-variant": "#434655",
+                        "on-primary": "#002a78",
+                        "on-primary-container": "#eeefff",
+                        "error-container": "#93000a",
+                        "on-tertiary": "#581e00",
+                        "on-tertiary-fixed-variant": "#7d2d00",
+                        "surface-container-lowest": "#0c0e16",
+                        "inverse-surface": "#e1e2ed",
+                        "on-tertiary-container": "#ffede6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "section-gap": "40px",
+                        "gutter": "16px",
+                        "stack-md": "16px",
+                        "stack-lg": "24px",
+                        "base": "8px",
+                        "container-padding-desktop": "32px",
+                        "container-padding-mobile": "20px",
+                        "stack-sm": "8px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "numeric-display": ["Inter"],
+                        "body-md": ["Inter"],
+                        "label-md": ["Inter"],
+                        "display": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "label-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "numeric-display": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "500" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500" }],
+                        "display": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Hide scrollbar for clean UI but allow scrolling */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            /* IE and Edge */
+            scrollbar-width: none;
+            /* Firefox */
+        }
+    </style>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+
+<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col overflow-hidden">
+    <!-- TopAppBar JSON Executed -->
+    <header
+        class="flex items-center justify-between px-container-padding-mobile w-full h-16 bg-surface border-b border-outline-variant sticky top-0 z-50">
+        <div class="flex items-center gap-4">
+            <button aria-label="Voltar"
+                class="text-on-surface p-2 -ml-2 rounded-full hover:bg-surface-variant/50 transition-colors">
+                <span class="material-symbols-outlined text-[24px]">arrow_back</span>
+            </button>
+            <h1 class="font-headline-md text-headline-md text-on-surface">Nova transação</h1>
+        </div>
+        <div class="flex items-center gap-2">
+            <!-- Action icons placeholder -->
+            <button aria-label="Ajuda"
+                class="text-on-surface p-2 rounded-full hover:bg-surface-variant/50 transition-colors">
+
+            </button>
+        </div>
+    </header>
+    <!-- Main Content Area -->
+    <main class="flex-1 overflow-y-auto no-scrollbar pb-24 pt-stack-md flex flex-col pb-40">
+        <!-- Segmented Toggle -->
+        <div class="px-container-padding-mobile mb-stack-lg">
+            <div class="flex bg-surface-container rounded-lg p-1 w-full">
+                <button
+                    class="flex-1 py-2 text-center rounded-md bg-primary-container text-on-primary-container font-label-md transition-colors shadow-sm">
+                    Despesa
+                </button>
+                <button
+                    class="flex-1 py-2 text-center rounded-md text-on-surface-variant font-label-md transition-colors">
+                    Receita
+                </button>
+            </div>
+        </div>
+        <!-- Large Amount Input -->
+        <div class="px-container-padding-mobile mb-stack-lg flex flex-col items-center justify-center">
+            <label class="text-on-surface-variant font-label-md mb-2">Valor</label>
+            <div class="flex items-center justify-center w-full">
+                <span class="font-numeric-display text-numeric-display text-on-surface-variant mr-2">R$</span>
+                <input
+                    class="bg-transparent border-none outline-none font-numeric-display text-numeric-display text-on-background text-center w-3/4 focus:ring-0 p-0"
+                    inputmode="decimal" placeholder="0,00" type="text" value="0,00">
+            </div>
+        </div>
+        <!-- Card Container for Fields -->
+        <div
+            class="bg-surface rounded-t-3xl flex-1 px-container-padding-mobile pt-stack-lg pb-stack-lg flex flex-col gap-stack-lg shadow-[0_-4px_12px_rgba(0,0,0,0.2)]">
+            <!-- Category Selector -->
+            <div class="flex flex-col gap-stack-sm">
+                <label class="text-on-surface font-label-md">Categoria</label>
+                <div class="grid grid-cols-4 gap-4 mt-2">
+                    <!-- Category Item (Active) -->
+                    <div class="flex flex-col items-center gap-2 cursor-pointer group">
+                        <div
+                            class="w-14 h-14 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center transition-transform group-active:scale-95">
+                            <span class="material-symbols-outlined text-[24px]">restaurant</span>
+                        </div>
+                        <span class="font-label-sm text-label-sm text-on-surface text-center">Alimentação</span>
+                    </div>
+                    <!-- Category Items (Inactive) -->
+                    <div class="flex flex-col items-center gap-2 cursor-pointer group">
+                        <div
+                            class="w-14 h-14 rounded-full bg-surface-container text-on-surface-variant flex items-center justify-center transition-transform group-active:scale-95 border border-transparent">
+                            <span class="material-symbols-outlined text-[24px]">directions_car</span>
+                        </div>
+                        <span class="font-label-sm text-label-sm text-on-surface-variant text-center">Transporte</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-2 cursor-pointer group">
+                        <div
+                            class="w-14 h-14 rounded-full bg-surface-container text-on-surface-variant flex items-center justify-center transition-transform group-active:scale-95 border border-transparent">
+                            <span class="material-symbols-outlined text-[24px]">medical_services</span>
+                        </div>
+                        <span class="font-label-sm text-label-sm text-on-surface-variant text-center">Saúde</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-2 cursor-pointer group">
+                        <div
+                            class="w-14 h-14 rounded-full bg-surface-container text-on-surface-variant flex items-center justify-center transition-transform group-active:scale-95 border border-transparent">
+                            <span class="material-symbols-outlined text-[24px]">receipt</span>
+                        </div>
+                        <span class="font-label-sm text-label-sm text-on-surface-variant text-center">Contas</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-2 cursor-pointer group">
+                        <div
+                            class="w-14 h-14 rounded-full bg-surface-container text-on-surface-variant flex items-center justify-center transition-transform group-active:scale-95 border border-transparent">
+                            <span class="material-symbols-outlined text-[24px]">payments</span>
+                        </div>
+                        <span class="font-label-sm text-label-sm text-on-surface-variant text-center">Salário</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-2 cursor-pointer group">
+                        <div
+                            class="w-14 h-14 rounded-full bg-surface-container text-on-surface-variant flex items-center justify-center transition-transform group-active:scale-95 border border-transparent">
+                            <span class="material-symbols-outlined text-[24px]">trending_up</span>
+                        </div>
+                        <span
+                            class="font-label-sm text-label-sm text-on-surface-variant text-center">Investimento</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-2 cursor-pointer group">
+                        <div
+                            class="w-14 h-14 rounded-full bg-surface-container text-on-surface-variant flex items-center justify-center transition-transform group-active:scale-95 border border-transparent">
+                            <span class="material-symbols-outlined text-[24px]">shopping_bag</span>
+                        </div>
+                        <span class="font-label-sm text-label-sm text-on-surface-variant text-center">Compras</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-2 cursor-pointer group">
+                        <div
+                            class="w-14 h-14 rounded-full bg-surface-container text-on-surface-variant flex items-center justify-center transition-transform group-active:scale-95 border border-transparent">
+                            <span class="material-symbols-outlined text-[24px]">more_horiz</span>
+                        </div>
+                        <span class="font-label-sm text-label-sm text-on-surface-variant text-center">Outros</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Description Input -->
+            <div class="flex flex-col gap-stack-sm">
+                <label class="text-on-surface font-label-md">Descrição</label>
+                <div
+                    class="flex items-center bg-surface-container rounded-lg px-4 py-3 focus-within:ring-1 focus-within:ring-primary-container transition-all">
+                    <span class="material-symbols-outlined text-on-surface-variant mr-3">edit</span>
+                    <input
+                        class="bg-transparent border-none outline-none w-full text-on-surface font-body-md p-0 focus:ring-0 placeholder:text-on-surface-variant/50"
+                        placeholder="Ex: Almoço de negócios" type="text">
+                </div>
+            </div>
+            <!-- Date Picker (Simulated) -->
+            <div class="flex flex-col gap-stack-sm">
+                <label class="text-on-surface font-label-md">Data</label>
+                <button
+                    class="flex items-center justify-between bg-surface-container rounded-lg px-4 py-3 text-left focus:outline-none focus:ring-1 focus:ring-primary-container transition-all">
+                    <div class="flex items-center text-on-surface font-body-md">
+                        <span class="material-symbols-outlined text-on-surface-variant mr-3">calendar_today</span>
+                        Hoje, 24 Out
+                    </div>
+                    <span class="material-symbols-outlined text-on-surface-variant">chevron_right</span>
+                </button>
+            </div>
+            <!-- Payment Method Selector -->
+            <div class="flex flex-col gap-stack-sm">
+                <label class="text-on-surface font-label-md">Método de Pagamento</label>
+                <div class="flex gap-3 pb-2 no-scrollbar flex-wrap justify-between">
+                    <button
+                        class="shrink-0 bg-primary-container text-on-primary-container font-label-md py-2 px-4 rounded-full flex items-center gap-2 whitespace-nowrap">
+                        <span class="material-symbols-outlined text-[18px]">credit_card</span>
+                        Cartão de Crédito
+                    </button>
+                    <button
+                        class="shrink-0 bg-surface-container text-on-surface-variant font-label-md py-2 px-4 rounded-full flex items-center gap-2 whitespace-nowrap border border-transparent">
+                        <span class="material-symbols-outlined text-[18px]">credit_card</span>
+                        Débito
+                    </button>
+                    <button
+                        class="shrink-0 bg-surface-container text-on-surface-variant font-label-md py-2 px-4 rounded-full flex items-center gap-2 whitespace-nowrap border border-transparent">
+
+                        PIX
+                    </button>
+                    <button
+                        class="shrink-0 bg-surface-container text-on-surface-variant font-label-md py-2 px-4 rounded-full flex items-center gap-2 whitespace-nowrap border border-transparent">
+                        <span class="material-symbols-outlined text-[18px]">payments</span>
+                        Dinheiro
+                    </button>
+                    <button
+                        class="shrink-0 bg-surface-container text-on-surface-variant font-label-md py-2 px-4 rounded-full flex items-center gap-2 whitespace-nowrap border border-transparent">
+                        <span class="material-symbols-outlined text-[18px]">sync_alt</span>
+                        Transferência
+                    </button>
+                </div>
+            </div>
+            <!-- Recurring Switch -->
+            <div class="flex items-center justify-between py-2 border-t border-surface-container-highest mt-2 pt-4">
+                <div class="flex items-center gap-3">
+                    <div
+                        class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant">
+                        <span class="material-symbols-outlined">repeat</span>
+                    </div>
+                    <span class="text-on-surface font-body-md">Pagamento recorrente</span>
+                </div>
+                <!-- Toggle Switch UI -->
+                <button
+                    class="w-12 h-6 bg-surface-container rounded-full relative transition-colors focus:outline-none">
+                    <div class="absolute left-1 top-1 w-4 h-4 bg-on-surface-variant rounded-full transition-transform">
+                    </div>
+                </button>
+            </div>
+            <!-- Notes Textarea -->
+            <div class="flex flex-col gap-stack-sm mt-2">
+                <label class="text-on-surface font-label-md">Observações (opcional)</label>
+                <textarea
+                    class="bg-surface-container rounded-lg px-4 py-3 border-none outline-none w-full text-on-surface font-body-md focus:ring-1 focus:ring-primary-container transition-all resize-none placeholder:text-on-surface-variant/50"
+                    placeholder="Adicione detalhes adicionais aqui..." rows="3"></textarea>
+            </div>
+        </div>
+    </main>
+    <!-- Bottom Action Bar (Not the Nav Bar, standard button container) -->
+    <div
+        class="fixed bottom-0 w-full z-20 bg-surface dark:bg-surface border-t border-surface-container-highest shadow-[0_-8px_16px_rgba(0,0,0,0.3)]">
+        <div class="px-container-padding-mobile py-4"><button
+                class="w-full h-[56px] bg-primary-container text-on-primary-container font-headline-md text-headline-md-mobile rounded-xl flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"><span
+                    class="material-symbols-outlined font-bold">check_circle</span>Salvar transação</button></div>
+        <nav class="flex items-center justify-around h-16 w-full border-t border-surface-variant"><a href="#"
+                class="flex flex-col items-center gap-1 text-on-surface-variant hover:text-primary transition-colors"><span
+                    class="material-symbols-outlined text-[24px]">home</span><span
+                    class="text-[10px] font-label-sm">Início</span></a><a href="#"
+                class="flex flex-col items-center gap-1 text-on-surface-variant hover:text-primary transition-colors"><span
+                    class="material-symbols-outlined text-[24px]">receipt_long</span><span
+                    class="text-[10px] font-label-sm">Transações</span></a><a href="#"
+                class="flex flex-col items-center gap-1 text-on-surface-variant hover:text-primary transition-colors"><span
+                    class="material-symbols-outlined text-[24px]">account_balance_wallet</span><span
+                    class="text-[10px] font-label-sm">Orçamentos</span></a><a href="#"
+                class="flex flex-col items-center gap-1 text-on-surface-variant hover:text-primary transition-colors"><span
+                    class="material-symbols-outlined text-[24px]">trending_up</span><span
+                    class="text-[10px] font-label-sm">Investir</span></a><a href="#"
+                class="flex flex-col items-center gap-1 text-on-surface-variant hover:text-primary transition-colors"><span
+                    class="material-symbols-outlined text-[24px]">person</span><span
+                    class="text-[10px] font-label-sm">Perfil</span></a></nav>
+    </div>
+    <nav
+        class="fixed bottom-0 left-0 right-0 h-16 bg-surface-container border-t border-outline-variant flex items-center justify-between px-4 z-30">
+        <button
+            class="flex flex-col items-center justify-center flex-1 gap-1 text-on-surface-variant hover:text-primary transition-colors">
+            <span class="material-symbols-outlined text-[24px]">home</span>
+            <span class="text-[10px] font-medium uppercase tracking-wider">Início</span>
+        </button>
+        <button
+            class="flex flex-col items-center justify-center flex-1 gap-1 text-on-primary-container transition-colors">
+            <div class="bg-primary-container/20 rounded-full px-4 py-1 flex items-center justify-center">
+                <span class="material-symbols-outlined text-[24px] fill-1">receipt_long</span>
+            </div>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-primary">Transações</span>
+        </button>
+        <button
+            class="flex flex-col items-center justify-center flex-1 gap-1 text-on-surface-variant hover:text-primary transition-colors">
+            <span class="material-symbols-outlined text-[24px]">account_balance_wallet</span>
+            <span class="text-[10px] font-medium uppercase tracking-wider">Orçamentos</span>
+        </button>
+        <button
+            class="flex flex-col items-center justify-center flex-1 gap-1 text-on-surface-variant hover:text-primary transition-colors">
+            <span class="material-symbols-outlined text-[24px]">trending_up</span>
+            <span class="text-[10px] font-medium uppercase tracking-wider">Investir</span>
+        </button>
+        <button
+            class="flex flex-col items-center justify-center flex-1 gap-1 text-on-surface-variant hover:text-primary transition-colors">
+            <span class="material-symbols-outlined text-[24px]">person</span>
+            <span class="text-[10px] font-medium uppercase tracking-wider">Perfil</span>
+        </button>
+    </nav>
+
+
+
+
+
+
+
+
+</body>
+
+</html>

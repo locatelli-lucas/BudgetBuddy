@@ -1,115 +1,215 @@
-import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, TextInput, Image } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  View, Text, ScrollView, TouchableOpacity, TextInput,
+  ActivityIndicator, RefreshControl,
+} from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useAuth } from '../../contexts/AuthContext';
+import { Colors } from '../../constants/colors';
+import { aiService } from '../../services/ai.service';
+import { AiInsight, InsightSeverity } from '../../types/ai';
+import { useErrorToast } from '../../contexts/ErrorToastContext';
+
+const SEVERITY_COLORS: Record<InsightSeverity, string> = {
+  INFO: Colors.primary,
+  WARNING: Colors.warning,
+  ERROR: Colors.error,
+  SUCCESS: Colors.success,
+};
+
+const SEVERITY_ICONS: Record<InsightSeverity, string> = {
+  INFO: 'info',
+  WARNING: 'warning',
+  ERROR: 'error',
+  SUCCESS: 'check-circle',
+};
+
+const TYPE_LABELS: Record<string, string> = {
+  ALERT: 'Alerta',
+  RECOMMENDATION: 'Recomendação',
+  PROGRESS: 'Progresso',
+};
 
 export function AiInsightsScreen({ navigation }: any) {
-  const { user } = useAuth();
+  const [insights, setInsights] = useState<AiInsight[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [chatMessage, setChatMessage] = useState('');
+  const [chatLoading, setChatLoading] = useState(false);
+  const [chatReply, setChatReply] = useState<string | null>(null);
+  const { showError } = useErrorToast();
+
+  const loadInsights = useCallback(async () => {
+    try {
+      const data = await aiService.getInsights();
+      setInsights(data);
+    } catch (err) {
+      console.error('Failed to load AI insights', err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadInsights();
+  }, [loadInsights]);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      const data = await aiService.refreshInsights();
+      setInsights(data);
+    } catch {}
+    setRefreshing(false);
+  }, []);
+
+  const handleSendChat = async () => {
+    if (!chatMessage.trim()) return;
+    setChatLoading(true);
+    try {
+      const res = await aiService.sendChatMessage(chatMessage.trim());
+      setChatReply(res.reply);
+      setChatMessage('');
+    } catch (err) {
+      showError(err, 'Falha ao enviar mensagem.');
+    } finally {
+      setChatLoading(false);
+    }
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
-      {/* TopAppBar */}
+      {/* Header */}
       <View className="px-5 py-4 flex-row justify-between items-center z-50">
         <View className="flex-row items-center gap-3">
           <TouchableOpacity onPress={() => navigation.goBack()} className="mr-2">
-            <MaterialIcons name="arrow-back" size={24} color="#e1e2ed" />
+            <MaterialIcons name="arrow-back" size={24} color={Colors.onSurface} />
           </TouchableOpacity>
           <Text className="text-primary text-headline-md font-bold">BudgetBuddy Insights</Text>
         </View>
-        <TouchableOpacity className="p-2 rounded-full hover:bg-surface-container-high">
-          <MaterialIcons name="notifications" size={24} color="#b4c5ff" />
+        <TouchableOpacity
+          className="p-2 rounded-full"
+          onPress={() => navigation.navigate('Notifications')}
+        >
+          <MaterialIcons name="notifications" size={24} color={Colors.primary} />
         </TouchableOpacity>
       </View>
 
-      <ScrollView className="flex-1 px-5 pt-6 pb-32" showsVerticalScrollIndicator={false}>
-        <View className="mb-8">
+      {loading ? (
+        <View className="flex-1 justify-center items-center">
+          <ActivityIndicator size="large" color={Colors.primary} />
+        </View>
+      ) : (
+        <ScrollView
+          className="flex-1 px-5 pt-6 pb-32"
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.primary} />
+          }
+        >
           <Text className="text-on-surface text-headline-lg font-bold mb-2">Insights</Text>
-          <Text className="text-on-surface-variant text-body-md">
+          <Text className="text-on-surface-variant text-body-md mb-6">
             Recomendações baseadas no seu comportamento financeiro
           </Text>
-        </View>
 
-        {/* Card 1: Delivery */}
-        <View className="bg-surface-container rounded-xl p-5 mb-4 border border-outline-variant/30">
-          <View className="flex-row items-center gap-4 mb-4">
-            <View className="w-12 h-12 rounded-full bg-primary-container/20 items-center justify-center">
-              <MaterialIcons name="delivery-dining" size={28} color="#2563EB" />
+          {/* Chat Reply */}
+          {chatReply && (
+            <View className="bg-surface rounded-xl p-4 border border-primary/20 mb-4">
+              <View className="flex-row items-start gap-3">
+                <MaterialIcons name="auto-awesome" size={20} color={Colors.primary} style={{ marginTop: 2 }} />
+                <Text className="text-body-md text-on-surface flex-1">{chatReply}</Text>
+              </View>
+              <TouchableOpacity className="mt-2 self-end" onPress={() => setChatReply(null)}>
+                <Text className="text-label-sm text-primary">Fechar</Text>
+              </TouchableOpacity>
             </View>
-            <View>
-              <Text className="text-on-surface text-body-lg font-bold">Gastos com Delivery</Text>
-              <Text className="text-error text-label-sm font-bold uppercase tracking-wider">Alerta de tendência</Text>
-            </View>
-          </View>
-          <Text className="text-on-surface-variant text-body-md mb-4">
-            Você gastou <Text className="text-error font-semibold">18% mais</Text> com delivery este mês em comparação à sua média habitual.
-          </Text>
-          <View className="p-4 bg-background/40 rounded-lg border-l-4 border-primary mb-4">
-            <Text className="text-on-surface text-body-md italic">
-              "Reduzindo 2 pedidos por semana você economizaria cerca de <Text className="text-primary font-bold">R$ 320</Text> por mês."
-            </Text>
-          </View>
-          <TouchableOpacity className="w-full py-3 bg-secondary-container rounded-full items-center justify-center">
-            <Text className="text-on-secondary-container font-label-md font-bold">Ver detalhes</Text>
-          </TouchableOpacity>
-        </View>
+          )}
 
-        {/* Card 2: Emergency Fund */}
-        <View className="bg-surface-container rounded-xl p-5 mb-4 border border-outline-variant/30">
-          <View className="flex-row items-center gap-4 mb-4">
-            <View className="w-12 h-12 rounded-full bg-tertiary-container/20 items-center justify-center">
-              <MaterialIcons name="shield" size={28} color="#ffb596" />
+          {/* Insight Cards */}
+          {insights.length === 0 ? (
+            <View className="py-10 items-center">
+              <MaterialIcons name="auto-awesome" size={48} color={Colors.onSurfaceVariant} />
+              <Text className="text-on-surface-variant text-body-md mt-4">Nenhum insight disponível</Text>
+              <TouchableOpacity
+                className="mt-4 bg-primary-container px-6 py-3 rounded-full"
+                onPress={onRefresh}
+              >
+                <Text className="text-on-primary-container font-label-md">Gerar Insights</Text>
+              </TouchableOpacity>
             </View>
-            <View>
-              <Text className="text-on-surface text-body-lg font-bold">Reserva de Emergência</Text>
-              <Text className="text-primary text-label-sm font-bold uppercase tracking-wider">Progresso Estável</Text>
-            </View>
-          </View>
-          <Text className="text-on-surface-variant text-body-md mb-4">
-            Sua reserva atual cobre <Text className="text-on-surface font-semibold">4 meses</Text> de despesas essenciais.
-          </Text>
-          <View className="mb-4">
-            <View className="flex-row justify-between mb-2">
-              <Text className="text-on-surface-variant text-label-sm">Meta: 6 meses</Text>
-              <Text className="text-on-surface-variant text-label-sm">66%</Text>
-            </View>
-            <View className="h-2 w-full bg-surface-container-highest rounded-full overflow-hidden">
-              <View className="h-full bg-primary rounded-full" style={{ width: '66%' }} />
-            </View>
-          </View>
-        </View>
+          ) : (
+            insights.map((insight) => {
+              const color = SEVERITY_COLORS[insight.severity] || Colors.primary;
+              return (
+                <TouchableOpacity
+                  key={insight.id}
+                  className="bg-surface rounded-xl p-5 mb-4 border border-outline-variant/10"
+                  onPress={() => navigation.navigate('AiInsightDetail', { insight })}
+                >
+                  <View className="flex-row items-start gap-4 mb-3">
+                    <View
+                      className="w-12 h-12 rounded-full items-center justify-center"
+                      style={{ backgroundColor: `${color}20` }}
+                    >
+                      <MaterialIcons
+                        name={(insight.icon || SEVERITY_ICONS[insight.severity] || 'info') as any}
+                        size={24}
+                        color={color}
+                      />
+                    </View>
+                    <View className="flex-1">
+                      <View className="flex-row items-center gap-2 mb-1">
+                        <View
+                          className="px-2 py-0.5 rounded-full"
+                          style={{ backgroundColor: `${color}20` }}
+                        >
+                          <Text className="text-label-xs font-bold" style={{ color }}>
+                            {TYPE_LABELS[insight.type] || insight.type}
+                          </Text>
+                        </View>
+                        {!insight.isRead && (
+                          <View className="w-2 h-2 rounded-full bg-primary" />
+                        )}
+                      </View>
+                      <Text className="text-on-surface text-body-lg font-bold">{insight.title}</Text>
+                    </View>
+                  </View>
+                  <Text className="text-on-surface-variant text-body-md" numberOfLines={3}>
+                    {insight.body}
+                  </Text>
+                  <View className="flex-row justify-end mt-3">
+                    <Text className="text-label-sm text-primary">Ver detalhes →</Text>
+                  </View>
+                </TouchableOpacity>
+              );
+            })
+          )}
+        </ScrollView>
+      )}
 
-        {/* Card 3: Leisure Budget */}
-        <View className="bg-surface-container rounded-xl p-5 mb-24 border border-outline-variant/30">
-          <View className="flex-row items-center gap-4 mb-4">
-            <View className="w-12 h-12 rounded-full bg-error-container/20 items-center justify-center">
-              <MaterialIcons name="warning" size={28} color="#EF4444" />
-            </View>
-            <View>
-              <Text className="text-on-surface text-body-lg font-bold">Orçamento de Lazer</Text>
-              <Text className="text-error text-label-sm font-bold uppercase tracking-wider">Limite Excedido</Text>
-            </View>
-          </View>
-          <Text className="text-on-surface-variant text-body-md mb-2">
-            Você ultrapassou o orçamento em <Text className="text-error font-semibold">R$ 150</Text> esta semana.
-          </Text>
-          <Text className="text-on-surface-variant text-body-md">
-            Recomendação: Tente reduzir gastos não essenciais na próxima semana para reequilibrar seu saldo.
-          </Text>
-        </View>
-      </ScrollView>
-
-      {/* AI Assistant Floating Input */}
-      <View className="absolute bottom-[20px] left-5 right-5 z-40">
-        <View className="bg-surface-variant/90 border border-outline-variant/30 rounded-full px-5 py-2 flex-row items-center gap-3 shadow-2xl">
-          <MaterialIcons name="auto-awesome" size={24} color="#b4c5ff" />
+      {/* AI Chat Input */}
+      <View className="absolute bottom-5 left-5 right-5 z-40">
+        <View className="bg-surface border border-outline-variant/30 rounded-full px-5 py-2 flex-row items-center gap-3 shadow-lg">
+          <MaterialIcons name="auto-awesome" size={24} color={Colors.primary} />
           <TextInput
             className="flex-1 text-on-surface font-body-md py-2"
             placeholder="Pergunte ao BudgetBuddy AI..."
-            placeholderTextColor="#8d90a0"
+            placeholderTextColor={Colors.outline}
+            value={chatMessage}
+            onChangeText={setChatMessage}
+            onSubmitEditing={handleSendChat}
+            returnKeyType="send"
           />
-          <TouchableOpacity className="w-10 h-10 rounded-full bg-primary items-center justify-center">
-            <MaterialIcons name="send" size={20} color="#002a78" />
+          <TouchableOpacity
+            className="w-10 h-10 rounded-full bg-primary items-center justify-center"
+            onPress={handleSendChat}
+            disabled={chatLoading}
+          >
+            {chatLoading ? (
+              <ActivityIndicator size="small" color={Colors.onPrimary} />
+            ) : (
+              <MaterialIcons name="send" size={20} color={Colors.onPrimary} />
+            )}
           </TouchableOpacity>
         </View>
       </View>

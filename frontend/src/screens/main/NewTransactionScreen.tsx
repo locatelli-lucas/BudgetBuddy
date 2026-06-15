@@ -1,61 +1,132 @@
-import React, { useState } from 'react';
-import { 
-  View, Text, TextInput, TouchableOpacity, ScrollView, 
-  Alert, ActivityIndicator, KeyboardAvoidingView, Platform 
+import React, { useState, useEffect } from 'react';
+import {
+  View, Text, TextInput, TouchableOpacity, ScrollView,
+  ActivityIndicator, KeyboardAvoidingView, Platform
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../../constants/colors';
+import { transactionService } from '../../services/transaction.service';
+import { aiService } from '../../services/ai.service';
+import { Category, PaymentMethod } from '../../types/transaction';
+import { useDebounce } from '../../hooks/useDebounce';
+import { useErrorToast } from '../../contexts/ErrorToastContext';
+import { Toast } from '../../components/ui/Toast';
+import { formatCurrencyInput, parseCurrencyInput } from '../../utils/currency';
 
-const categories = [
-  { key: 'food', icon: 'restaurant', label: 'Alimentação' },
-  { key: 'transport', icon: 'directions-car', label: 'Transporte' },
-  { key: 'health', icon: 'medical-services', label: 'Saúde' },
-  { key: 'bills', icon: 'receipt', label: 'Contas' },
-  { key: 'salary', icon: 'payments', label: 'Salário' },
-  { key: 'investment', icon: 'trending-up', label: 'Investimento' },
-  { key: 'shopping', icon: 'shopping-bag', label: 'Compras' },
-  { key: 'other', icon: 'more-horiz', label: 'Outros' },
+const MONTHS_DISPLAY = [
+  'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
+  'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro',
 ];
 
-const paymentMethods = [
-  { key: 'credit', icon: 'credit-card', label: 'Crédito' },
-  { key: 'debit', icon: 'credit-card', label: 'Débito' },
-  { key: 'pix', icon: 'pix', label: 'PIX' },
-  { key: 'cash', icon: 'payments', label: 'Dinheiro' },
-  { key: 'transfer', icon: 'sync-alt', label: 'Transferência' },
+function formatDisplayDate(dateStr: string): string {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  return `${String(d).padStart(2, '0')} de ${MONTHS_DISPLAY[m - 1]} de ${y}`;
+}
+
+const PAYMENT_METHODS: { key: PaymentMethod; label: string; icon: keyof typeof MaterialIcons.glyphMap }[] = [
+  { key: 'CREDIT_CARD', label: 'Crédito', icon: 'credit-card' },
+  { key: 'DEBIT_CARD', label: 'Débito', icon: 'credit-card' },
+  { key: 'PIX', label: 'PIX', icon: 'pix' },
+  { key: 'CASH', label: 'Dinheiro', icon: 'payments' },
+  { key: 'TRANSFER', label: 'Transf.', icon: 'sync-alt' },
 ];
 
-export function NewTransactionScreen({ navigation }: any) {
-  const [transactionType, setTransactionType] = useState<'EXPENSE' | 'INCOME'>('EXPENSE');
+export function NewTransactionScreen({ navigation, route }: any) {
+  const defaultType = route.params?.defaultType || 'EXPENSE';
+  const [transactionType, setTransactionType] = useState<'EXPENSE' | 'INCOME'>(defaultType);
   const [amount, setAmount] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('food');
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedCategoryId, setSelectedCategoryId] = useState('');
   const [description, setDescription] = useState('');
-  const [date, setDate] = useState('Hoje, 24 Out');
-  const [paymentMethod, setPaymentMethod] = useState('credit');
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('CREDIT_CARD');
   const [isRecurring, setIsRecurring] = useState(false);
   const [notes, setNotes] = useState('');
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [loading, setLoading] = useState(false);
+  const [fetchingCategories, setFetchingCategories] = useState(true);
+  const [toastVisible, setToastVisible] = useState(false);
+  const { showError } = useErrorToast();
+
+  const debouncedDescription = useDebounce(description, 1000);
+
+  // Fetch real categories from API
+  useEffect(() => {
+    async function loadCategories() {
+      try {
+        const data = await transactionService.getCategories();
+        setCategories(data);
+        if (data.length > 0) {
+          setSelectedCategoryId(data[0].id);
+        }
+      } catch (err) {
+        console.error('Failed to load categories', err);
+      } finally {
+        setFetchingCategories(false);
+      }
+    }
+    loadCategories();
+  }, []);
+
+  // When switching transaction type, auto-select the first matching category
+  useEffect(() => {
+    if (categories.length > 0) {
+      const matching = categories.filter((cat) => {
+        if (transactionType === 'INCOME') return cat.type === 'INCOME' || cat.type === 'BOTH';
+        return cat.type === 'EXPENSE' || cat.type === 'BOTH';
+      });
+      if (matching.length > 0 && !matching.find((c) => c.id === selectedCategoryId)) {
+        setSelectedCategoryId(matching[0].id);
+      }
+    }
+  }, [transactionType, categories]);
+
+  // Trigger AI auto-categorization when description is typed
+  useEffect(() => {
+    const val = parseCurrencyInput(amount);
+    if (debouncedDescription.trim().length > 2 && !isNaN(val) && val > 0) {
+      aiService.autoCategorize({ description: debouncedDescription, amount: val })
+        .then((res) => {
+          if (res.categoryId) {
+            setSelectedCategoryId(res.categoryId);
+          }
+        })
+        .catch(() => { });
+    }
+  }, [debouncedDescription, amount]);
 
   const handleSave = async () => {
-    if (!amount || parseFloat(amount.replace(',', '.')) <= 0) {
-      Alert.alert('Erro', 'Informe um valor válido');
+    const parsedAmount = parseCurrencyInput(amount);
+    if (isNaN(parsedAmount) || parsedAmount <= 0) {
+      showError(new Error('Informe um valor válido'));
       return;
     }
     if (!description.trim()) {
-      Alert.alert('Erro', 'Informe uma descrição');
+      showError(new Error('Informe uma descrição'));
+      return;
+    }
+    if (!selectedCategoryId) {
+      showError(new Error('Selecione uma categoria'));
       return;
     }
 
     setLoading(true);
     try {
-      // In a real implementation, call the API to save the transaction
-      // await transactionService.create({...});
-      Alert.alert('Sucesso', 'Transação salva com sucesso!', [
-        { text: 'OK', onPress: () => navigation.goBack() }
-      ]);
-    } catch {
-      Alert.alert('Erro', 'Falha ao salvar transação');
+      await transactionService.createTransaction({
+        categoryId: selectedCategoryId,
+        type: transactionType,
+        amount: parsedAmount,
+        description: description.trim(),
+        paymentMethod,
+        date: selectedDate,
+        isRecurring,
+        notes: notes.trim() || undefined,
+      });
+
+      setToastVisible(true);
+      setTimeout(() => navigation.goBack(), 1500);
+    } catch (err) {
+      showError(err, 'Falha ao salvar transação');
     } finally {
       setLoading(false);
     }
@@ -63,13 +134,19 @@ export function NewTransactionScreen({ navigation }: any) {
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
-      <KeyboardAvoidingView 
+      <Toast
+        visible={toastVisible}
+        message="Transação salva com sucesso!"
+        type="success"
+        onHide={() => setToastVisible(false)}
+      />
+      <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className="flex-1"
       >
         {/* TopAppBar */}
         <View className="flex-row items-center justify-between px-5 h-14">
-          <TouchableOpacity 
+          <TouchableOpacity
             onPress={() => navigation.goBack()}
             className="p-2 -ml-2 rounded-full"
           >
@@ -79,7 +156,7 @@ export function NewTransactionScreen({ navigation }: any) {
           <View className="w-10" />
         </View>
 
-        <ScrollView 
+        <ScrollView
           className="flex-1"
           contentContainerStyle={{ paddingBottom: 120 }}
           showsVerticalScrollIndicator={false}
@@ -96,10 +173,10 @@ export function NewTransactionScreen({ navigation }: any) {
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
-                className={`flex-1 py-2 rounded-md ${transactionType === 'INCOME' ? 'bg-primary-container' : ''}`}
+                className={`flex-1 py-2 rounded-md ${transactionType === 'INCOME' ? 'bg-success' : ''}`}
                 onPress={() => setTransactionType('INCOME')}
               >
-                <Text className={`text-center font-label-md ${transactionType === 'INCOME' ? 'text-on-primary-container' : 'text-on-surface-variant'}`}>
+                <Text className={`text-center font-label-md ${transactionType === 'INCOME' ? 'text-white' : 'text-on-surface-variant'}`}>
                   Receita
                 </Text>
               </TouchableOpacity>
@@ -109,15 +186,15 @@ export function NewTransactionScreen({ navigation }: any) {
           {/* Amount Input */}
           <View className="px-5 mb-6 items-center justify-center">
             <Text className="text-label-md text-on-surface-variant mb-2">Valor</Text>
-            <View className="flex-row items-center justify-center w-full">
-              <Text className="text-numeric-display text-on-surface-variant mr-2">R$</Text>
+            <View className="flex-row items-baseline">
+              <Text className="text-numeric-display text-on-surface-variant">R$</Text>
               <TextInput
-                className="text-numeric-display text-on-background text-center flex-1"
+                className="text-numeric-display text-on-background text-center w-32"
                 placeholder="0,00"
                 placeholderTextColor={Colors.outline}
-                keyboardType="decimal-pad"
+                keyboardType="numeric"
                 value={amount}
-                onChangeText={setAmount}
+                onChangeText={(text) => setAmount(formatCurrencyInput(text))}
               />
             </View>
           </View>
@@ -127,33 +204,42 @@ export function NewTransactionScreen({ navigation }: any) {
             {/* Category Selector */}
             <View className="gap-2">
               <Text className="text-label-md text-on-surface">Categoria</Text>
-              <View className="flex-row flex-wrap justify-between mt-2">
-                {categories.map((cat) => (
-                  <TouchableOpacity
-                    key={cat.key}
-                    className="items-center gap-2 mb-4"
-                    style={{ width: '23%' }}
-                    onPress={() => setSelectedCategory(cat.key)}
-                  >
-                    <View className={`w-14 h-14 rounded-full items-center justify-center ${
-                      selectedCategory === cat.key 
-                        ? 'bg-primary-container' 
-                        : 'bg-surface-container'
-                    }`}>
-                      <MaterialIcons 
-                        name={cat.icon as any} 
-                        size={24} 
-                        color={selectedCategory === cat.key ? Colors.onPrimaryContainer : Colors.onSurfaceVariant} 
-                      />
-                    </View>
-                    <Text className={`text-label-sm text-center ${
-                      selectedCategory === cat.key ? 'text-on-surface' : 'text-on-surface-variant'
-                    }`}>
-                      {cat.label}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
+              {fetchingCategories ? (
+                <ActivityIndicator color={Colors.primary} className="my-4" />
+              ) : (
+                <View className="flex-row flex-wrap mt-2 px-4 gap-2">
+                  {categories
+                    .filter((cat) => {
+                      if (transactionType === 'INCOME') return cat.type === 'INCOME' || cat.type === 'BOTH';
+                      return cat.type === 'EXPENSE' || cat.type === 'BOTH';
+                    })
+                    .map((cat) => (
+                      <TouchableOpacity
+                        key={cat.id}
+                        className="items-center gap-2 mb-4"
+                        style={{ width: '23%' }}
+                        onPress={() => setSelectedCategoryId(cat.id)}
+                      >
+                        <View className={`w-12 h-12 rounded-full items-center justify-center ${selectedCategoryId === cat.id
+                          ? transactionType === 'INCOME' ? 'bg-success' : 'bg-primary-container'
+                          : 'bg-surface-container'
+                          }`}>
+                          <MaterialIcons
+                            name={(cat.icon || 'help-outline') as any}
+                            size={22}
+                            color={selectedCategoryId === cat.id
+                              ? transactionType === 'INCOME' ? '#fff' : Colors.onPrimaryContainer
+                              : Colors.onSurfaceVariant}
+                          />
+                        </View>
+                        <Text className={`text-label-sm text-center truncate w-full ${selectedCategoryId === cat.id ? 'text-on-surface font-semibold' : 'text-on-surface-variant'
+                          }`}>
+                          {cat.name}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                </View>
+              )}
             </View>
 
             {/* Description Input */}
@@ -174,37 +260,45 @@ export function NewTransactionScreen({ navigation }: any) {
             {/* Date Picker */}
             <View className="gap-2">
               <Text className="text-label-md text-on-surface">Data</Text>
-              <TouchableOpacity className="flex-row items-center justify-between bg-surface-container rounded-lg px-4 py-3">
+              <TouchableOpacity
+                className="flex-row items-center justify-between bg-surface-container rounded-lg px-4 py-3"
+                onPress={() =>
+                  navigation.navigate('DatePicker', {
+                    initialDate: selectedDate,
+                    onSelect: (dateStr: string) => setSelectedDate(dateStr),
+                  })
+                }
+              >
                 <View className="flex-row items-center">
                   <MaterialIcons name="calendar-today" size={20} color={Colors.outline} style={{ marginRight: 12 }} />
-                  <Text className="text-body-md text-on-surface">{date}</Text>
+                  <Text className="text-body-md text-on-surface">
+                    {formatDisplayDate(selectedDate)}
+                  </Text>
                 </View>
-                <MaterialIcons name="chevron-right" size={20} color={Colors.outline} />
+                <MaterialIcons name="chevron-right" size={20} color={Colors.onSurfaceVariant} />
               </TouchableOpacity>
             </View>
 
             {/* Payment Method */}
             <View className="gap-2">
               <Text className="text-label-md text-on-surface">Método de Pagamento</Text>
-              <View className="flex-row flex-wrap gap-3">
-                {paymentMethods.map((method) => (
+              <View className="flex-row flex-wrap gap-2">
+                {PAYMENT_METHODS.map((method) => (
                   <TouchableOpacity
                     key={method.key}
-                    className={`py-2 px-4 rounded-full flex-row items-center gap-2 ${
-                      paymentMethod === method.key 
-                        ? 'bg-primary-container' 
-                        : 'bg-surface-container'
-                    }`}
+                    className={`py-2 px-3 rounded-full flex-row items-center gap-1.5 ${paymentMethod === method.key
+                      ? 'bg-primary-container'
+                      : 'bg-surface-container'
+                      }`}
                     onPress={() => setPaymentMethod(method.key)}
                   >
-                    <MaterialIcons 
-                      name={method.icon as any} 
-                      size={18} 
-                      color={paymentMethod === method.key ? Colors.onPrimaryContainer : Colors.onSurfaceVariant} 
+                    <MaterialIcons
+                      name={method.icon}
+                      size={16}
+                      color={paymentMethod === method.key ? Colors.onPrimaryContainer : Colors.onSurfaceVariant}
                     />
-                    <Text className={`font-label-md ${
-                      paymentMethod === method.key ? 'text-on-primary-container' : 'text-on-surface-variant'
-                    }`}>
+                    <Text className={`font-label-md ${paymentMethod === method.key ? 'text-on-primary-container font-semibold' : 'text-on-surface-variant'
+                      }`}>
                       {method.label}
                     </Text>
                   </TouchableOpacity>
@@ -218,15 +312,14 @@ export function NewTransactionScreen({ navigation }: any) {
                 <View className="w-10 h-10 rounded-full bg-surface-container items-center justify-center">
                   <MaterialIcons name="repeat" size={20} color={Colors.onSurfaceVariant} />
                 </View>
-                <Text className="text-body-md text-on-surface">Pagamento recorrente</Text>
+                <Text className="text-body-md text-on-surface mr-2">Pagamento recorrente</Text>
               </View>
               <TouchableOpacity
                 className={`w-12 h-6 rounded-full relative ${isRecurring ? 'bg-primary-container' : 'bg-surface-container'}`}
                 onPress={() => setIsRecurring(!isRecurring)}
               >
-                <View className={`absolute top-1 w-4 h-4 rounded-full transition-transform ${
-                  isRecurring ? 'bg-on-primary-container right-1' : 'bg-on-surface-variant left-1'
-                }`} />
+                <View className={`absolute top-1 w-4 h-4 rounded-full transition-transform ${isRecurring ? 'bg-on-primary-container right-1' : 'bg-on-surface-variant left-1'
+                  }`} />
               </TouchableOpacity>
             </View>
 
@@ -250,16 +343,15 @@ export function NewTransactionScreen({ navigation }: any) {
         {/* Bottom Action Bar */}
         <View className="px-5 py-4 bg-surface border-t border-surface-container-highest">
           <TouchableOpacity
-            className="w-full h-14 bg-primary-container rounded-xl flex-row items-center justify-center gap-2 active:scale-[0.98]"
+            className={`w-full h-14 rounded-xl flex-row items-center justify-center gap-2 active:scale-[0.98] ${transactionType === 'INCOME' ? 'bg-success' : 'bg-primary-container'}`}
             onPress={handleSave}
             disabled={loading}
           >
             {loading ? (
-              <ActivityIndicator color={Colors.onPrimaryContainer} />
+              <ActivityIndicator color={transactionType === 'INCOME' ? '#fff' : Colors.onPrimaryContainer} />
             ) : (
               <>
-                <MaterialIcons name="check-circle" size={24} color={Colors.onPrimaryContainer} />
-                <Text className="text-headline-md text-on-primary-container font-bold">
+                <Text className={`text-body-md font-bold ${transactionType === 'INCOME' ? 'text-white' : 'text-on-primary-container'}`}>
                   Salvar transação
                 </Text>
               </>

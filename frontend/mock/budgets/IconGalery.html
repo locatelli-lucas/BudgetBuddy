@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html class="dark" lang="en" style="">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Select Category - BudgetBuddy</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com" rel="preconnect">
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet">
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed-dim": "#ffb596",
+                        "on-tertiary-fixed-variant": "#7d2d00",
+                        "on-error-container": "#ffdad6",
+                        "primary": "#b4c5ff",
+                        "surface-container-lowest": "#0c0e16",
+                        "secondary-fixed-dim": "#b9c7e0",
+                        "on-tertiary": "#581e00",
+                        "on-surface": "#e1e2ed",
+                        "on-secondary-fixed-variant": "#3a485c",
+                        "surface": "#11131b",
+                        "on-surface-variant": "#c3c6d7",
+                        "on-secondary-container": "#abb9d2",
+                        "on-primary-fixed-variant": "#003ea8",
+                        "outline": "#8d90a0",
+                        "on-tertiary-fixed": "#360f00",
+                        "surface-tint": "#b4c5ff",
+                        "surface-container-highest": "#32343d",
+                        "secondary-container": "#3c4a5e",
+                        "inverse-primary": "#0053db",
+                        "on-secondary": "#233144",
+                        "on-background": "#e1e2ed",
+                        "surface-container": "#1d1f27",
+                        "surface-container-high": "#282a32",
+                        "secondary-fixed": "#d5e3fd",
+                        "on-primary-container": "#eeefff",
+                        "inverse-surface": "#e1e2ed",
+                        "surface-bright": "#373942",
+                        "tertiary-container": "#bc4800",
+                        "tertiary": "#ffb596",
+                        "inverse-on-surface": "#2e3039",
+                        "primary-container": "#2563eb",
+                        "on-tertiary-container": "#ffede6",
+                        "surface-dim": "#11131b",
+                        "on-primary": "#002a78",
+                        "primary-fixed": "#dbe1ff",
+                        "surface-container-low": "#191b23",
+                        "on-primary-fixed": "#00174b",
+                        "background": "#11131b",
+                        "on-error": "#690005",
+                        "primary-fixed-dim": "#b4c5ff",
+                        "error-container": "#93000a",
+                        "error": "#ffb4ab",
+                        "tertiary-fixed": "#ffdbcd",
+                        "surface-variant": "#32343d",
+                        "on-secondary-fixed": "#0d1c2f",
+                        "outline-variant": "#434655",
+                        "secondary": "#b9c7e0"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "section-gap": "40px",
+                        "stack-md": "16px",
+                        "container-padding-desktop": "32px",
+                        "gutter": "16px",
+                        "stack-sm": "8px",
+                        "stack-lg": "24px",
+                        "container-padding-mobile": "20px",
+                        "base": "8px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Inter"],
+                        "label-md": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "display": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "numeric-display": ["Inter"],
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-lg-mobile": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "display": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "numeric-display": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "500" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom scrollbar for a cleaner look */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #32343d;
+            /* surface-variant */
+            border-radius: 9999px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #434655;
+            /* outline-variant */
+        }
+    </style>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+
+<body
+    class="text-on-background font-body-md min-h-screen flex flex-col antialiased selection:bg-primary-container selection:text-on-primary-container bg-surface">
+    <!-- TopAppBar -->
+    <header class="w-full top-0 sticky z-40 transition-colors bg-surface">
+        <div class="flex items-center justify-between px-container-padding-mobile h-16 w-full">
+            <div class="flex items-center gap-4 px-container-padding-mobile h-16 w-full">
+                <button aria-label="Go back"
+                    class="text-on-surface-variant hover:bg-surface-container-high transition-colors cursor-pointer active:scale-95 duration-200 rounded-full p-2 flex items-center justify-center -ml-2">
+                    <span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+                </button>
+                <h1 class="font-headline-md text-headline-md text-primary tracking-tight flex-1">Select Category</h1>
+                <button aria-label="Search"
+                    class="text-on-surface-variant hover:bg-surface-container-high transition-colors cursor-pointer active:scale-95 duration-200 rounded-full p-2 flex items-center justify-center -mr-2">
+                    <span class="material-symbols-outlined" data-icon="search">search</span>
+                </button>
+            </div>
+        </div>
+    </header>
+    <!-- Main Content -->
+    <main class="flex-1 w-full max-w-4xl mx-auto px-container-padding-mobile py-stack-md flex flex-col gap-stack-lg">
+        <!-- Search Bar (Expanded State Mock) -->
+        <div class="relative w-full group">
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <span class="material-symbols-outlined text-outline">search</span>
+            </div>
+            <input
+                class="block w-full pl-12 pr-4 py-3 bg-surface-container-low border-transparent rounded-xl text-on-surface placeholder-on-surface-variant focus:border-primary focus:bg-surface focus:ring-1 focus:ring-primary transition-all duration-200 shadow-sm"
+                placeholder="Search icons (e.g. food, travel...)" type="text" value="">
+            <div class="absolute inset-y-0 right-0 pr-2 flex items-center">
+                <button
+                    class="p-2 text-on-surface-variant hover:text-on-surface rounded-full transition-colors hidden group-focus-within:block">
+                    <span class="material-symbols-outlined text-[20px]">close</span>
+                </button>
+            </div>
+        </div>
+        <!-- Filter Chips (Horizontal Scroll) -->
+        <div
+            class="flex gap-base overflow-x-auto pb-2 -mx-container-padding-mobile px-container-padding-mobile scrollbar-hide snap-x">
+            <button
+                class="snap-start shrink-0 px-4 py-2 bg-primary-container text-on-primary-container rounded-full font-label-md text-label-md transition-colors shadow-sm">All
+                Icons</button>
+            <button
+                class="snap-start shrink-0 px-4 py-2 bg-surface-container text-on-surface hover:bg-surface-container-high rounded-full font-label-md text-label-md transition-colors border border-outline-variant/30">Finance</button>
+            <button
+                class="snap-start shrink-0 px-4 py-2 bg-surface-container text-on-surface hover:bg-surface-container-high rounded-full font-label-md text-label-md transition-colors border border-outline-variant/30">Food
+                &amp; Drink</button>
+            <button
+                class="snap-start shrink-0 px-4 py-2 bg-surface-container text-on-surface hover:bg-surface-container-high rounded-full font-label-md text-label-md transition-colors border border-outline-variant/30">Shopping</button>
+            <button
+                class="snap-start shrink-0 px-4 py-2 bg-surface-container text-on-surface hover:bg-surface-container-high rounded-full font-label-md text-label-md transition-colors border border-outline-variant/30">Transport</button>
+            <button
+                class="snap-start shrink-0 px-4 py-2 bg-surface-container text-on-surface hover:bg-surface-container-high rounded-full font-label-md text-label-md transition-colors border border-outline-variant/30">Health</button>
+        </div>
+        <!-- Icon Grid Container -->
+        <div class="flex flex-col gap-stack-lg pb-24">
+            <!-- Category Section: Finance -->
+            <section class="flex flex-col gap-stack-sm">
+                <h2 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider pl-1">Finance
+                </h2>
+                <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-gutter">
+                    <!-- Icon Item -->
+                    <button
+                        class="aspect-square flex flex-col items-center justify-center gap-2 bg-surface-container-low hover:bg-surface-container-high rounded-xl border border-transparent hover:border-outline-variant/50 transition-all duration-200 active:scale-95 group">
+                        <span
+                            class="material-symbols-outlined text-[28px] text-on-surface group-hover:text-primary transition-colors"
+                            data-weight="fill" style="font-variation-settings: 'FILL' 0;">account_balance</span>
+                    </button>
+                    <!-- Icon Item -->
+                    <button
+                        class="aspect-square flex flex-col items-center justify-center gap-2 bg-surface-container-low hover:bg-surface-container-high rounded-xl border border-transparent hover:border-outline-variant/50 transition-all duration-200 active:scale-95 group">
+                        <span
+                            class="material-symbols-outlined text-[28px] text-on-surface group-hover:text-primary transition-colors"
+                            data-weight="fill" style="font-variation-settings: 'FILL' 0;">account_balance_wallet</span>
+                    </button>
+                    <!-- Icon Item -->
+                    <button
+                        class="aspect-square flex flex-col items-center justify-center gap-2 bg-surface-container-low hover:bg-surface-container-high rounded-xl border border-transparent hover:border-outline-variant/50 transition-all duration-200 active:scale-95 group">
+                        <span
+                            class="material-symbols-outlined text-[28px] text-on-surface group-hover:text-primary transition-colors"
+                            data-weight="fill" style="font-variation-settings: 'FILL' 0;">credit_card</span>
+                    </button>
+                    <!-- Icon Item -->
+                    <button
+                        class="aspect-square flex flex-col items-center justify-center gap-2 bg-surface-container-low hover:bg-surface-container-high rounded-xl border border-transparent hover:border-outline-variant/50 transition-all duration-200 active:scale-95 group">
+                        <span
+                            class="material-symbols-outlined text-[28px] text-on-surface group-hover:text-primary transition-colors"
+                            data-weight="fill" style="font-variation-settings: 'FILL' 0;">savings</span>
+                    </button>
+                    <!-- Icon Item -->
+                    <button
+                        class="aspect-square flex flex-col items-center justify-center gap-2 bg-surface-container-low hover:bg-surface-container-high rounded-xl border border-transparent hover:border-outline-variant/50 transition-all duration-200 active:scale-95 group">
+                        <span
+                            class="material-symbols-outlined text-[28px] text-on-surface group-hover:text-primary transition-colors"
+                            data-weight="fill" style="font-variation-settings: 'FILL' 0;">payments</span>
+                    </button>
+                    <!-- Icon Item -->
+                    <button
+                        class="aspect-square flex flex-col items-center justify-center gap-2 bg-surface-container-low hover:bg-surface-container-high rounded-xl border border-transparent hover:border-outline-variant/50 transition-all duration-200 active:scale-95 group">
+                        <span
+                            class="material-symbols-outlined text-[28px] text-on-surface group-hover:text-primary transition-colors"
+                            data-weight="fill" style="font-variation-settings: 'FILL' 0;">receipt_long</span>
+                    </button>
+                    <!-- Icon Item -->
+                    <button
+                        class="aspect-square flex flex-col items-center justify-center gap-2 bg-surface-container-low hover:bg-surface-container-high rounded-xl border border-transparent hover:border-outline-variant/50 transition-all duration-200 active:scale-95 group">
+                        <span
+                            class="material-symbols-outlined text-[28px] text-on-surface group-hover:text-primary transition-colors"
+                            data-weight="fill" style="font-variation-settings: 'FILL' 0;">currency_exchange</span>
+                    </button>
+                    <!-- Icon Item -->
+                    <button
+                        class="aspect-square flex flex-col items-center justify-center gap-2 bg-surface-container-low hover:bg-surface-container-high rounded-xl border border-transparent hover:border-outline-variant/50 transition-all duration-200 active:scale-95 group">
+                        <span
+                            class="material-symbols-outlined text-[28px] text-on-surface group-hover:text-primary transition-colors"
+                            data-weight="fill" style="font-variation-settings: 'FILL' 0;">paid</span>
+                    </button>
+                </div>
+            </section>
+            <!-- Category Section: Food & Drink -->
+            <section class="flex flex-col gap-stack-sm">
+                <h2 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider pl-1">Food &amp;
+                    Drink</h2>
+                <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-gutter">
+                    <!-- Icon Item -->
+                    <button
+                        class="aspect-square flex flex-col items-center justify-center gap-2 bg-surface-container-low hover:bg-surface-container-high rounded-xl border border-transparent hover:border-outline-variant/50 transition-all duration-200 active:scale-95 group">
+                        <span
+                            class="material-symbols-outlined text-[28px] text-on-surface group-hover:text-primary transition-colors"
+                            data-weight="fill" style="font-variation-settings: 'FILL' 0;">restaurant</span>
+                    </button>
+                    <!-- Icon Item -->
+                    <button
+                        class="aspect-square flex flex-col items-center justify-center gap-2 bg-surface-container-low hover:bg-surface-container-high rounded-xl border border-transparent hover:border-outline-variant/50 transition-all duration-200 active:scale-95 group">
+                        <span
+                            class="material-symbols-outlined text-[28px] text-on-surface group-hover:text-primary transition-colors"
+                            data-weight="fill" style="font-variation-settings: 'FILL' 0;">local_cafe</span>
+                    </button>
+                    <!-- Icon Item -->
+                    <button
+                        class="aspect-square flex flex-col items-center justify-center gap-2 bg-surface-container-low hover:bg-surface-container-high rounded-xl border border-transparent hover:border-outline-variant/50 transition-all duration-200 active:scale-95 group">
+                        <span
+                            class="material-symbols-outlined text-[28px] text-on-surface group-hover:text-primary transition-colors"
+                            data-weight="fill" style="font-variation-settings: 'FILL' 0;">fastfood</span>
+                    </button>
+                    <!-- Icon Item -->
+                    <button
+                        class="aspect-square flex flex-col items-center justify-center gap-2 bg-surface-container-low hover:bg-surface-container-high rounded-xl border border-transparent hover:border-outline-variant/50 transition-all duration-200 active:scale-95 group">
+                        <span
+                            class="material-symbols-outlined text-[28px] text-on-surface group-hover:text-primary transition-colors"
+                            data-weight="fill" style="font-variation-settings: 'FILL' 0;">local_bar</span>
+                    </button>
+                    <!-- Icon Item -->
+                    <button
+                        class="aspect-square flex flex-col items-center justify-center gap-2 bg-surface-container-low hover:bg-surface-container-high rounded-xl border border-transparent hover:border-outline-variant/50 transition-all duration-200 active:scale-95 group">
+                        <span
+                            class="material-symbols-outlined text-[28px] text-on-surface group-hover:text-primary transition-colors"
+                            data-weight="fill" style="font-variation-settings: 'FILL' 0;">bakery_dining</span>
+                    </button>
+                    <!-- Icon Item -->
+                    <button
+                        class="aspect-square flex flex-col items-center justify-center gap-2 bg-surface-container-low hover:bg-surface-container-high rounded-xl border border-transparent hover:border-outline-variant/50 transition-all duration-200 active:scale-95 group">
+                        <span
+                            class="material-symbols-outlined text-[28px] text-on-surface group-hover:text-primary transition-colors"
+                            data-weight="fill" style="font-variation-settings: 'FILL' 0;">local_pizza</span>
+                    </button>
+                </div>
+            </section>
+            <!-- Category Section: Shopping -->
+            <section class="flex flex-col gap-stack-sm">
+                <h2 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider pl-1">Shopping
+                </h2>
+                <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-gutter">
+                    <!-- Icon Item -->
+                    <button
+                        class="aspect-square flex flex-col items-center justify-center gap-2 bg-surface-container-low hover:bg-surface-container-high rounded-xl border border-transparent hover:border-outline-variant/50 transition-all duration-200 active:scale-95 group">
+                        <span
+                            class="material-symbols-outlined text-[28px] text-on-surface group-hover:text-primary transition-colors"
+                            data-weight="fill" style="font-variation-settings: 'FILL' 0;">shopping_cart</span>
+                    </button>
+                    <!-- Icon Item -->
+                    <button
+                        class="aspect-square flex flex-col items-center justify-center gap-2 bg-surface-container-low hover:bg-surface-container-high rounded-xl border border-transparent hover:border-outline-variant/50 transition-all duration-200 active:scale-95 group">
+                        <span
+                            class="material-symbols-outlined text-[28px] text-on-surface group-hover:text-primary transition-colors"
+                            data-weight="fill" style="font-variation-settings: 'FILL' 0;">shopping_bag</span>
+                    </button>
+                    <!-- Icon Item -->
+                    <button
+                        class="aspect-square flex flex-col items-center justify-center gap-2 bg-surface-container-low hover:bg-surface-container-high rounded-xl border border-transparent hover:border-outline-variant/50 transition-all duration-200 active:scale-95 group">
+                        <span
+                            class="material-symbols-outlined text-[28px] text-on-surface group-hover:text-primary transition-colors"
+                            data-weight="fill" style="font-variation-settings: 'FILL' 0;">storefront</span>
+                    </button>
+                    <!-- Icon Item -->
+                    <button
+                        class="aspect-square flex flex-col items-center justify-center gap-2 bg-surface-container-low hover:bg-surface-container-high rounded-xl border border-transparent hover:border-outline-variant/50 transition-all duration-200 active:scale-95 group">
+                        <span
+                            class="material-symbols-outlined text-[28px] text-on-surface group-hover:text-primary transition-colors"
+                            data-weight="fill" style="font-variation-settings: 'FILL' 0;">checkroom</span>
+                    </button>
+                </div>
+            </section>
+        </div>
+    </main>
+    <div class="fixed bottom-20 right-4 z-[60] sm:right-8 md:right-12">
+        <button
+            class="flex items-center gap-2 bg-primary text-on-primary hover:bg-primary-container hover:text-on-primary-container px-6 py-4 rounded-full shadow-lg transition-all duration-300 active:scale-95 group">
+            <span class="material-symbols-outlined font-bold">add</span>
+            <span class="font-label-md text-label-md">Adicionar categoria</span>
+        </button>
+    </div>
+    <nav
+        class="fixed bottom-0 left-0 right-0 z-50 bg-surface-container border-t border-outline-variant/30 px-container-padding-mobile pb-safe">
+        <div class="flex justify-between items-center h-16 max-w-4xl mx-auto">
+            <button
+                class="flex flex-col items-center justify-center gap-1 flex-1 text-on-surface-variant hover:text-primary transition-colors">
+                <span class="material-symbols-outlined">home</span>
+                <span class="text-label-sm font-label-sm">Início</span>
+            </button>
+            <button
+                class="flex flex-col items-center justify-center gap-1 flex-1 text-on-surface-variant hover:text-primary transition-colors">
+                <span class="material-symbols-outlined">receipt_long</span>
+                <span class="text-label-sm font-label-sm">Transações</span>
+            </button>
+            <button
+                class="flex flex-col items-center justify-center gap-1 flex-1 text-on-surface-variant hover:text-primary transition-colors">
+                <span class="material-symbols-outlined">account_balance_wallet</span>
+                <span class="text-label-sm font-label-sm">Orçamentos</span>
+            </button>
+            <button
+                class="flex flex-col items-center justify-center gap-1 flex-1 text-on-surface-variant hover:text-primary transition-colors">
+                <span class="material-symbols-outlined">trending_up</span>
+                <span class="text-label-sm font-label-sm">Investir</span>
+            </button>
+            <button
+                class="flex flex-col items-center justify-center gap-1 flex-1 text-on-surface-variant hover:text-primary transition-colors">
+                <span class="material-symbols-outlined">person</span>
+                <span class="text-label-sm font-label-sm">Perfil</span>
+            </button>
+        </div>
+    </nav>
+    <!-- Suppressed BottomNavBar: The prompt indicates this is a sub-flow ("opened when clicking the 'more' icon in the category creation flow"), not a top-level destination. -->
+    <script>
+        // Simple script to handle chip selection for visual feedback
+        document.addEventListener('DOMContentLoaded', () => {
+            const chips = document.querySelectorAll('.overflow-x-auto button');
+            chips.forEach(chip => {
+                chip.addEventListener('click', () => {
+                    // Reset all chips
+                    chips.forEach(c => {
+                        c.className = 'snap-start shrink-0 px-4 py-2 bg-surface-container text-on-surface hover:bg-surface-container-high rounded-full font-label-md text-label-md transition-colors border border-outline-variant/30';
+                    });
+                    // Set active chip
+                    chip.className = 'snap-start shrink-0 px-4 py-2 bg-primary-container text-on-primary-container rounded-full font-label-md text-label-md transition-colors shadow-sm';
+                });
+            });
+        });
+    </script>
+
+
+
+
+
+
+
+
+</body>
+
+</html>

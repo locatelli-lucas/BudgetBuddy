@@ -1,18 +1,20 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import { useAuth } from '../../contexts/AuthContext';
+import { useErrorToast } from '../../contexts/ErrorToastContext';
 import { MaterialIcons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export function LoginScreen({ navigation }: any) {
   const { signIn } = useAuth();
+  const { showError } = useErrorToast();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
   async function handleLogin() {
     if (!email || !password) {
-      Alert.alert('Erro', 'Preencha todos os campos');
+      showError(new Error('Preencha todos os campos'));
       return;
     }
     
@@ -20,7 +22,7 @@ export function LoginScreen({ navigation }: any) {
     try {
       await signIn(email, password);
     } catch (error) {
-      Alert.alert('Erro', 'Falha ao fazer login. Verifique suas credenciais.');
+      showError(error, 'Falha ao fazer login. Verifique suas credenciais.');
     } finally {
       setLoading(false);
     }

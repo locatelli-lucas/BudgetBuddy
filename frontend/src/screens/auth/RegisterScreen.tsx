@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import { useAuth } from '../../contexts/AuthContext';
+import { useErrorToast } from '../../contexts/ErrorToastContext';
 import { MaterialIcons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export function RegisterScreen({ navigation }: any) {
   const { signUp } = useAuth();
+  const { showError } = useErrorToast();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -13,7 +15,7 @@ export function RegisterScreen({ navigation }: any) {
 
   async function handleRegister() {
     if (!name || !email || !password) {
-      Alert.alert('Erro', 'Preencha todos os campos');
+      showError(new Error('Preencha todos os campos'));
       return;
     }
 
@@ -21,7 +23,7 @@ export function RegisterScreen({ navigation }: any) {
     try {
       await signUp(name, email, password);
     } catch (error) {
-      Alert.alert('Erro', 'Falha ao criar conta. Tente novamente.');
+      showError(error, 'Falha ao criar conta. Tente novamente.');
     } finally {
       setLoading(false);
     }

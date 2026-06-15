@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-br">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>BudgetBuddy - Redefinir Limites</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #11131b;
+            color: #e1e2ed;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .glass-card {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.8) 100%);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #b4c5ff;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(180, 197, 255, 0.4);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #b4c5ff;
+            cursor: pointer;
+            border: none;
+        }
+    </style>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "background": "#11131b",
+                        "primary-fixed": "#dbe1ff",
+                        "outline-variant": "#434655",
+                        "surface-bright": "#373942",
+                        "on-tertiary": "#581e00",
+                        "surface-tint": "#b4c5ff",
+                        "surface": "#11131b",
+                        "surface-dim": "#11131b",
+                        "on-error-container": "#ffdad6",
+                        "on-surface": "#e1e2ed",
+                        "tertiary-fixed-dim": "#ffb596",
+                        "on-background": "#e1e2ed",
+                        "inverse-primary": "#0053db",
+                        "on-tertiary-fixed": "#360f00",
+                        "surface-container-lowest": "#0c0e16",
+                        "primary-container": "#2563eb",
+                        "surface-container-highest": "#32343d",
+                        "tertiary": "#ffb596",
+                        "on-tertiary-container": "#ffede6",
+                        "on-surface-variant": "#c3c6d7",
+                        "primary": "#b4c5ff",
+                        "on-secondary-fixed-variant": "#3a485c",
+                        "on-secondary": "#233144",
+                        "tertiary-fixed": "#ffdbcd",
+                        "secondary-fixed": "#d5e3fd",
+                        "on-error": "#690005",
+                        "on-primary-fixed-variant": "#003ea8",
+                        "secondary": "#b9c7e0",
+                        "primary-fixed-dim": "#b4c5ff",
+                        "surface-container": "#1d1f27",
+                        "surface-container-low": "#191b23",
+                        "on-primary-fixed": "#00174b",
+                        "on-tertiary-fixed-variant": "#7d2d00",
+                        "error-container": "#93000a",
+                        "on-primary-container": "#eeefff",
+                        "tertiary-container": "#bc4800",
+                        "outline": "#8d90a0",
+                        "on-primary": "#002a78",
+                        "surface-variant": "#32343d",
+                        "error": "#ffb4ab",
+                        "surface-container-high": "#282a32",
+                        "inverse-surface": "#e1e2ed",
+                        "on-secondary-container": "#abb9d2",
+                        "secondary-fixed-dim": "#b9c7e0",
+                        "on-secondary-fixed": "#0d1c2f",
+                        "inverse-on-surface": "#2e3039",
+                        "secondary-container": "#3c4a5e"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-md": "16px",
+                        "base": "8px",
+                        "gutter": "16px",
+                        "container-padding-desktop": "32px",
+                        "stack-lg": "24px",
+                        "stack-sm": "8px",
+                        "section-gap": "40px",
+                        "container-padding-mobile": "20px"
+                    },
+                    "fontFamily": {
+                        "numeric-display": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "display": ["Inter"],
+                        "label-md": ["Inter"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "numeric-display": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "500" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "display": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+
+<body class="flex flex-col min-h-screen bg-surface">
+    <!-- TopAppBar -->
+    <header
+        class="w-full sticky top-0 z-50 bg-background dark:bg-background flex justify-between items-center px-container-padding-mobile py-stack-md bg-surface">
+        <div class="flex items-center gap-4">
+            <button aria-label="Voltar" class="p-2 -ml-2 hover:bg-surface-container transition-colors rounded-full">
+                <span class="material-symbols-outlined text-on-surface">arrow_back</span>
+            </button>
+            <h1 class="font-headline-md text-headline-md text-on-surface">Redefinir limites</h1>
+        </div>
+        <div class="flex items-center">
+            <button
+                class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center overflow-hidden active:scale-95 transition-transform">
+                <img alt="User Profile" class="w-full h-full object-cover"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuD_ZYclV3cy0iCFDoyWBP9Bu37qSwB65mU8EEQoYIuiemg4K9oLgsaKxwVhsHAhboFS1jTBRZtoUQTdrp5Z4k0MJ9t27uTIje3iQK7FJ0kvERgKayme4kA2LnxYBUZjIY_NS6mFYD8ldiy5DeFBPiWmxVrUc0FFfijUAo-joVbJuT2MYxv2vrSQXivlWiB1xEbOrE165pVjC3NGS09i12hrvSDuBSUu76sZu368wRlNe8yG_S2h_RMkCjPjFbpRx_HBhGFMulfomKs">
+            </button>
+        </div>
+    </header>
+    <main class="flex-1 px-container-padding-mobile pb-32">
+        <!-- Global Budget Summary Card -->
+        <section class="mt-6">
+            <div class="glass-card rounded-xl p-stack-lg shadow-sm">
+                <div class="flex justify-between items-start mb-stack-md">
+                    <div>
+                        <p class="font-label-md text-label-md text-on-surface-variant">Resumo Global Mensal</p>
+                        <h2 class="font-numeric-display text-numeric-display text-primary-fixed mt-2">R$ 4.250,00</h2>
+                    </div>
+                    <div class="p-3 bg-primary-container rounded-lg">
+                        <span class="material-symbols-outlined text-on-primary-container">account_balance_wallet</span>
+                    </div>
+                </div>
+                <div class="space-y-stack-sm">
+                    <div class="flex justify-between text-label-sm font-label-sm">
+                        <span class="text-on-surface-variant">Planejado vs. Renda</span>
+                        <span class="text-primary" id="income-percentage">68% da Renda</span>
+                    </div>
+                    <div class="h-2 w-full bg-surface-container-highest rounded-full overflow-hidden">
+                        <div class="h-full bg-primary transition-all duration-500" id="global-progress"
+                            style="width: 68%;"></div>
+                    </div>
+                    <p class="text-label-sm font-label-sm text-on-surface-variant mt-2">
+                        Sua renda mensal estimada: <span class="text-on-surface font-semibold">R$ 6.250,00</span>
+                    </p>
+                </div>
+            </div>
+        </section>
+        <!-- Categories List -->
+        <section class="mt-section-gap">
+            <h3 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest mb-stack-md">
+                Categorias Ativas</h3>
+            <div class="space-y-gutter">
+                <!-- Category Item 1 -->
+                <div class="surface-container rounded-xl p-gutter border border-outline-variant/30">
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center">
+                                <span class="material-symbols-outlined text-on-secondary-container">restaurant</span>
+                            </div>
+                            <div>
+                                <p class="font-label-md text-label-md text-on-surface">Alimentação</p>
+                                <p class="font-label-sm text-label-sm text-on-surface-variant">Gasto médio: R$ 1.100</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <input
+                                class="w-24 bg-surface-container-low border-none rounded-lg text-right font-numeric-display text-body-lg focus:ring-1 focus:ring-primary text-primary"
+                                oninput="updateProgress(this, 'range-1', 'val-1')" type="text" value="1200">
+                        </div>
+                    </div>
+                    <input
+                        class="w-full h-1.5 bg-surface-container-highest rounded-lg appearance-none cursor-pointer accent-primary"
+                        id="range-1" max="3000" min="0" oninput="updateInput(this, 'val-1')" step="50" type="range"
+                        value="1200">
+                    <div class="flex justify-between mt-2 text-label-sm font-label-sm text-on-surface-variant">
+                        <span class="">Min R$ 0</span>
+                        <span class="">Limite: R$ <span id="val-1" class="">1.200</span></span>
+                    </div>
+                </div>
+                <!-- Category Item 2 -->
+                <div class="surface-container rounded-xl p-gutter border border-outline-variant/30">
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center">
+                                <span
+                                    class="material-symbols-outlined text-on-secondary-container">directions_car</span>
+                            </div>
+                            <div>
+                                <p class="font-label-md text-label-md text-on-surface">Transporte</p>
+                                <p class="font-label-sm text-label-sm text-on-surface-variant">Gasto médio: R$ 450</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <input
+                                class="w-24 bg-surface-container-low border-none rounded-lg text-right font-numeric-display text-body-lg focus:ring-1 focus:ring-primary text-primary"
+                                oninput="updateProgress(this, 'range-2', 'val-2')" type="text" value="600">
+                        </div>
+                    </div>
+                    <input
+                        class="w-full h-1.5 bg-surface-container-highest rounded-lg appearance-none cursor-pointer accent-primary"
+                        id="range-2" max="2000" min="0" oninput="updateInput(this, 'val-2')" step="50" type="range"
+                        value="600">
+                    <div class="flex justify-between mt-2 text-label-sm font-label-sm text-on-surface-variant">
+                        <span class="">Min R$ 0</span>
+                        <span class="">Limite: R$ <span id="val-2" class="">600</span></span>
+                    </div>
+                </div>
+                <!-- Category Item 3 -->
+                <div class="surface-container rounded-xl p-gutter border border-outline-variant/30">
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center">
+                                <span class="material-symbols-outlined text-on-secondary-container">home</span>
+                            </div>
+                            <div>
+                                <p class="font-label-md text-label-md text-on-surface">Moradia</p>
+                                <p class="font-label-sm text-label-sm text-on-surface-variant">Fixo: R$ 2.000</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <input
+                                class="w-24 bg-surface-container-low border-none rounded-lg text-right font-numeric-display text-body-lg focus:ring-1 focus:ring-primary text-primary"
+                                oninput="updateProgress(this, 'range-3', 'val-3')" type="text" value="2000">
+                        </div>
+                    </div>
+                    <input
+                        class="w-full h-1.5 bg-surface-container-highest rounded-lg appearance-none cursor-pointer accent-primary"
+                        id="range-3" max="5000" min="0" oninput="updateInput(this, 'val-3')" step="100" type="range"
+                        value="2000">
+                    <div class="flex justify-between mt-2 text-label-sm font-label-sm text-on-surface-variant">
+                        <span class="">Min R$ 0</span>
+                        <span class="">Limite: R$ <span id="val-3" class="">2.000</span></span>
+                    </div>
+                </div>
+                <!-- Category Item 4 -->
+                <div class="surface-container rounded-xl p-gutter border border-outline-variant/30">
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center">
+                                <span
+                                    class="material-symbols-outlined text-on-secondary-container">fitness_center</span>
+                            </div>
+                            <div>
+                                <p class="font-label-md text-label-md text-on-surface">Saúde &amp; Bem-estar</p>
+                                <p class="font-label-sm text-label-sm text-on-surface-variant">Gasto médio: R$ 320</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <input
+                                class="w-24 bg-surface-container-low border-none rounded-lg text-right font-numeric-display text-body-lg focus:ring-1 focus:ring-primary text-primary"
+                                oninput="updateProgress(this, 'range-4', 'val-4')" type="text" value="450">
+                        </div>
+                    </div>
+                    <input
+                        class="w-full h-1.5 bg-surface-container-highest rounded-lg appearance-none cursor-pointer accent-primary"
+                        id="range-4" max="1500" min="0" oninput="updateInput(this, 'val-4')" step="50" type="range"
+                        value="450">
+                    <div class="flex justify-between mt-2 text-label-sm font-label-sm text-on-surface-variant">
+                        <span class="">Min R$ 0</span>
+                        <span class="">Limite: R$ <span id="val-4" class="">450</span></span>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Actions -->
+        <div class="mt-section-gap space-y-stack-md">
+            <button
+                class="w-full h-[56px] bg-primary-container text-on-primary-container font-label-md text-label-md rounded-xl hover:opacity-90 transition-all active:scale-95 flex items-center justify-center gap-2">
+                Salvar novos limites
+            </button>
+            <button
+                class="w-full h-[56px] bg-secondary-container/30 text-secondary-fixed font-label-md text-label-md rounded-xl hover:bg-secondary-container/50 transition-all active:scale-95 flex items-center justify-center">
+                Cancelar
+            </button>
+        </div>
+    </main>
+    <!-- Bottom Navigation -->
+    <nav
+        class="fixed bottom-0 w-full z-50 rounded-t-xl bg-surface-container dark:bg-surface-container shadow-sm flex justify-around items-center px-2 py-3">
+        <div
+            class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant p-2 hover:bg-surface-container-high transition-all active:scale-95 duration-150">
+            <span class="material-symbols-outlined">home</span>
+            <span class="font-label-sm text-label-sm">Início</span>
+        </div>
+        <div
+            class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant p-2 hover:bg-surface-container-high transition-all active:scale-95 duration-150">
+            <span class="material-symbols-outlined">receipt_long</span>
+            <span class="font-label-sm text-label-sm">Transações</span>
+        </div>
+        <div
+            class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-xl p-2 hover:bg-surface-container-high transition-all active:scale-95 duration-150">
+            <span class="material-symbols-outlined"
+                style="font-variation-settings: 'FILL' 1;">account_balance_wallet</span>
+            <span class="font-label-sm text-label-sm">Orçamentos</span>
+        </div>
+        <div
+            class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant p-2 hover:bg-surface-container-high transition-all active:scale-95 duration-150">
+            <span class="material-symbols-outlined">trending_up</span>
+            <span class="font-label-sm text-label-sm">Investir</span>
+        </div>
+        <div
+            class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant p-2 hover:bg-surface-container-high transition-all active:scale-95 duration-150">
+            <span class="material-symbols-outlined">person</span>
+            <span class="font-label-sm text-label-sm">Perfil</span>
+        </div>
+    </nav>
+    <script>
+        function updateInput(range, valId) {
+            document.getElementById(valId).textContent = parseInt(range.value).toLocaleString('pt-BR');
+            const inputField = range.parentElement.querySelector('input[type="text"]');
+            inputField.value = range.value;
+            calculateTotal();
+        }
+
+        function updateProgress(input, rangeId, valId) {
+            const range = document.getElementById(rangeId);
+            const valSpan = document.getElementById(valId);
+            let val = parseInt(input.value) || 0;
+
+            if (val > range.max) val = range.max;
+            range.value = val;
+            valSpan.textContent = val.toLocaleString('pt-BR');
+            calculateTotal();
+        }
+
+        function calculateTotal() {
+            const ranges = [
+                document.getElementById('range-1'),
+                document.getElementById('range-2'),
+                document.getElementById('range-3'),
+                document.getElementById('range-4')
+            ];
+
+            let total = 0;
+            ranges.forEach(r => total += parseInt(r.value));
+
+            const income = 6250;
+            const percentage = Math.round((total / income) * 100);
+
+            document.querySelector('h2.font-numeric-display').textContent = `R$ ${total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+            document.getElementById('income-percentage').textContent = `${percentage}% da Renda`;
+
+            const progressBar = document.getElementById('global-progress');
+            progressBar.style.width = `${percentage}%`;
+
+            if (percentage > 90) {
+                progressBar.classList.remove('bg-primary');
+                progressBar.classList.add('bg-error');
+            } else {
+                progressBar.classList.remove('bg-error');
+                progressBar.classList.add('bg-primary');
+            }
+        }
+
+        // Initialize total calculation
+        window.onload = calculateTotal;
+    </script>
+
+
+
+
+
+
+
+
+</body>
+
+</html>

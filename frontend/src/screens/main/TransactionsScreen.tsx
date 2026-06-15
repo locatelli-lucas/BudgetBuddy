@@ -1,128 +1,198 @@
-import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, TextInput } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, FlatList, TouchableOpacity, TextInput, ActivityIndicator, RefreshControl } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors } from '../../constants/colors';
 import { TransactionItem } from '../../components/TransactionItem';
+import { usePagination } from '../../hooks/usePagination';
+import { transactionService } from '../../services/transaction.service';
+import { Transaction, TransactionFilter, TransactionType } from '../../types/transaction';
+import { useDebounce } from '../../hooks/useDebounce';
+import { formatSmartDate } from '../../utils/dates';
 
-export function TransactionsScreen() {
+const PAYMENT_LABELS: Record<string, string> = {
+  CREDIT_CARD: 'Cartão de Crédito',
+  DEBIT_CARD: 'Débito',
+  PIX: 'Pix',
+  CASH: 'Dinheiro',
+  TRANSFER: 'Transferência',
+};
+
+export function TransactionsScreen({ navigation }: any) {
   const insets = useSafeAreaInsets();
+  const [searchText, setSearchText] = useState('');
+  const debouncedSearch = useDebounce(searchText, 500);
+
+  const {
+    data: transactions,
+    isLoading,
+    isRefreshing,
+    filters,
+    refresh,
+    loadMore,
+    applyFilters,
+  } = usePagination<Transaction, TransactionFilter>({
+    fetchData: (page, size, f) => transactionService.getTransactions(page, size, f),
+    initialFilters: { type: undefined },
+  });
+
+  // Apply search filter when debounced value updates
+  useEffect(() => {
+    applyFilters({ ...filters, search: debouncedSearch || undefined });
+  }, [debouncedSearch]);
+
+  // Refresh when screen gains focus (e.g. after creating a transaction)
+  useFocusEffect(
+    useCallback(() => {
+      refresh();
+    }, [])
+  );
+
+  const handleTypeSelect = (type: TransactionType | undefined) => {
+    applyFilters({ ...filters, type });
+  };
+
+  // Group transactions by date helper
+  const groupTransactionsByDate = (txs: Transaction[]) => {
+    const groups: { [key: string]: Transaction[] } = {};
+    txs.forEach((tx) => {
+      const dateStr = new Date(tx.date).toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
+      });
+      if (!groups[dateStr]) {
+        groups[dateStr] = [];
+      }
+      groups[dateStr].push(tx);
+    });
+    return Object.keys(groups).map((date) => ({
+      date,
+      data: groups[date],
+    }));
+  };
+
+  const transactionGroups = groupTransactionsByDate(transactions);
+  const activeType = filters?.type;
+  const headerTitle = activeType === 'INCOME' ? 'Receitas' : activeType === 'EXPENSE' ? 'Despesas' : 'Transações';
+  const headerAccent = activeType === 'INCOME' ? 'border-[#22C55E]' : activeType === 'EXPENSE' ? 'border-error' : 'border-transparent';
 
   return (
-    <View className="flex-1 bg-background">
-      {/* Top App Bar & Filters */}
-      <View 
-        className="bg-surface/90 pb-2 z-50 shadow-sm"
-        style={{ paddingTop: insets.top }}
-      >
-        <View className="flex-row justify-between items-center px-5 h-16">
-          <Text className="text-headline-md font-bold text-on-surface">Transações</Text>
-          <TouchableOpacity className="w-10 h-10 items-center justify-center rounded-full">
-            <MaterialIcons name="more-vert" size={24} color={Colors.primary} />
-          </TouchableOpacity>
+    <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
+      {/* Search Header */}
+      <View className={`bg-surface/90 pb-2 z-50 border-b-2 ${headerAccent}`}>
+        <View className="flex-row justify-between items-center px-5 h-14">
+          <Text className="text-headline-md font-bold text-on-surface">{headerTitle}</Text>
+          <View className="w-10" />
         </View>
 
-        {/* Search Bar */}
+        {/* Search Input */}
         <View className="px-5 pb-2">
-          <View className="flex-row items-center bg-surface-variant h-12 rounded-xl px-4 border border-transparent">
+          <View className="flex-row items-center bg-[#1E293B] h-12 rounded-xl px-4 border border-transparent">
             <MaterialIcons name="search" size={20} color={Colors.outline} style={{ marginRight: 8 }} />
             <TextInput 
               placeholder="Buscar transação..."
               placeholderTextColor={Colors.outline}
               className="flex-1 text-on-surface text-body-md"
+              value={searchText}
+              onChangeText={setSearchText}
             />
           </View>
         </View>
 
-        {/* Filter Chips */}
-        <ScrollView 
-          horizontal 
-          showsHorizontalScrollIndicator={false}
-          className="px-5 py-2"
-          contentContainerStyle={{ paddingRight: 40 }}
-        >
-          <View className="flex-row gap-2">
-            <TouchableOpacity className="h-10 px-4 rounded-full bg-primary-container items-center justify-center">
-              <Text className="text-on-primary-container font-label-md">Todas</Text>
-            </TouchableOpacity>
-            <TouchableOpacity className="h-10 px-4 rounded-full bg-surface-variant items-center justify-center border border-outline-variant/10">
-              <Text className="text-on-surface-variant font-label-md">Receitas</Text>
-            </TouchableOpacity>
-            <TouchableOpacity className="h-10 px-4 rounded-full bg-surface-variant items-center justify-center border border-outline-variant/10">
-              <Text className="text-on-surface-variant font-label-md">Despesas</Text>
-            </TouchableOpacity>
-            <TouchableOpacity className="h-10 px-4 rounded-full bg-surface-variant items-center justify-center border border-outline-variant/10 flex-row gap-1">
-              <Text className="text-on-surface-variant font-label-md">Este mês</Text>
-              <MaterialIcons name="arrow-drop-down" size={16} color={Colors.onSurfaceVariant} />
-            </TouchableOpacity>
-            <TouchableOpacity className="h-10 px-4 rounded-full bg-surface-variant items-center justify-center border border-outline-variant/10">
-              <Text className="text-on-surface-variant font-label-md">Categorias</Text>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
+        {/* Horizontal Chips */}
+        <View className="h-12 justify-center">
+          <FlatList
+            horizontal
+            data={[
+              { label: 'Todas', value: undefined },
+              { label: 'Receitas', value: 'INCOME' },
+              { label: 'Despesas', value: 'EXPENSE' },
+            ]}
+            keyExtractor={(item) => item.label}
+            contentContainerStyle={{ paddingHorizontal: 20 }}
+            showsHorizontalScrollIndicator={false}
+            renderItem={({ item }) => {
+              const active = filters?.type === item.value;
+              return (
+                <TouchableOpacity
+                  onPress={() => handleTypeSelect(item.value as any)}
+                  className={`h-10 px-4 rounded-full items-center justify-center mr-2 border ${
+                    active 
+                      ? 'bg-primary-container border-transparent' 
+                      : 'bg-[#1E293B] border-outline-variant/10'
+                  }`}
+                >
+                  <Text className={active ? 'text-on-primary-container font-label-md' : 'text-on-surface-variant font-label-md'}>
+                    {item.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            }}
+          />
+        </View>
       </View>
 
-      {/* Main Content */}
-      <ScrollView 
-        className="flex-1 px-5 pt-4"
-        contentContainerStyle={{ paddingBottom: 100 }}
-        showsVerticalScrollIndicator={false}
+      {/* Main List */}
+      <FlatList
+        data={transactionGroups}
+        keyExtractor={(item) => item.date}
+        contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 120, paddingTop: 10 }}
+        refreshControl={
+          <RefreshControl refreshing={isRefreshing} onRefresh={refresh} tintColor={Colors.primary} />
+        }
+        onEndReached={loadMore}
+        onEndReachedThreshold={0.2}
+        ListEmptyComponent={
+          !isLoading ? (
+            <View className="flex-1 py-10 items-center">
+              <Text className="text-on-surface-variant text-body-md">Nenhuma transação encontrada</Text>
+            </View>
+          ) : null
+        }
+        ListFooterComponent={
+          isLoading ? (
+            <View className="py-4">
+              <ActivityIndicator size="small" color={Colors.primary} />
+            </View>
+          ) : null
+        }
+        renderItem={({ item }) => (
+          <View className="mb-6">
+            <Text className="text-label-md text-on-surface-variant uppercase tracking-wider mb-2 ml-1">
+              {item.date}
+            </Text>
+            <View className="bg-[#1E293B] rounded-xl p-2 shadow-md">
+              {item.data.map((tx, idx) => (
+                <View key={tx.id}>
+                  <TransactionItem
+                    id={tx.id}
+                    title={tx.description}
+                    subtitle={`${tx.category?.name || 'Outros'} • ${PAYMENT_LABELS[tx.paymentMethod] || tx.paymentMethod}`}
+                    amount={tx.amount}
+                    type={tx.type}
+                    icon={(tx.category?.icon || 'help-outline') as any}
+                    onPress={() => {}}
+                  />
+                  {idx < item.data.length - 1 && (
+                    <View className="h-[1px] bg-outline-variant/20 mx-3 my-1" />
+                  )}
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
+      />
+
+      <TouchableOpacity
+        activeOpacity={0.8}
+        onPress={() => navigation.navigate('NewTransaction', { defaultType: activeType })}
+        className="absolute bottom-6 right-6 px-6 h-14 bg-primary rounded-2xl flex-row items-center justify-center shadow-lg z-50 gap-2"
       >
-        {/* Group: Hoje */}
-        <View className="mb-6">
-          <Text className="text-label-md text-on-surface-variant uppercase tracking-wider mb-2 ml-1">Hoje</Text>
-          <View className="bg-surface-variant rounded-xl p-2 shadow-sm">
-            <TransactionItem 
-              id="1"
-              title="Uber"
-              subtitle="Transporte • Cartão de Crédito"
-              amount={24.90}
-              type="EXPENSE"
-              icon="directions-car"
-            />
-          </View>
-        </View>
-
-        {/* Group: Ontem */}
-        <View className="mb-6">
-          <Text className="text-label-md text-on-surface-variant uppercase tracking-wider mb-2 ml-1">Ontem</Text>
-          <View className="bg-surface-variant rounded-xl p-2 shadow-sm">
-            <TransactionItem 
-              id="2"
-              title="iFood"
-              subtitle="Alimentação • Pix"
-              amount={82.00}
-              type="EXPENSE"
-              icon="restaurant"
-            />
-            <View className="h-[1px] bg-outline-variant/20 mx-3 my-1" />
-            <TransactionItem 
-              id="3"
-              title="Farmácia"
-              subtitle="Saúde • Dinheiro"
-              amount={45.50}
-              type="EXPENSE"
-              icon="local-hospital"
-            />
-          </View>
-        </View>
-
-        {/* Group: 15 de Maio */}
-        <View className="mb-6">
-          <Text className="text-label-md text-on-surface-variant uppercase tracking-wider mb-2 ml-1">15 de Maio</Text>
-          <View className="bg-surface-variant rounded-xl p-2 shadow-sm">
-            <TransactionItem 
-              id="4"
-              title="Salário"
-              subtitle="Renda • Transferência"
-              amount={12500.00}
-              type="INCOME"
-              icon="work"
-            />
-          </View>
-        </View>
-
-      </ScrollView>
+        <MaterialIcons name="add" size={24} color={Colors.onPrimary} />
+        <Text className="text-on-primary font-bold text-label-md">Nova transação</Text>
+      </TouchableOpacity>
     </View>
   );
 }

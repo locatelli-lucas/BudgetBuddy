@@ -14,6 +14,16 @@ import { useErrorToast } from '../../contexts/ErrorToastContext';
 import { Toast } from '../../components/ui/Toast';
 import { formatCurrencyInput, parseCurrencyInput } from '../../utils/currency';
 
+const MONTHS_DISPLAY = [
+  'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
+  'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro',
+];
+
+function formatDisplayDate(dateStr: string): string {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  return `${String(d).padStart(2, '0')} de ${MONTHS_DISPLAY[m - 1]} de ${y}`;
+}
+
 const PAYMENT_METHODS: { key: PaymentMethod; label: string; icon: keyof typeof MaterialIcons.glyphMap }[] = [
   { key: 'CREDIT_CARD', label: 'Crédito', icon: 'credit-card' },
   { key: 'DEBIT_CARD', label: 'Débito', icon: 'credit-card' },
@@ -176,10 +186,10 @@ export function NewTransactionScreen({ navigation, route }: any) {
           {/* Amount Input */}
           <View className="px-5 mb-6 items-center justify-center">
             <Text className="text-label-md text-on-surface-variant mb-2">Valor</Text>
-            <View className="flex-row items-baseline justify-center">
-              <Text className="text-numeric-display text-on-surface-variant mr-2">R$</Text>
+            <View className="flex-row items-baseline">
+              <Text className="text-numeric-display text-on-surface-variant">R$</Text>
               <TextInput
-                className="text-numeric-display text-on-background text-center w-40"
+                className="text-numeric-display text-on-background text-center w-32"
                 placeholder="0,00"
                 placeholderTextColor={Colors.outline}
                 keyboardType="numeric"
@@ -262,7 +272,7 @@ export function NewTransactionScreen({ navigation, route }: any) {
                 <View className="flex-row items-center">
                   <MaterialIcons name="calendar-today" size={20} color={Colors.outline} style={{ marginRight: 12 }} />
                   <Text className="text-body-md text-on-surface">
-                    {new Date(selectedDate + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
+                    {formatDisplayDate(selectedDate)}
                   </Text>
                 </View>
                 <MaterialIcons name="chevron-right" size={20} color={Colors.onSurfaceVariant} />

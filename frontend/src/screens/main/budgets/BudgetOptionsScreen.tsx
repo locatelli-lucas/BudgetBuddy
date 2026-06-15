@@ -19,20 +19,8 @@ export function BudgetOptionsScreen({ navigation, route }: any) {
     {
       icon: 'history' as const,
       label: 'Ver Histórico',
-      subtitle: 'Visualize meses anteriores',
+      subtitle: 'Visualize meses anteriores desta categoria',
       onPress: () => navigation.navigate('BudgetHistory'),
-    },
-    {
-      icon: 'category' as const,
-      label: 'Gerenciar Categorias',
-      subtitle: 'Adicione ou edite categorias',
-      onPress: () => navigation.navigate('ManageCategories'),
-    },
-    {
-      icon: 'tune' as const,
-      label: 'Redefinir Limites',
-      subtitle: 'Ajuste todos os limites deste mês',
-      onPress: () => navigation.navigate('RedefineLimits'),
     },
   ];
 

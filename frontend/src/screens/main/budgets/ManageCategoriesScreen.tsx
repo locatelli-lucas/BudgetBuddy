@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
-  View, Text, FlatList, TouchableOpacity, Alert, ActivityIndicator, RefreshControl,
+  View, Text, FlatList, TouchableOpacity, Pressable, Alert, ActivityIndicator, RefreshControl,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../../../constants/colors';
 import { transactionService } from '../../../services/transaction.service';
@@ -24,9 +25,11 @@ export function ManageCategoriesScreen({ navigation }: any) {
     }
   }, []);
 
-  useEffect(() => {
-    loadCategories();
-  }, [loadCategories]);
+  useFocusEffect(
+    useCallback(() => {
+      loadCategories();
+    }, [loadCategories])
+  );
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -35,6 +38,7 @@ export function ManageCategoriesScreen({ navigation }: any) {
   }, [loadCategories]);
 
   const handleDelete = (cat: Category) => {
+    console.log('Estou sendo chamado!!!!!')
     if (cat.isDefault) {
       Alert.alert('Erro', 'Categorias padrão não podem ser removidas');
       return;
@@ -84,42 +88,51 @@ export function ManageCategoriesScreen({ navigation }: any) {
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.primary} />
           }
           renderItem={({ item }) => (
-            <TouchableOpacity
-              className="bg-surface rounded-xl p-4 flex-row items-center gap-4 mb-3 border border-outline-variant/10"
-              onPress={() =>
-                navigation.navigate('AddCategory', {
-                  categoryId: item.id,
-                  categoryName: item.name,
-                  categoryIcon: item.icon,
-                  categoryColor: item.color,
-                  categoryType: item.type,
-                })
-              }
-            >
-              <View
-                className="w-10 h-10 rounded-full items-center justify-center"
-                style={{ backgroundColor: item.color ? `${item.color}20` : `${Colors.primary}20` }}
+            <View className="bg-surface rounded-xl flex-row items-center mb-3 border border-outline-variant/10">
+              <TouchableOpacity
+                className="flex-1 flex-row items-center gap-4 p-4"
+                disabled={item.isDefault}
+                onPress={() =>
+                  navigation.navigate('AddCategory', {
+                    categoryId: item.id,
+                    categoryName: item.name,
+                    categoryIcon: item.icon,
+                    categoryColor: item.color,
+                    categoryType: item.type,
+                  })
+                }
               >
-                <MaterialIcons
-                  name={(item.icon || 'help-outline') as any}
-                  size={20}
-                  color={item.color || Colors.primary}
-                />
-              </View>
-              <View className="flex-1">
-                <Text className="text-body-md font-semibold text-on-surface">{item.name}</Text>
-                <Text className="text-label-sm text-on-surface-variant">
-                  {item.type === 'INCOME' ? 'Receita' : item.type === 'EXPENSE' ? 'Despesa' : 'Ambos'}
-                  {item.isDefault ? ' · Padrão' : ''}
-                </Text>
-              </View>
+                <View
+                  className="w-10 h-10 rounded-full items-center justify-center"
+                  style={{ backgroundColor: item.color ? `${item.color}20` : `${Colors.primary}20` }}
+                >
+                  <MaterialIcons
+                    name={(item.icon || 'help-outline') as any}
+                    size={20}
+                    color={item.color || Colors.primary}
+                  />
+                </View>
+                <View className="flex-1">
+                  <Text className="text-body-md font-semibold text-on-surface">{item.name}</Text>
+                  <Text className="text-label-sm text-on-surface-variant">
+                    {item.type === 'INCOME' ? 'Receita' : item.type === 'EXPENSE' ? 'Despesa' : 'Ambos'}
+                    {item.isDefault ? ' · Padrão' : ''}
+                  </Text>
+                </View>
+                {!item.isDefault && (
+                  <MaterialIcons name="chevron-right" size={24} color={Colors.onSurfaceVariant} />
+                )}
+              </TouchableOpacity>
               {!item.isDefault && (
-                <TouchableOpacity onPress={() => handleDelete(item)} className="p-2">
+                <Pressable
+                  onPress={() => handleDelete(item)}
+                  className="w-12 items-center justify-center"
+                  style={{ alignSelf: 'stretch' }}
+                >
                   <MaterialIcons name="delete" size={20} color={Colors.error} />
-                </TouchableOpacity>
+                </Pressable>
               )}
-              <MaterialIcons name="chevron-right" size={24} color={Colors.onSurfaceVariant} />
-            </TouchableOpacity>
+            </View>
           )}
           ListEmptyComponent={
             <View className="py-10 items-center">

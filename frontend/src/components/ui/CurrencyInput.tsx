@@ -16,14 +16,14 @@ export function CurrencyInput({
   large = false,
 }: CurrencyInputProps) {
   return (
-    <View className="flex-row items-center justify-center">
+    <View className="flex-row items-center">
       <Text
-        className={`${large ? 'text-numeric-display' : 'text-headline-md'} text-on-surface-variant mr-2`}
+        className={`${large ? 'text-numeric-display' : 'text-headline-md'} text-on-surface-variant`}
       >
         R$
       </Text>
       <TextInput
-        className={`${large ? 'text-numeric-display' : 'text-headline-md'} text-on-background text-center`}
+        className={`${large ? 'text-numeric-display' : 'text-headline-md'} text-on-background text-center w-32`}
         placeholder={placeholder}
         placeholderTextColor={Colors.outline}
         keyboardType="decimal-pad"

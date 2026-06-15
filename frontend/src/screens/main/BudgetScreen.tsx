@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl, Modal, Pressable } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -8,6 +8,11 @@ import { CategoryProgress } from '../../components/CategoryProgress';
 import { budgetService } from '../../services/budget.service';
 import { BudgetStatusResponse, ForecastResponse } from '../../types/budget';
 
+const MONTHS = [
+  'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
+  'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro',
+];
+
 export function BudgetScreen({ navigation }: any) {
   const insets = useSafeAreaInsets();
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -15,6 +20,7 @@ export function BudgetScreen({ navigation }: any) {
   const [refreshing, setRefreshing] = useState(false);
   const [budgets, setBudgets] = useState<BudgetStatusResponse[]>([]);
   const [forecast, setForecast] = useState<ForecastResponse | null>(null);
+  const [menuVisible, setMenuVisible] = useState(false);
 
   const month = currentDate.getMonth() + 1;
   const year = currentDate.getFullYear();
@@ -64,11 +70,14 @@ export function BudgetScreen({ navigation }: any) {
   };
 
   const formatMonthName = () => {
-    return currentDate.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+    return `${MONTHS[currentDate.getMonth()]} de ${currentDate.getFullYear()}`;
   };
 
   const formatCurrency = (val: number) => {
-    return `R$ ${val.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const abs = Math.abs(val);
+    const parts = abs.toFixed(2).split('.');
+    const intPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    return `R$ ${intPart},${parts[1]}`;
   };
 
   return (
@@ -84,11 +93,45 @@ export function BudgetScreen({ navigation }: any) {
         </View>
         <TouchableOpacity 
           className="w-10 h-10 items-center justify-center rounded-full"
-          onPress={() => navigation.navigate('BudgetHistory')}
+          onPress={() => setMenuVisible(true)}
         >
-          <MaterialIcons name="history" size={24} color={Colors.primary} />
+          <MaterialIcons name="more-vert" size={24} color={Colors.primary} />
         </TouchableOpacity>
       </View>
+
+      {/* ─── Overflow Menu Modal ────────────────────────────────────── */}
+      <Modal
+        visible={menuVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setMenuVisible(false)}
+      >
+        <Pressable className="flex-1 bg-black/50" onPress={() => setMenuVisible(false)}>
+          <View className="absolute top-0 right-0 mt-[100px] mr-4 w-56 bg-surface-container rounded-xl border border-outline-variant/30 shadow-lg overflow-hidden">
+            <TouchableOpacity
+              className="flex-row items-center gap-3 px-4 py-3 border-b border-outline-variant/20"
+              onPress={() => { setMenuVisible(false); navigation.navigate('RedefineLimits'); }}
+            >
+              <MaterialIcons name="tune" size={20} color={Colors.onSurface} />
+              <Text className="text-body-md text-on-surface">Redefinir limites</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              className="flex-row items-center gap-3 px-4 py-3 border-b border-outline-variant/20"
+              onPress={() => { setMenuVisible(false); navigation.navigate('ManageCategories'); }}
+            >
+              <MaterialIcons name="category" size={20} color={Colors.onSurface} />
+              <Text className="text-body-md text-on-surface">Gerenciar categorias</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              className="flex-row items-center gap-3 px-4 py-3"
+              onPress={() => { setMenuVisible(false); navigation.navigate('BudgetHistory'); }}
+            >
+              <MaterialIcons name="history" size={20} color={Colors.onSurface} />
+              <Text className="text-body-md text-on-surface">Histórico de orçamentos</Text>
+            </TouchableOpacity>
+          </View>
+        </Pressable>
+      </Modal>
 
       {loading ? (
         <View className="flex-1 justify-center items-center">

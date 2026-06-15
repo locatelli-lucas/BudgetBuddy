@@ -74,9 +74,6 @@ export function IconGalleryScreen({ navigation, route }: any) {
             }}
           >
             <MaterialIcons name={item as any} size={28} color={Colors.primary} />
-            <Text className="text-label-xs text-on-surface-variant mt-1 text-center" numberOfLines={1}>
-              {item.replace(/-/g, ' ')}
-            </Text>
           </TouchableOpacity>
         )}
       />

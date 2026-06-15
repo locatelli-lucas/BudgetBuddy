@@ -181,10 +181,10 @@ export function CreateBudgetScreen({ navigation, route }: any) {
           {/* Amount Input */}
           <View className="items-center mb-8">
             <Text className="text-label-md text-on-surface-variant mb-2">Limite Mensal</Text>
-            <View className="flex-row items-baseline justify-center">
-              <Text className="text-numeric-display text-on-surface-variant mr-2">R$</Text>
+            <View className="flex-row items-baseline">
+              <Text className="text-numeric-display text-on-surface-variant">R$</Text>
               <TextInput
-                className="text-numeric-display text-on-background text-center w-40"
+                className="text-numeric-display text-on-background text-center w-32"
                 placeholder="0,00"
                 placeholderTextColor={Colors.outline}
                 keyboardType="numeric"
@@ -205,8 +205,7 @@ export function CreateBudgetScreen({ navigation, route }: any) {
             {fetchingCategories ? (
               <ActivityIndicator color={Colors.primary} className="my-4" />
             ) : (
-              <View className="flex-row flex-wrap"
-                style={{ columnGap: 21.5, rowGap: 15 }}>
+              <View className="flex-row flex-wrap justify-between">
                 {categories.map((cat) => {
                   const isSelected = selectedCategoryId === cat.id;
                   const disabled = !!budgetId;
@@ -217,7 +216,7 @@ export function CreateBudgetScreen({ navigation, route }: any) {
                         ? 'bg-primary-container border-primary/20'
                         : 'bg-surface-container border-transparent'
                         } ${disabled ? 'opacity-60' : ''}`}
-                      style={{ width: '30%' }}
+                      style={{ width: '30%', marginBottom: 12 }}
                       disabled={disabled}
                       onPress={() => setSelectedCategoryId(cat.id)}
                     >
@@ -288,7 +287,13 @@ export function CreateBudgetScreen({ navigation, route }: any) {
             {/* Personalizar Limites */}
             <TouchableOpacity
               className="flex-row items-center justify-between p-4 bg-surface-container-low rounded-xl border border-outline-variant/30"
-              onPress={() => navigation.navigate('RedefineLimits')}
+              onPress={() => {
+                const selectedCat = categories.find((c) => c.id === selectedCategoryId);
+                navigation.navigate('DefineLimit', {
+                  categoryId: selectedCategoryId,
+                  categoryName: selectedCat?.name || '',
+                });
+              }}
             >
               <View className="flex-row items-center gap-4">
                 <View className="w-10 h-10 items-center justify-center rounded-lg bg-secondary-container">

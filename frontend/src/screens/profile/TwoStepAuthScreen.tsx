@@ -75,7 +75,7 @@ export function TwoStepAuthScreen({ navigation }: any) {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-background" edges={['top']} style={{ flex: 1, backgroundColor: Colors.background }}>
       <Toast visible={toastVisible} message="Operação realizada com sucesso!" type="success" onHide={() => setToastVisible(false)} />
       <View className="flex-row items-center justify-between px-5 h-14">
         <TouchableOpacity onPress={() => navigation.goBack()} className="p-2 -ml-2 rounded-full">

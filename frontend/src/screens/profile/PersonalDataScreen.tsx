@@ -42,7 +42,7 @@ export function PersonalDataScreen({ navigation }: any) {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-background" edges={['top']} style={{ flex: 1, backgroundColor: Colors.background }}>
       <Toast
         visible={toastVisible}
         message="Dados atualizados com sucesso!"

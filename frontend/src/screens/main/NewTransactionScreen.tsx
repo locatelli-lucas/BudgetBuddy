@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, ScrollView,
-  ActivityIndicator, KeyboardAvoidingView, Platform
+  ActivityIndicator, KeyboardAvoidingView, Platform,
+  LayoutAnimation, UIManager
 } from 'react-native';
+
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 import { MaterialIcons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../../constants/colors';
@@ -133,7 +138,7 @@ export function NewTransactionScreen({ navigation, route }: any) {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-background" edges={['top']} style={{ flex: 1, backgroundColor: Colors.background }}>
       <Toast
         visible={toastVisible}
         message="Transação salva com sucesso!"
@@ -145,7 +150,10 @@ export function NewTransactionScreen({ navigation, route }: any) {
         className="flex-1"
       >
         {/* TopAppBar */}
-        <View className="flex-row items-center justify-between px-5 h-14">
+        <View
+          className="flex-row items-center justify-between px-5 bg-surface z-50 border-b border-outline-variant/10"
+          style={{ paddingTop: 8, paddingBottom: 16 }}
+        >
           <TouchableOpacity
             onPress={() => navigation.goBack()}
             className="p-2 -ml-2 rounded-full"
@@ -186,10 +194,10 @@ export function NewTransactionScreen({ navigation, route }: any) {
           {/* Amount Input */}
           <View className="px-5 mb-6 items-center justify-center">
             <Text className="text-label-md text-on-surface-variant mb-2">Valor</Text>
-            <View className="flex-row items-baseline">
-              <Text className="text-numeric-display text-on-surface-variant">R$</Text>
+            <View className="flex-row items-center justify-center">
+              <Text className="text-headline-lg font-bold text-on-surface-variant mr-2">R$</Text>
               <TextInput
-                className="text-numeric-display text-on-background text-center w-32"
+                className="text-numeric-display text-on-background min-w-[150px]"
                 placeholder="0,00"
                 placeholderTextColor={Colors.outline}
                 keyboardType="numeric"
@@ -315,11 +323,14 @@ export function NewTransactionScreen({ navigation, route }: any) {
                 <Text className="text-body-md text-on-surface mr-2">Pagamento recorrente</Text>
               </View>
               <TouchableOpacity
-                className={`w-12 h-6 rounded-full relative ${isRecurring ? 'bg-primary-container' : 'bg-surface-container'}`}
-                onPress={() => setIsRecurring(!isRecurring)}
+                className={`w-12 h-6 rounded-full px-1 justify-center ${isRecurring ? 'bg-primary-container items-end' : 'bg-surface-container items-start'}`}
+                onPress={() => {
+                  LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+                  setIsRecurring(!isRecurring);
+                }}
+                activeOpacity={0.8}
               >
-                <View className={`absolute top-1 w-4 h-4 rounded-full transition-transform ${isRecurring ? 'bg-on-primary-container right-1' : 'bg-on-surface-variant left-1'
-                  }`} />
+                <View className={`w-4 h-4 rounded-full ${isRecurring ? 'bg-on-primary-container' : 'bg-on-surface-variant'}`} />
               </TouchableOpacity>
             </View>
 

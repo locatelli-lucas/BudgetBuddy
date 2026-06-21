@@ -79,10 +79,13 @@ export function TransactionsScreen({ navigation }: any) {
   const headerAccent = activeType === 'INCOME' ? 'border-[#22C55E]' : activeType === 'EXPENSE' ? 'border-error' : 'border-transparent';
 
   return (
-    <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
+    <View className="flex-1 bg-background" style={{ flex: 1, backgroundColor: Colors.background }}>
       {/* Search Header */}
-      <View className={`bg-surface/90 pb-2 z-50 border-b-2 ${headerAccent}`}>
-        <View className="flex-row justify-between items-center px-5 h-14">
+      <View
+        className={`bg-surface/90 pb-4 z-50 border-b-2 ${headerAccent}`}
+        style={{ paddingTop: insets.top + 8 }}
+      >
+        <View className="flex-row justify-between items-center px-5 h-14 mb-2">
           <Text className="text-headline-md font-bold text-on-surface">{headerTitle}</Text>
           <View className="w-10" />
         </View>

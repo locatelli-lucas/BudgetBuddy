@@ -7,6 +7,7 @@ import { ErrorToastProvider } from './src/contexts/ErrorToastContext';
 import { RootNavigator } from './src/navigation/RootNavigator';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useTheme } from './src/contexts/ThemeContext';
+import { Colors } from './src/constants/colors';
 
 function ThemedStatusBar() {
   const { theme } = useTheme();
@@ -15,8 +16,8 @@ function ThemedStatusBar() {
 
 export default function App() {
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaProvider>
+    <GestureHandlerRootView style={{ flex: 1, backgroundColor: Colors.background }}>
+      <SafeAreaProvider style={{ flex: 1 }}>
         <ThemeProvider>
           <ErrorToastProvider>
             <AuthProvider>

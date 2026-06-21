@@ -2,9 +2,15 @@ import React, { useState, useEffect, useMemo } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, ScrollView,
   ActivityIndicator, KeyboardAvoidingView, Platform,
+  LayoutAnimation, UIManager,
 } from 'react-native';
+
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 import { MaterialIcons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Colors } from '../../../constants/colors';
 import { transactionService } from '../../../services/transaction.service';
 import { budgetService } from '../../../services/budget.service';
@@ -140,7 +146,7 @@ export function CreateBudgetScreen({ navigation, route }: any) {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-background" edges={['top']} style={{ flex: 1 }}>
       <Toast
         visible={toastVisible}
         message="Orçamento salvo com sucesso!"
@@ -152,7 +158,10 @@ export function CreateBudgetScreen({ navigation, route }: any) {
         className="flex-1"
       >
         {/* Header */}
-        <View className="flex-row items-center justify-between px-5 h-16">
+        <View
+          className="flex-row items-center justify-between px-5 bg-surface z-50 border-b border-outline-variant/10"
+          style={{ paddingTop: 8, paddingBottom: 16 }}
+        >
           <View className="flex-row items-center gap-4">
             <TouchableOpacity
               onPress={() => navigation.goBack()}
@@ -181,10 +190,10 @@ export function CreateBudgetScreen({ navigation, route }: any) {
           {/* Amount Input */}
           <View className="items-center mb-8">
             <Text className="text-label-md text-on-surface-variant mb-2">Limite Mensal</Text>
-            <View className="flex-row items-baseline">
-              <Text className="text-numeric-display text-on-surface-variant">R$</Text>
+            <View className="flex-row items-center justify-center">
+              <Text className="text-headline-lg font-bold text-on-surface-variant mr-2">R$</Text>
               <TextInput
-                className="text-numeric-display text-on-background text-center w-32"
+                className="text-numeric-display text-on-background text-center min-w-[150px]"
                 placeholder="0,00"
                 placeholderTextColor={Colors.outline}
                 keyboardType="numeric"
@@ -276,41 +285,24 @@ export function CreateBudgetScreen({ navigation, route }: any) {
                 </View>
               </View>
               <TouchableOpacity
-                className={`w-12 h-6 rounded-full relative ${notifyAt80 ? 'bg-primary-container' : 'bg-surface-container-highest'}`}
-                onPress={() => setNotifyAt80(!notifyAt80)}
+                className={`w-12 h-6 rounded-full px-1 justify-center ${notifyAt80 ? 'bg-primary-container items-end' : 'bg-surface-container-highest items-start'}`}
+                onPress={() => {
+                  LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+                  setNotifyAt80(!notifyAt80);
+                }}
+                activeOpacity={0.8}
               >
-                <View className={`absolute top-1 w-4 h-4 rounded-full ${notifyAt80 ? 'bg-on-primary-container right-1' : 'bg-on-surface-variant left-1'
-                  }`} />
+                <View className={`w-4 h-4 rounded-full ${notifyAt80 ? 'bg-on-primary-container' : 'bg-on-surface-variant'}`} />
               </TouchableOpacity>
             </View>
-
-            {/* Personalizar Limites */}
-            <TouchableOpacity
-              className="flex-row items-center justify-between p-4 bg-surface-container-low rounded-xl border border-outline-variant/30"
-              onPress={() => {
-                const selectedCat = categories.find((c) => c.id === selectedCategoryId);
-                navigation.navigate('DefineLimit', {
-                  categoryId: selectedCategoryId,
-                  categoryName: selectedCat?.name || '',
-                });
-              }}
-            >
-              <View className="flex-row items-center gap-4">
-                <View className="w-10 h-10 items-center justify-center rounded-lg bg-secondary-container">
-                  <MaterialIcons name="tune" size={20} color={Colors.onSecondaryContainer} />
-                </View>
-                <View>
-                  <Text className="text-label-md text-on-surface">Personalizar Limites</Text>
-                  <Text className="text-body-md text-on-surface-variant">Ajustar faixas de aviso e controle</Text>
-                </View>
-              </View>
-              <MaterialIcons name="chevron-right" size={24} color={Colors.outline} />
-            </TouchableOpacity>
           </View>
 
           {/* Inspirational Card */}
           <View className="relative h-40 overflow-hidden rounded-2xl bg-surface-container-low p-6 border border-outline-variant/20 mb-4">
-            <View className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full" style={{ marginRight: -64, marginTop: -64 }} />
+            <LinearGradient
+              colors={[`${Colors.primary}20`, 'rgba(0,0,0,0)']}
+              style={{ position: 'absolute', right: -50, top: -50, width: 180, height: 180, borderRadius: 90 }}
+            />
             <View className="flex-1 justify-center gap-2">
               <Text className="text-headline-md text-on-surface leading-tight">Mantenha o controle</Text>
               <Text className="text-body-md text-on-surface-variant" style={{ maxWidth: 200 }}>

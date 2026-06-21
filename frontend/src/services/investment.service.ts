@@ -5,6 +5,8 @@ import {
   Investment,
   InvestmentRequest,
   InvestmentDashboard,
+  PortfolioPerformancePoint,
+  AssetSearchResult,
   Institution,
   InstitutionRequest,
 } from '../types/investment';
@@ -39,6 +41,19 @@ export const investmentService = {
     return response.data.data;
   },
 
+  getPortfolioSummary: async (): Promise<InvestmentDashboard> => {
+    const response = await api.get<ApiResponse<InvestmentDashboard>>('/api/v1/portfolio/summary');
+    return response.data.data;
+  },
+
+  getPortfolioPerformance: async (period: string = '1M'): Promise<PortfolioPerformancePoint[]> => {
+    const response = await api.get<ApiResponse<PortfolioPerformancePoint[]>>(
+      '/api/v1/portfolio/performance',
+      { params: { period } }
+    );
+    return response.data.data;
+  },
+
   // Institutions (User approved Option A: new backend entity)
   getInstitutions: async (): Promise<Institution[]> => {
     const response = await api.get<ApiResponse<Institution[]>>('/api/v1/institutions');
@@ -52,5 +67,26 @@ export const investmentService = {
 
   deleteInstitution: async (id: string): Promise<void> => {
     await api.delete(`/api/v1/institutions/${id}`);
+  },
+
+  // Market data
+  searchMarketAssets: async (query: string): Promise<AssetSearchResult[]> => {
+    const response = await api.get<ApiResponse<AssetSearchResult[]>>('/api/v1/market/search', {
+      params: { q: query },
+    });
+    return response.data.data;
+  },
+
+  getMarketQuote: async (symbol: string): Promise<{
+    symbol: string;
+    name: string;
+    price: number;
+    change: number;
+    changePercent: number;
+    previousClose: number;
+    currency: string;
+  }> => {
+    const response = await api.get<ApiResponse<any>>(`/api/v1/market/quote/${symbol}`);
+    return response.data.data;
   },
 };

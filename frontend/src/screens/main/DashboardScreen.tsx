@@ -7,6 +7,7 @@ import { Colors } from '../../constants/colors';
 import { FloatingActionButton } from '../../components/FloatingActionButton';
 import { TransactionItem } from '../../components/TransactionItem';
 import { BarChart, LineChart, PieChart } from 'react-native-gifted-charts';
+import { LinearGradient } from 'expo-linear-gradient';
 import { ExportReportSheet } from './ExportReportSheet';
 import { useAuth } from '../../contexts/AuthContext';
 import { transactionService } from '../../services/transaction.service';
@@ -131,11 +132,11 @@ export function DashboardScreen({ navigation }: any) {
   };
 
   return (
-    <View className="flex-1 bg-background">
+    <View className="flex-1 bg-background" style={{ flex: 1, backgroundColor: Colors.background }}>
       {/* Top App Bar */}
       <View
-        className="flex-row justify-between items-center px-5 h-20 bg-surface z-50"
-        style={{ paddingTop: insets.top }}
+        className="flex-row justify-between items-center px-5 bg-surface z-50 border-b border-outline-variant/10"
+        style={{ paddingTop: insets.top + 8, paddingBottom: 16 }}
       >
         <View className="flex-row items-center gap-3">
           <View className="w-10 h-10 rounded-full overflow-hidden bg-surface-container-high border border-outline-variant/30 mr-1">
@@ -187,7 +188,10 @@ export function DashboardScreen({ navigation }: any) {
         )}
         {/* Main Balance Card */}
         <View className="bg-surface-variant rounded-xl p-6 shadow-md mb-6 relative overflow-hidden">
-          <View className="absolute -right-10 -top-10 w-40 h-40 bg-primary/10 rounded-full" />
+          <LinearGradient
+            colors={[`${Colors.primary}20`, 'rgba(0,0,0,0)']}
+            style={{ position: 'absolute', right: -40, top: -40, width: 220, height: 220, borderRadius: 110 }}
+          />
           <Text className="text-label-md text-on-surface-variant">Saldo atual</Text>
           <Text className="text-numeric-display font-medium text-on-surface mt-1">
             {formatCurrency(summary?.netBalance || 0)}

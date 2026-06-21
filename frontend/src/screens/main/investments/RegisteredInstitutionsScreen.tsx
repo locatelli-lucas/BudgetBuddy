@@ -66,7 +66,7 @@ export function RegisteredInstitutionsScreen({ navigation }: any) {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-background" edges={['top']} style={{ flex: 1, backgroundColor: Colors.background }}>
       {/* Header */}
       <View className="flex-row items-center justify-between px-5 h-14 border-b border-outline-variant/20">
         <View className="flex-row items-center gap-4">

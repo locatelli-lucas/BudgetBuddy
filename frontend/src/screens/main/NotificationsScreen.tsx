@@ -82,7 +82,7 @@ export function NotificationsScreen({ navigation }: any) {
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-background" edges={['top']} style={{ flex: 1, backgroundColor: Colors.background }}>
       <View className="flex-row items-center justify-between px-5 h-14">
         <View className="flex-row items-center gap-4">
           <TouchableOpacity onPress={() => navigation.goBack()} className="p-2 -ml-2 rounded-full">

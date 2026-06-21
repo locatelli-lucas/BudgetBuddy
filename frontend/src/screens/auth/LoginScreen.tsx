@@ -4,6 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useErrorToast } from '../../contexts/ErrorToastContext';
 import { MaterialIcons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Colors } from '../../constants/colors';
 
 export function LoginScreen({ navigation }: any) {
   const { signIn } = useAuth();
@@ -29,10 +30,11 @@ export function LoginScreen({ navigation }: any) {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
+    <SafeAreaView className="flex-1 bg-background" style={{ flex: 1, backgroundColor: Colors.background }}>
       <KeyboardAvoidingView 
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className="flex-1 px-6 justify-center"
+        style={{ flex: 1 }}
       >
         <View className="items-center mb-10">
           <View className="w-20 h-20 bg-primary/20 rounded-full items-center justify-center mb-6">
@@ -44,7 +46,7 @@ export function LoginScreen({ navigation }: any) {
           </Text>
         </View>
         
-        <View className="space-y-4 mb-8">
+        <View className="gap-4 mb-8">
           <View className="bg-surface-container h-14 rounded-xl flex-row items-center px-4 border border-transparent focus-within:border-primary-container">
             <MaterialIcons name="email" size={20} color="#8d90a0" className="mr-3" />
             <TextInput

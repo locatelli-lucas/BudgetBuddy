@@ -34,11 +34,53 @@ export function parseCurrencyInput(formatted: string): number {
 }
 
 /**
- * Formats a number to Brazilian currency display: 1000 → "1.000,00"
+ * Formats a number to Brazilian currency display: 1000 → "R$ 1.000,00"
  */
 export function formatCurrency(value: number): string {
-  const fixed = value.toFixed(2);
+  const abs = Math.abs(value);
+  const fixed = abs.toFixed(2);
   const [reais, cents] = fixed.split('.');
   const withSeparators = reais.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-  return `R$ ${withSeparators},${cents}`;
+  const formatted = `R$ ${withSeparators},${cents}`;
+  return value < 0 ? `- ${formatted}` : formatted;
+}
+
+const MONTHS = [
+  'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
+  'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro',
+];
+
+const MONTHS_SHORT = [
+  'jan', 'fev', 'mar', 'abr', 'mai', 'jun',
+  'jul', 'ago', 'set', 'out', 'nov', 'dez',
+];
+
+/**
+ * Formats an ISO date string (YYYY-MM-DD) to Brazilian display: "15 de junho de 2026"
+ */
+export function formatDateLong(dateStr: string): string {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  return `${String(d).padStart(2, '0')} de ${MONTHS[m - 1]} de ${y}`;
+}
+
+/**
+ * Formats an ISO date string to short Brazilian: "15/06/2026"
+ */
+export function formatDateShort(dateStr: string): string {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  return `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}/${y}`;
+}
+
+/**
+ * Formats a Date object to "mes/ano": "jan/26"
+ */
+export function formatMonthShort(date: Date): string {
+  return `${MONTHS_SHORT[date.getMonth()]}/${String(date.getFullYear()).slice(2)}`;
+}
+
+/**
+ * Formats a Date object to "mês de ano": "junho de 2026"
+ */
+export function formatMonthLong(date: Date): string {
+  return `${MONTHS[date.getMonth()]} de ${date.getFullYear()}`;
 }

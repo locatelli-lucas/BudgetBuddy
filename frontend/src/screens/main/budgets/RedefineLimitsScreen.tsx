@@ -1,36 +1,82 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import {
   View, Text, TextInput, ScrollView, TouchableOpacity,
-  ActivityIndicator, RefreshControl,
+  ActivityIndicator, RefreshControl, Image, PanResponder, LayoutChangeEvent,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Colors } from '../../../constants/colors';
 import { budgetService } from '../../../services/budget.service';
-import { BudgetStatusResponse } from '../../../types/budget';
+import { useAuth } from '../../../contexts/AuthContext';
+import { budgetService as service } from '../../../services/budget.service';
 import { useErrorToast } from '../../../contexts/ErrorToastContext';
 import { Toast } from '../../../components/ui/Toast';
 import { formatCurrencyInput, parseCurrencyInput } from '../../../utils/currency';
 
-const MONTHS = [
-  'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
-  'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro',
-];
+// ─── Slider Component ────────────────────────────────────────────────────────
 
-type BudgetRow = BudgetStatusResponse & {
-  newLimitRaw: string;
-  parsedLimit: number;
-};
-
-function formatMoney(value: number): string {
-  const abs = Math.abs(value);
-  const parts = abs.toFixed(2).split('.');
-  const intPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-  return `R$ ${intPart},${parts[1]}`;
+interface BudgetSliderProps {
+  value: number;
+  max: number;
+  onChange: (value: number) => void;
+  color: string;
 }
 
+function BudgetSlider({ value, max, onChange, color }: BudgetSliderProps) {
+  const trackWidth = useRef(0);
+  const clamp = (v: number) => Math.min(max, Math.max(0, v));
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: () => true,
+      onPanResponderGrant: (evt) => {
+        const x = evt.nativeEvent.locationX;
+        const newRatio = Math.min(1, Math.max(0, x / (trackWidth.current || 1)));
+        onChange(clamp(Math.round(newRatio * max)));
+      },
+      onPanResponderMove: (evt) => {
+        const x = evt.nativeEvent.locationX;
+        const newRatio = Math.min(1, Math.max(0, x / (trackWidth.current || 1)));
+        onChange(clamp(Math.round(newRatio * max)));
+      },
+    }),
+  ).current;
+
+  const ratio = max > 0 ? value / max : 0;
+  const thumbPos = ratio * 100;
+
+  return (
+    <View className="relative h-10 justify-center">
+      <View
+        onLayout={(e) => (trackWidth.current = e.nativeEvent.layout.width)}
+        className="w-full h-1.5 bg-surface-container-highest rounded-full"
+        {...panResponder.panHandlers}
+      >
+        <View
+          className="h-full rounded-full"
+          style={{ width: `${thumbPos}%`, backgroundColor: color }}
+        />
+      </View>
+      <View
+        className="absolute w-5 h-5 rounded-full bg-white shadow-md border-2"
+        style={{
+          left: `${thumbPos}%`,
+          transform: [{ translateX: -10 }],
+          borderColor: color,
+        }}
+        pointerEvents="none"
+      />
+    </View>
+  );
+}
+
+// ─── Main Screen ──────────────────────────────────────────────────────────────
+
 export function RedefineLimitsScreen({ navigation }: any) {
-  const [budgets, setBudgets] = useState<BudgetRow[]>([]);
+  const { user } = useAuth();
+  const [budgets, setBudgets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -41,22 +87,24 @@ export function RedefineLimitsScreen({ navigation }: any) {
   const currentMonth = now.getMonth() + 1;
   const currentYear = now.getFullYear();
 
-  // ─── Load data ────────────────────────────────────────────────────────
+  // Mock estimated income for the progress bar
+  const estimatedIncome = 6250.0;
+
   const loadBudgets = useCallback(async () => {
     try {
       const data = await budgetService.getBudgetStatus(currentMonth, currentYear);
       setBudgets(
         data.map((b) => {
-          const rawLimit = b.limit > 0 ? formatCurrencyInput(String(Math.round(b.limit * 100))) : '';
+          const rawLimit = b.limit > 0 ? String(Math.round(b.limit)) : '0';
           return {
             ...b,
             newLimitRaw: rawLimit,
-            parsedLimit: b.limit,
+            parsedLimit: b.limit || 0,
           };
         }),
       );
     } catch (err) {
-      console.error('Failed to load budgets', err);
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -66,240 +114,154 @@ export function RedefineLimitsScreen({ navigation }: any) {
     loadBudgets();
   }, [loadBudgets]);
 
-  const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    await loadBudgets();
-    setRefreshing(false);
-  }, [loadBudgets]);
-
-  // ─── Derived ──────────────────────────────────────────────────────────
   const totalLimit = useMemo(
     () => budgets.reduce((sum, b) => sum + b.parsedLimit, 0),
     [budgets],
   );
 
-  const maxIndividualLimit = useMemo(
-    () => Math.max(...budgets.map((b) => b.parsedLimit), 1),
-    [budgets],
-  );
+  const incomeUsageRatio = Math.min(totalLimit / estimatedIncome, 1);
 
-  // ─── Handlers ─────────────────────────────────────────────────────────
-  const handleLimitChange = (categoryId: string, text: string) => {
-    const formatted = formatCurrencyInput(text);
-    const parsed = parseCurrencyInput(formatted);
+  const handleLimitChange = (categoryId: string, value: number) => {
     setBudgets((prev) =>
       prev.map((b) =>
         b.categoryId === categoryId
-          ? { ...b, newLimitRaw: formatted, parsedLimit: isNaN(parsed) ? 0 : parsed }
+          ? { ...b, parsedLimit: value, newLimitRaw: String(value) }
           : b,
       ),
     );
   };
 
-  const handleSaveAll = async () => {
-    const toSave = budgets.filter((b) => b.parsedLimit > 0);
-    if (toSave.length === 0) {
-      showError(new Error('Defina pelo menos um limite'));
-      return;
-    }
+  const handleTextChange = (categoryId: string, text: string) => {
+    const numeric = text.replace(/[^0-9]/g, '');
+    const value = parseInt(numeric || '0', 10);
+    handleLimitChange(categoryId, value);
+  };
 
+  const handleSaveAll = async () => {
     setSaving(true);
     try {
-      const promises = toSave.map((b) => {
-        const request = {
-          categoryId: b.categoryId,
-          month: currentMonth,
-          year: currentYear,
-          limitAmount: b.parsedLimit,
-        };
-        if (b.id) {
-          return budgetService.updateBudget(b.id, request);
-        }
-        return budgetService.createBudget(request);
-      });
-
-      await Promise.all(promises);
+      await Promise.all(
+        budgets.map((b) => {
+          const req = { categoryId: b.categoryId, month: currentMonth, year: currentYear, limitAmount: b.parsedLimit };
+          return b.id ? budgetService.updateBudget(b.id, req) : budgetService.createBudget(req);
+        })
+      );
       setToastVisible(true);
       setTimeout(() => navigation.goBack(), 1500);
     } catch (err) {
-      showError(err, 'Falha ao salvar alguns limites');
+      showError(err);
     } finally {
       setSaving(false);
     }
   };
 
-  // ─── Render ───────────────────────────────────────────────────────────
+  const formatMoney = (v: number) =>
+    `R$ ${v.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+
+  const formatMoneyFull = (v: number) =>
+    `R$ ${v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={['top']}>
-      <Toast
-        visible={toastVisible}
-        message="Todos os limites foram atualizados!"
-        type="success"
-        onHide={() => setToastVisible(false)}
-      />
+    <SafeAreaView className="flex-1 bg-background" style={{ flex: 1, backgroundColor: Colors.background }}>
+      <Toast visible={toastVisible} message="Limites atualizados!" type="success" onHide={() => setToastVisible(false)} />
 
       {/* Header */}
-      <View className="flex-row items-center justify-between px-5 h-14">
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          className="p-2 -ml-2 rounded-full"
-        >
-          <MaterialIcons name="arrow-back" size={24} color={Colors.onSurface} />
+      <View className="flex-row items-center justify-between px-5 py-4">
+        <TouchableOpacity onPress={() => navigation.goBack()} className="p-2 -ml-2">
+          <MaterialIcons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
-        <Text className="text-headline-md font-bold text-on-surface">Redefinir limites</Text>
-        <View className="w-10" />
+        <Text className="text-xl font-bold text-white flex-1 ml-4">Redefinir limites</Text>
+        <View className="w-10 h-10 rounded-full overflow-hidden border border-primary/30">
+          {user?.avatarUrl ? (
+            <Image source={{ uri: user.avatarUrl }} className="w-full h-full" />
+          ) : (
+            <View className="w-full h-full bg-primary/20 items-center justify-center">
+              <MaterialIcons name="person" size={24} color={Colors.primary} />
+            </View>
+          )}
+        </View>
       </View>
 
-      {loading ? (
-        <View className="flex-1 justify-center items-center">
-          <ActivityIndicator size="large" color={Colors.primary} />
-        </View>
-      ) : (
-        <ScrollView
-          className="flex-1 px-5 pt-4"
-          contentContainerStyle={{ paddingBottom: 160 }}
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.primary} />
-          }
-          showsVerticalScrollIndicator={false}
-        >
-          {/* ─── Global Budget Summary Card ──────────────────────────── */}
-          <View className="bg-surface-container rounded-xl p-5 mb-6 border border-outline-variant/20">
-            <View className="flex-row justify-between items-start mb-4">
-              <View className="flex-1">
-                <Text className="text-label-md text-on-surface-variant">Resumo Global Mensal</Text>
-                <Text className="text-numeric-display text-primary mt-2">
-                  {formatMoney(totalLimit)}
-                </Text>
-              </View>
-              <View className="p-3 bg-primary-container rounded-lg">
-                <MaterialIcons name="account-balance-wallet" size={24} color={Colors.onPrimaryContainer} />
-              </View>
+      <ScrollView className="flex-1 px-5" contentContainerStyle={{ paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
+        {/* Global Summary */}
+        <View className="bg-[#1a1c26] rounded-2xl p-6 mb-8 shadow-sm relative overflow-hidden">
+          <LinearGradient
+            colors={[`${Colors.primary}15`, 'rgba(0,0,0,0)']}
+            style={{ position: 'absolute', right: -30, top: -30, width: 160, height: 160, borderRadius: 80 }}
+          />
+          <View className="flex-row justify-between items-start mb-6">
+            <View>
+              <Text className="text-xs font-semibold text-on-surface-variant uppercase tracking-widest opacity-60">Resumo Global Mensal</Text>
+              <Text className="text-3xl font-bold text-white mt-1">{formatMoneyFull(totalLimit)}</Text>
             </View>
-            <View className="gap-2">
-              <View className="flex-row justify-between">
-                <Text className="text-label-sm text-on-surface-variant">
-                  Total planejado para {MONTHS[now.getMonth()]}
-                </Text>
-                <Text className="text-label-sm text-primary font-medium">
-                  {budgets.filter((b) => b.parsedLimit > 0).length} categorias
-                </Text>
-              </View>
-              <View className="h-2 w-full bg-surface-container-highest rounded-full overflow-hidden">
-                <View
-                  className="h-full bg-primary rounded-full"
-                  style={{ width: `${Math.min((totalLimit / Math.max(totalLimit, 1)) * 100, 100)}%` }}
-                />
-              </View>
-              <Text className="text-label-sm text-on-surface-variant mt-1">
-                Mês de referência: {MONTHS[now.getMonth()]} de {now.getFullYear()}
-              </Text>
+            <View className="p-3 bg-primary rounded-2xl">
+              <MaterialIcons name="account-balance-wallet" size={24} color="#fff" />
             </View>
           </View>
 
-          {/* ─── Categories List ─────────────────────────────────────── */}
-          <Text className="text-label-md text-on-surface-variant uppercase tracking-widest mb-3">
-            Categorias ativas
+          <View className="flex-row justify-between mb-2">
+            <Text className="text-xs text-on-surface-variant font-medium">Planejado vs. Renda</Text>
+            <Text className="text-xs text-on-surface-variant font-bold">{Math.round(incomeUsageRatio * 100)}% da Renda</Text>
+          </View>
+          <View className="h-2 w-full bg-surface-container-highest rounded-full overflow-hidden mb-3">
+            <View className="h-full bg-primary rounded-full" style={{ width: `${incomeUsageRatio * 100}%` }} />
+          </View>
+          <Text className="text-xs text-on-surface-variant text-center italic opacity-70">
+            Sua renda mensal estimada: <Text className="text-white font-bold">{formatMoneyFull(estimatedIncome)}</Text>
           </Text>
+        </View>
 
-          <View className="gap-4">
-            {budgets.map((b) => {
-              const barPercent = maxIndividualLimit > 0
-                ? Math.min((b.parsedLimit / maxIndividualLimit) * 100, 100)
-                : 0;
+        <Text className="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-4 opacity-70">Categorias Ativas</Text>
 
-              return (
-                <View
-                  key={b.categoryId}
-                  className="bg-surface-container rounded-xl p-4 border border-outline-variant/30"
-                >
-                  {/* Row: icon, name, spending, limit input */}
-                  <View className="flex-row justify-between items-center mb-4">
-                    <View className="flex-row items-center gap-3 flex-1">
-                      <View
-                        className="w-10 h-10 rounded-full items-center justify-center"
-                        style={{ backgroundColor: `${b.categoryColor || Colors.primary}20` }}
-                      >
-                        <MaterialIcons
-                          name={(b.categoryIcon || 'help-outline') as any}
-                          size={20}
-                          color={b.categoryColor || Colors.primary}
-                        />
-                      </View>
-                      <View className="flex-1">
-                        <Text className="text-label-md text-on-surface font-medium">{b.categoryName}</Text>
-                        <Text className="text-label-sm text-on-surface-variant">
-                          Gasto atual: {formatMoney(b.spent)}
-                        </Text>
-                      </View>
-                    </View>
-                    <View className="w-28">
-                      <View className="flex-row items-center bg-surface-container-low rounded-lg py-2 px-3 border border-outline-variant/20">
-                        <Text className="text-body-md text-on-surface-variant">R$</Text>
-                        <TextInput
-                          className="flex-1 text-body-md text-primary text-right"
-                          placeholder="0,00"
-                          placeholderTextColor={Colors.outline}
-                          keyboardType="numeric"
-                          value={b.newLimitRaw}
-                          onChangeText={(text) => handleLimitChange(b.categoryId, text)}
-                        />
-                      </View>
-                    </View>
+        <View className="gap-4">
+          {budgets.map((b) => (
+            <View key={b.categoryId} className="bg-[#1a1c26] rounded-2xl p-5 border border-white/5">
+              <View className="flex-row items-center justify-between mb-5">
+                <View className="flex-row items-center gap-4 flex-1">
+                  <View className="w-12 h-12 rounded-2xl bg-surface-container-highest items-center justify-center">
+                    <MaterialIcons name={b.categoryIcon || 'category'} size={24} color={Colors.primary} />
                   </View>
-
-                  {/* Visual bar */}
-                  <View className="h-1.5 w-full bg-surface-container-highest rounded-full overflow-hidden mb-2">
-                    <View
-                      className="h-full rounded-full"
-                      style={{
-                        width: `${barPercent}%`,
-                        backgroundColor: b.categoryColor || Colors.primary,
-                      }}
-                    />
-                  </View>
-
-                  {/* Min / Max labels */}
-                  <View className="flex-row justify-between">
-                    <Text className="text-label-sm text-on-surface-variant">Min R$ 0</Text>
-                    <Text className="text-label-sm text-on-surface-variant">
-                      Limite: {formatMoney(b.parsedLimit)}
+                  <View>
+                    <Text className="text-base font-bold text-white">{b.categoryName}</Text>
+                    <Text className="text-xs text-on-surface-variant opacity-60">
+                      Gasto médio: {formatMoney(b.spent || 0)}
                     </Text>
                   </View>
                 </View>
-              );
-            })}
-          </View>
+                <View className="bg-surface-container-highest px-4 py-3 rounded-xl min-w-[80px] items-end">
+                  <TextInput
+                    className="text-lg font-bold text-primary"
+                    keyboardType="numeric"
+                    value={b.newLimitRaw}
+                    onChangeText={(t) => handleTextChange(b.categoryId, t)}
+                    style={{ textAlign: 'right' }}
+                  />
+                </View>
+              </View>
 
-          {/* ─── Action Buttons ──────────────────────────────────────── */}
-          <View className="mt-6 gap-3">
-            <TouchableOpacity
-              className="w-full h-14 bg-primary-container rounded-xl flex-row items-center justify-center gap-2"
-              onPress={handleSaveAll}
-              disabled={saving}
-            >
-              {saving ? (
-                <ActivityIndicator color={Colors.onPrimaryContainer} />
-              ) : (
-                <>
-                  <MaterialIcons name="save" size={24} color={Colors.onPrimaryContainer} />
-                  <Text className="text-body-md text-on-primary-container font-bold">
-                    Salvar novos limites
-                  </Text>
-                </>
-              )}
-            </TouchableOpacity>
+              <BudgetSlider
+                value={b.parsedLimit}
+                max={Math.max(b.parsedLimit * 1.5, b.spent * 1.5, 3000)}
+                onChange={(v) => handleLimitChange(b.categoryId, v)}
+                color={Colors.primary}
+              />
 
-            <TouchableOpacity
-              className="w-full h-14 rounded-xl flex-row items-center justify-center"
-              style={{ backgroundColor: `${Colors.secondaryContainer}50` }}
-              onPress={() => navigation.goBack()}
-            >
-              <Text className="text-body-md text-secondary font-medium">Cancelar</Text>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
-      )}
+              <View className="flex-row justify-between mt-1">
+                <Text className="text-[10px] text-on-surface-variant font-medium opacity-50">Min R$ 0</Text>
+                <Text className="text-[10px] text-on-surface-variant font-bold opacity-70">Limite: {formatMoney(b.parsedLimit)}</Text>
+              </View>
+            </View>
+          ))}
+        </View>
+
+        <TouchableOpacity className="w-full h-14 bg-primary rounded-2xl items-center justify-center mt-8 mb-3" onPress={handleSaveAll} disabled={saving}>
+          {saving ? <ActivityIndicator color="#fff" /> : <Text className="text-base font-bold text-white">Salvar novos limites</Text>}
+        </TouchableOpacity>
+
+        <TouchableOpacity className="w-full h-14 bg-transparent border border-white/10 rounded-2xl items-center justify-center" onPress={() => navigation.goBack()}>
+          <Text className="text-base font-bold text-on-surface-variant opacity-80">Cancelar</Text>
+        </TouchableOpacity>
+      </ScrollView>
     </SafeAreaView>
   );
 }

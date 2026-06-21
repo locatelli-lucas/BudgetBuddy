@@ -45,3 +45,29 @@ export interface InstitutionRequest {
   name: string;
   brokerCode?: string;
 }
+
+export interface PortfolioPerformancePoint {
+  date: string; // ISO date
+  value: number;
+}
+
+export interface AssetSearchResult {
+  symbol: string;
+  name: string;
+  exchange: string;
+  type: string;
+}
+
+export interface AssetTypeConfig {
+  type: InvestmentType;
+  label: string;
+  icon: string;
+  description: string;
+  showQuantity: boolean;
+  showAvgPrice: boolean;
+  showTicker: boolean;
+  showExchange: boolean;
+  showWallet: boolean;
+  showFixedIncomeFields: boolean;
+  fractionalQuantity: boolean;
+}

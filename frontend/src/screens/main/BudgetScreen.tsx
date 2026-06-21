@@ -81,11 +81,11 @@ export function BudgetScreen({ navigation }: any) {
   };
 
   return (
-    <View className="flex-1 bg-background">
+    <View className="flex-1 bg-background" style={{ flex: 1, backgroundColor: Colors.background }}>
       {/* Top App Bar */}
       <View 
-        className="flex-row justify-between items-center px-5 h-20 bg-surface z-50"
-        style={{ paddingTop: insets.top }}
+        className="flex-row justify-between items-center px-5 bg-surface z-50 border-b border-outline-variant/10"
+        style={{ paddingTop: insets.top + 8, paddingBottom: 16 }}
       >
         <View>
           <Text className="text-headline-md font-bold text-on-surface">Orçamentos</Text>

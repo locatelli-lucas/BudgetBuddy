@@ -4,6 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useErrorToast } from '../../contexts/ErrorToastContext';
 import { MaterialIcons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Colors } from '../../constants/colors';
 
 export function RegisterScreen({ navigation }: any) {
   const { signUp } = useAuth();
@@ -30,10 +31,11 @@ export function RegisterScreen({ navigation }: any) {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
+    <SafeAreaView className="flex-1 bg-background" style={{ flex: 1, backgroundColor: Colors.background }}>
       <KeyboardAvoidingView 
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className="flex-1 px-6 justify-center"
+        style={{ flex: 1 }}
       >
         <TouchableOpacity 
           className="w-10 h-10 items-center justify-center rounded-full bg-surface-container absolute top-4 left-4 z-10"
@@ -49,7 +51,7 @@ export function RegisterScreen({ navigation }: any) {
           </Text>
         </View>
         
-        <View className="space-y-4 mb-8">
+        <View className="gap-4 mb-8">
           <View className="bg-surface-container h-14 rounded-xl flex-row items-center px-4 border border-transparent focus-within:border-primary-container">
             <MaterialIcons name="person" size={20} color="#8d90a0" className="mr-3" />
             <TextInput

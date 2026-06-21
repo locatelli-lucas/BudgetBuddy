@@ -2,8 +2,12 @@ import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import {
   View, Text, TextInput, TouchableOpacity, ActivityIndicator,
   KeyboardAvoidingView, Platform, ScrollView, PanResponder,
-  LayoutChangeEvent, Vibration,
+  LayoutChangeEvent, Vibration, LayoutAnimation, UIManager,
 } from 'react-native';
+
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 import { MaterialIcons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../../../constants/colors';
@@ -60,21 +64,27 @@ function LimitSlider({ value, min, max, onChange, spentRatio, isOverLimit }: Sli
 
   const spentBarW = Math.min(spentRatio, 1) * 100;
   const thumbPos = ratio * 100;
-  const limitMarkerVisible = ratio < 0.98;
   const barColor = isOverLimit ? Colors.error : Colors.primary;
 
   return (
-    <View className="relative pt-5 pb-3">
+    <View className="relative pt-8 pb-3">
+      {/* Spent marker label */}
+      <View
+        className="absolute top-0 items-center"
+        style={{ left: `${spentBarW}%` as any, transform: [{ translateX: -18 }] }}
+        pointerEvents="none"
+      >
+        <Text className="text-[10px] text-on-surface-variant font-medium">Gasto</Text>
+      </View>
+
       {/* Limit label above thumb */}
-      {limitMarkerVisible && (
-        <View
-          className="absolute top-0 items-center"
-          style={{ left: `${thumbPos}%` as any, transform: [{ translateX: -18 }] }}
-          pointerEvents="none"
-        >
-          <Text className="text-[10px] text-primary font-semibold">Limite</Text>
-        </View>
-      )}
+      <View
+        className="absolute top-0 items-center"
+        style={{ left: `${thumbPos}%` as any, transform: [{ translateX: -18 }] }}
+        pointerEvents="none"
+      >
+        <Text className="text-[10px] text-primary font-bold">Limite</Text>
+      </View>
 
       {/* Track + hit area */}
       <View
@@ -85,18 +95,18 @@ function LimitSlider({ value, min, max, onChange, spentRatio, isOverLimit }: Sli
       >
         {/* Track background */}
         <View className="w-full h-2 bg-surface-variant rounded-full overflow-visible">
-          {/* Spent fill */}
+          {/* Limit fill (blue bar up to the thumb) */}
           <View
             className="h-full rounded-full absolute left-0 top-0"
-            style={{ width: `${spentBarW}%`, backgroundColor: barColor }}
+            style={{ width: `${thumbPos}%`, backgroundColor: `${barColor}40` }}
             pointerEvents="none"
           />
         </View>
 
-        {/* Limit marker (vertical line) */}
+        {/* Spent marker (vertical line) */}
         <View
-          className="absolute w-[2px] h-7 bg-primary -top-2.5"
-          style={{ left: `${thumbPos}%` as any, transform: [{ translateX: -1 }] }}
+          className="absolute w-[2px] h-7 bg-on-surface-variant/50 -top-2.5"
+          style={{ left: `${spentBarW}%` as any, transform: [{ translateX: -1 }] }}
           pointerEvents="none"
         />
 
@@ -268,7 +278,7 @@ export function DefineLimitScreen({ navigation, route }: any) {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-background" edges={['top']} style={{ flex: 1, backgroundColor: Colors.background }}>
       <Toast
         visible={toastVisible}
         message="Limite definido com sucesso!"
@@ -280,7 +290,10 @@ export function DefineLimitScreen({ navigation, route }: any) {
         className="flex-1"
       >
         {/* ─── Header ─────────────────────────────────────────────────── */}
-        <View className="flex-row items-center justify-between px-5 h-14">
+        <View
+          className="flex-row items-center justify-between px-5 bg-surface z-50 border-b border-outline-variant/10"
+          style={{ paddingTop: 8, paddingBottom: 16 }}
+        >
           <TouchableOpacity
             onPress={() => navigation.goBack()}
             className="p-2 -ml-2 rounded-full active:bg-surface-container"
@@ -339,10 +352,10 @@ export function DefineLimitScreen({ navigation, route }: any) {
 
               {/* Amount display */}
               <View className="items-center w-full max-w-[280px]">
-                <View className="flex-row items-baseline">
-                  <Text className="text-headline-md text-primary opacity-60 mr-1">R$</Text>
+                <View className="flex-row items-center justify-center">
+                  <Text className="text-headline-lg font-bold text-on-surface-variant mr-2">R$</Text>
                   <TextInput
-                    className="text-numeric-display text-primary text-center w-40 pb-1"
+                    className="text-numeric-display text-primary text-center min-w-[150px]"
                     placeholder="0,00"
                     placeholderTextColor={Colors.outlineVariant}
                     keyboardType="numeric"
@@ -434,7 +447,10 @@ export function DefineLimitScreen({ navigation, route }: any) {
             {/* ─── Notification Toggle ─────────────────────────────────── */}
             <TouchableOpacity
               className="flex-row items-center justify-between p-4 bg-surface-container rounded-xl border border-surface-variant mb-6 active:bg-surface-container-high"
-              onPress={() => setNotifyAt80(!notifyAt80)}
+              onPress={() => {
+                LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+                setNotifyAt80(!notifyAt80);
+              }}
               activeOpacity={0.8}
             >
               <View className="flex-1 pr-4">
@@ -445,15 +461,13 @@ export function DefineLimitScreen({ navigation, route }: any) {
               </View>
               {/* Toggle Switch */}
               <View
-                className={`w-12 h-6 rounded-full relative justify-center ${
-                  notifyAt80 ? 'bg-primary-container' : 'bg-surface-container-highest'
+                className={`w-12 h-6 rounded-full px-1 justify-center ${
+                  notifyAt80 ? 'bg-primary-container items-end' : 'bg-surface-container-highest items-start'
                 }`}
               >
                 <View
-                  className={`absolute w-5 h-5 rounded-full shadow-sm ${
-                    notifyAt80
-                      ? 'bg-on-primary-container right-[2px]'
-                      : 'bg-on-surface-variant left-[2px]'
+                  className={`w-4 h-4 rounded-full shadow-sm ${
+                    notifyAt80 ? 'bg-on-primary-container' : 'bg-on-surface-variant'
                   }`}
                 />
               </View>

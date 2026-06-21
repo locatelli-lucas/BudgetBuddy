@@ -78,9 +78,12 @@ export function AiInsightsScreen({ navigation }: any) {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-background" edges={['top']} style={{ flex: 1, backgroundColor: Colors.background }}>
       {/* Header */}
-      <View className="px-5 py-4 flex-row justify-between items-center z-50">
+      <View
+        className="px-5 flex-row justify-between items-center z-50 bg-surface border-b border-outline-variant/10"
+        style={{ paddingTop: 8, paddingBottom: 16 }}
+      >
         <View className="flex-row items-center gap-3">
           <TouchableOpacity onPress={() => navigation.goBack()} className="mr-2">
             <MaterialIcons name="arrow-back" size={24} color={Colors.onSurface} />

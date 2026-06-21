@@ -1,18 +1,16 @@
 package com.budgetbuddy.infrastructure.finance;
 
+import com.budgetbuddy.domain.market.dto.HistoricalPoint;
+import com.budgetbuddy.domain.market.dto.QuoteResponse;
+import com.budgetbuddy.domain.market.dto.SearchResult;
 import com.budgetbuddy.infrastructure.currency.AwesomeApiService;
 import com.budgetbuddy.infrastructure.currency.dto.CurrencyRateResponse;
-import com.budgetbuddy.infrastructure.finance.dto.QuoteResponse;
 import com.budgetbuddy.infrastructure.news.NewsApiService;
 import com.budgetbuddy.infrastructure.news.dto.NewsArticleResponse;
 import com.budgetbuddy.shared.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -26,8 +24,30 @@ public class MarketController {
     private final NewsApiService newsApiService;
 
     @GetMapping("/quote/{ticker}")
-    public ResponseEntity<ApiResponse<QuoteResponse>> getQuote(@PathVariable String ticker) {
-        return ResponseEntity.ok(ApiResponse.success(yahooFinanceService.getQuote(ticker)));
+    public ResponseEntity<ApiResponse<com.budgetbuddy.infrastructure.finance.dto.QuoteResponse>> getQuote(
+            @PathVariable String ticker) {
+        QuoteResponse q = yahooFinanceService.getQuote(ticker);
+        return ResponseEntity.ok(ApiResponse.success(
+                com.budgetbuddy.infrastructure.finance.dto.QuoteResponse.builder()
+                        .ticker(q.getSymbol())
+                        .name(q.getName())
+                        .price(q.getPrice())
+                        .change(q.getChange())
+                        .changePercent(q.getChangePercent())
+                        .build()));
+    }
+
+    @GetMapping("/history/{ticker}")
+    public ResponseEntity<ApiResponse<List<HistoricalPoint>>> getHistory(
+            @PathVariable String ticker,
+            @RequestParam(defaultValue = "1M") String period) {
+        return ResponseEntity.ok(ApiResponse.success(
+                yahooFinanceService.getHistoricalData(ticker, period)));
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponse<List<SearchResult>>> search(@RequestParam("q") String query) {
+        return ResponseEntity.ok(ApiResponse.success(yahooFinanceService.searchAsset(query)));
     }
 
     @GetMapping("/currency")

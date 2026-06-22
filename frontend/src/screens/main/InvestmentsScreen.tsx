@@ -1,3 +1,4 @@
+import { useErrorToast } from '../../contexts/ErrorToastContext';
 import React, { useState, useCallback } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl, Image, Modal, Pressable } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
@@ -55,6 +56,7 @@ function AssetLogo({ ticker, size = 40 }: { ticker: string, size?: number }) {
 }
 
 export function InvestmentsScreen({ navigation }: any) {
+  const { showError } = useErrorToast();
   const insets = useSafeAreaInsets();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -75,7 +77,7 @@ export function InvestmentsScreen({ navigation }: any) {
       setInvestments(listData);
       setPerformance(perfData);
     } catch (err) {
-      console.error('Failed to load investments statistics', err);
+      showError(err, 'Failed to load investments statistics');
     } finally {
       setLoading(false);
     }

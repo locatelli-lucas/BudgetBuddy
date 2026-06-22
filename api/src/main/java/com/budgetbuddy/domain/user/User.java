@@ -41,7 +41,7 @@ public class User implements UserDetails {
     @Column(nullable = false, unique = true, length = 150)
     private String email;
 
-    @Column(name = "password_hash", nullable = false)
+    @Column(name = "password_hash")
     private String password;
 
     @Column(name = "avatar_url", length = 500)
@@ -50,12 +50,9 @@ public class User implements UserDetails {
     @Column(name = "fcm_token", length = 500)
     private String fcmToken;
 
-    @Column(name = "two_factor_secret", length = 64)
-    private String twoFactorSecret;
-
     @Builder.Default
-    @Column(name = "two_factor_enabled", nullable = false)
-    private boolean twoFactorEnabled = false;
+    @Column(name = "email_verified", nullable = false)
+    private boolean emailVerified = false;
 
     @Builder.Default
     @Column(nullable = false)

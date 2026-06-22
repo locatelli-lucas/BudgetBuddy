@@ -104,7 +104,7 @@ export function RedefineLimitsScreen({ navigation }: any) {
         }),
       );
     } catch (err) {
-      console.error(err);
+      showError(err);
     } finally {
       setLoading(false);
     }

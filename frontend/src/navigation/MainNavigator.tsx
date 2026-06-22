@@ -29,12 +29,15 @@ import { RegisteredInstitutionsScreen } from '../screens/main/investments/Regist
 import { InvestmentOptionsScreen } from '../screens/main/investments/InvestmentOptionsScreen';
 import { AssetNewsScreen } from '../screens/main/investments/AssetNewsScreen';
 import { NewsDetailsScreen } from '../screens/main/investments/NewsDetailsScreen';
+import { PriceAlertsScreen } from '../screens/main/investments/PriceAlertsScreen';
 
 // Profile sub-screens
 import { PersonalDataScreen } from '../screens/profile/PersonalDataScreen';
 import { SecurityScreen } from '../screens/profile/SecurityScreen';
+import { ConnectedAccountsScreen } from '../screens/profile/ConnectedAccountsScreen';
 import { UpdatePasswordScreen } from '../screens/profile/UpdatePasswordScreen';
 import { TwoStepAuthScreen } from '../screens/profile/TwoStepAuthScreen';
+import { BackupCodesScreen } from '../screens/profile/BackupCodesScreen';
 import { NotificationSettingsScreen } from '../screens/profile/NotificationSettingsScreen';
 import { NotificationOptionsScreen } from '../screens/profile/NotificationOptionsScreen';
 import { AppearanceScreen } from '../screens/profile/AppearanceScreen';
@@ -149,12 +152,15 @@ export function MainNavigator() {
       <Stack.Screen name="InvestmentOptions" component={InvestmentOptionsScreen} />
       <Stack.Screen name="AssetNews" component={AssetNewsScreen} />
       <Stack.Screen name="NewsDetails" component={NewsDetailsScreen} />
+      <Stack.Screen name="PriceAlerts" component={PriceAlertsScreen} />
 
       {/* Profile */}
       <Stack.Screen name="PersonalData" component={PersonalDataScreen} />
       <Stack.Screen name="Security" component={SecurityScreen} />
+      <Stack.Screen name="ConnectedAccounts" component={ConnectedAccountsScreen} />
       <Stack.Screen name="UpdatePassword" component={UpdatePasswordScreen} />
       <Stack.Screen name="TwoStepAuth" component={TwoStepAuthScreen} />
+      <Stack.Screen name="BackupCodes" component={BackupCodesScreen} />
       <Stack.Screen name="NotificationSettings" component={NotificationSettingsScreen} />
       <Stack.Screen name="NotificationOptions" component={NotificationOptionsScreen} />
       <Stack.Screen name="Appearance" component={AppearanceScreen} />

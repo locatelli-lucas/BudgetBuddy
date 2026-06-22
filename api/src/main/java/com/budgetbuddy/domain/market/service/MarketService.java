@@ -6,6 +6,7 @@ import com.budgetbuddy.domain.market.dto.SearchResult;
 import com.budgetbuddy.domain.market.provider.MarketDataProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -18,8 +19,18 @@ public class MarketService {
 
     private final MarketDataProvider provider;
 
+    /** For REST endpoints — returns cached data (TTL: 5 min). */
     @Cacheable(value = "market-quotes", key = "#symbol")
     public QuoteResponse getQuote(String symbol) {
+        return provider.getQuote(symbol);
+    }
+
+    /**
+     * For schedulers — always fetches fresh data from Yahoo Finance
+     * and refreshes the cache so subsequent REST calls are also up-to-date.
+     */
+    @CacheEvict(value = "market-quotes", key = "#symbol")
+    public QuoteResponse getQuoteFresh(String symbol) {
         return provider.getQuote(symbol);
     }
 

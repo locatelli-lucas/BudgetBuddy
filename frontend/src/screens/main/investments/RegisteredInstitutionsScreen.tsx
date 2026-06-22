@@ -1,3 +1,4 @@
+import { useErrorToast } from '../../../contexts/ErrorToastContext';
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, FlatList, TouchableOpacity, TextInput, Alert, ActivityIndicator } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -7,6 +8,7 @@ import { investmentService } from '../../../services/investment.service';
 import { Institution } from '../../../types/investment';
 
 export function RegisteredInstitutionsScreen({ navigation }: any) {
+  const { showError } = useErrorToast();
   const [institutions, setInstitutions] = useState<Institution[]>([]);
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(true);
@@ -17,7 +19,7 @@ export function RegisteredInstitutionsScreen({ navigation }: any) {
       const data = await investmentService.getInstitutions();
       setInstitutions(data);
     } catch (err) {
-      console.error('Failed to load registered brokers', err);
+      showError(err, 'Failed to load registered brokers');
     } finally {
       setLoading(false);
     }

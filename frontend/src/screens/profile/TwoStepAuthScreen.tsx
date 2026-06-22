@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, TextInput, Alert, ActivityIndicator } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, TextInput, Alert, ActivityIndicator, Image } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../../constants/colors';
@@ -37,12 +37,15 @@ export function TwoStepAuthScreen({ navigation }: any) {
     }
     setLoading(true);
     try {
-      await authService.enable2FA(code);
+      const backupCodes = await authService.enable2FA(code);
       await refreshUser();
       setEnabled(true);
       setSetupData(null);
       setCode('');
       setToastVisible(true);
+
+      // Redirect to backup codes screen
+      navigation.navigate('BackupCodes', { codes: backupCodes });
     } catch (err) {
       showError(err, 'Código inválido');
     } finally {
@@ -51,7 +54,12 @@ export function TwoStepAuthScreen({ navigation }: any) {
   };
 
   const handleDisable = () => {
-    Alert.alert('Desativar 2FA', 'Digite o código do seu aplicativo autenticador para desativar.', [
+    if (!code || code.length < 6) {
+      showError(new Error('Digite o código para desativar'));
+      return;
+    }
+
+    Alert.alert('Desativar 2FA', 'Tem certeza que deseja desativar a verificação em duas etapas?', [
       { text: 'Cancelar', style: 'cancel' },
       {
         text: 'Desativar',
@@ -108,14 +116,22 @@ export function TwoStepAuthScreen({ navigation }: any) {
         {setupData && (
           <View className="gap-4">
             <View className="bg-surface rounded-xl p-4 border border-outline-variant/10 items-center">
-              <Text className="text-label-md text-on-surface-variant mb-2">
+              <Text className="text-label-md text-on-surface-variant mb-4">
                 Escaneie o QR code com seu aplicativo autenticador:
               </Text>
-              <Text className="text-body-md text-on-surface bg-surface-container rounded-lg p-3 font-mono mb-2">
-                Chave: {setupData.secret}
+
+              <View className="bg-white p-2 rounded-lg mb-4">
+                <Image
+                  source={{ uri: setupData.qrCode }}
+                  style={{ width: 200, height: 200 }}
+                />
+              </View>
+
+              <Text className="text-label-sm text-on-surface-variant mb-2">
+                Ou insira a chave manualmente:
               </Text>
-              <Text className="text-label-sm text-on-surface-variant">
-                Ou insira a chave manualmente no aplicativo.
+              <Text className="text-body-md text-on-surface bg-surface-container rounded-lg p-3 font-mono mb-2">
+                {setupData.secret}
               </Text>
             </View>
 

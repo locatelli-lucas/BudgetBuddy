@@ -17,7 +17,9 @@ import { BudgetStatusResponse } from '../../types/budget';
 import { getErrorMessage, isNetworkError } from '../../utils/errors';
 import { useErrorToast } from '../../contexts/ErrorToastContext';
 import { formatCurrency } from '../../utils/currency';
-import { formatSmartDate } from '../../utils/dates';
+import { formatSmartDate, formatRelativeTime } from '../../utils/dates';
+import { notificationService } from '../../services/notification.service';
+import { Notification } from '../../types/notification';
 
 export function DashboardScreen({ navigation }: any) {
   const insets = useSafeAreaInsets();
@@ -30,18 +32,24 @@ export function DashboardScreen({ navigation }: any) {
   const [summary, setSummary] = useState<TransactionSummary | null>(null);
   const [recentTransactions, setRecentTransactions] = useState<Transaction[]>([]);
   const [budgetStatus, setBudgetStatus] = useState<BudgetStatusResponse[]>([]);
+  const [recentNotifications, setRecentNotifications] = useState<Notification[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const loadDashboardData = useCallback(async () => {
     try {
       setError(null);
-      const [summaryData, recentData, budgetData] = await Promise.all([
+      const [summaryData, recentData, budgetData, notificationsData, count] = await Promise.all([
         transactionService.getSummary(),
         transactionService.getRecentTransactions(5),
         budgetService.getBudgetStatus(),
+        notificationService.getNotifications(undefined, false, 0, 3),
+        notificationService.getUnreadCount(),
       ]);
       setSummary(summaryData);
       setRecentTransactions(recentData);
       setBudgetStatus(budgetData);
+      setRecentNotifications(notificationsData.content);
+      setUnreadCount(count);
     } catch (err) {
       const msg = getErrorMessage(err, 'Falha ao carregar dados do dashboard.');
       setError(msg);
@@ -53,27 +61,25 @@ export function DashboardScreen({ navigation }: any) {
   useFocusEffect(
     useCallback(() => {
       loadDashboardData();
+
+      const interval = setInterval(async () => {
+        try {
+          const count = await notificationService.getUnreadCount();
+          setUnreadCount(count);
+        } catch (e) {
+          // Ignore polling errors
+        }
+      }, 30000); // 30 seconds
+
+      return () => clearInterval(interval);
     }, [loadDashboardData])
   );
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    setError(null);
-    try {
-      const [summaryData, recentData] = await Promise.all([
-        transactionService.getSummary(),
-        transactionService.getRecentTransactions(5),
-      ]);
-      setSummary(summaryData);
-      setRecentTransactions(recentData);
-    } catch (err) {
-      const msg = getErrorMessage(err);
-      setError(msg);
-      showError(err);
-    } finally {
-      setRefreshing(false);
-    }
-  }, [showError]);
+    await loadDashboardData();
+    setRefreshing(false);
+  }, [loadDashboardData]);
 
   // Chart data — income vs expense for current month
   const monthLabels = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'];
@@ -161,10 +167,30 @@ export function DashboardScreen({ navigation }: any) {
             <MaterialIcons name="description" size={24} color={Colors.primary} />
           </TouchableOpacity>
           <TouchableOpacity
-            className="w-10 h-10 items-center justify-center rounded-full"
-            onPress={() => navigation.navigate('Profile', { screen: 'Notifications' })}
+            style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center', position: 'relative' }}
+            onPress={() => navigation.navigate('Notifications')}
           >
             <MaterialIcons name="notifications" size={24} color={Colors.primary} />
+            {unreadCount > 0 && (
+              <View style={{
+                position: 'absolute',
+                top: 4,
+                right: 4,
+                minWidth: 16,
+                height: 16,
+                borderRadius: 8,
+                backgroundColor: '#ef4444',
+                alignItems: 'center',
+                justifyContent: 'center',
+                paddingHorizontal: 3,
+                borderWidth: 1.5,
+                borderColor: Colors.surface,
+              }}>
+                <Text style={{ fontSize: 9, fontWeight: 'bold', color: '#fff', lineHeight: 12 }}>
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </Text>
+              </View>
+            )}
           </TouchableOpacity>
         </View>
       </View>
@@ -227,6 +253,44 @@ export function DashboardScreen({ navigation }: any) {
             <Text className="text-body-lg font-bold text-on-surface mt-2">
               {formatCurrency(summary?.totalExpense || 0)}
             </Text>
+          </View>
+        </View>
+
+        {/* Recent Notifications Widget */}
+        <View className="mb-8">
+          <View className="flex-row justify-between items-end mb-4">
+            <Text className="text-headline-md font-semibold text-on-surface">Notificações recentes</Text>
+            <TouchableOpacity onPress={() => navigation.navigate('Notifications')}>
+              <Text className="text-label-md text-primary">Ver todas</Text>
+            </TouchableOpacity>
+          </View>
+          <View className="bg-surface-variant rounded-xl p-2 shadow-sm">
+            {recentNotifications.length === 0 ? (
+              <View className="p-4 items-center">
+                <Text className="text-on-surface-variant text-label-md">Nenhuma notificação</Text>
+              </View>
+            ) : (
+              recentNotifications.map((n, i) => (
+                <TouchableOpacity
+                  key={n.id}
+                  className={`p-3 flex-row items-center gap-3 ${i < recentNotifications.length - 1 ? 'border-b border-outline-variant/10' : ''}`}
+                  onPress={() => navigation.navigate('Notifications')}
+                >
+                  <View className={`w-8 h-8 rounded-full items-center justify-center ${n.isRead ? 'bg-surface-container' : 'bg-primary/10'}`}>
+                    <MaterialIcons
+                      name={n.category === 'INVESTMENTS' ? 'show-chart' : n.category === 'FINANCE' ? 'account-balance-wallet' : 'notifications'}
+                      size={16}
+                      color={n.isRead ? Colors.onSurfaceVariant : Colors.primary}
+                    />
+                  </View>
+                  <View className="flex-1">
+                    <Text className={`text-body-sm ${n.isRead ? 'text-on-surface-variant' : 'text-on-surface font-semibold'}`} numberOfLines={1}>{n.title}</Text>
+                    <Text className="text-[10px] text-on-surface-variant">{formatRelativeTime(n.createdAt)}</Text>
+                  </View>
+                  {!n.isRead && <View className="w-2 h-2 rounded-full bg-primary" />}
+                </TouchableOpacity>
+              ))
+            )}
           </View>
         </View>
 

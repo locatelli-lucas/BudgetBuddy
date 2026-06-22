@@ -44,7 +44,7 @@ export function AiInsightsScreen({ navigation }: any) {
       const data = await aiService.getInsights();
       setInsights(data);
     } catch (err) {
-      console.error('Failed to load AI insights', err);
+      showError(err, 'Failed to load AI insights');
     } finally {
       setLoading(false);
     }

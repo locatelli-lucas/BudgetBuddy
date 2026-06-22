@@ -170,7 +170,7 @@ export function DefineLimitScreen({ navigation, route }: any) {
           setParsedLimit(status.limit);
         }
       } catch (err) {
-        console.error('Failed to load data', err);
+        showError(err, 'Failed to load data');
       } finally {
         setDataLoading(false);
       }

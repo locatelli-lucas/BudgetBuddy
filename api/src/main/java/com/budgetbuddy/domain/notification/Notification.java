@@ -1,22 +1,8 @@
 package com.budgetbuddy.domain.notification;
 
 import com.budgetbuddy.domain.user.User;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -42,21 +28,46 @@ public class Notification {
     private String title;
 
     @Column(columnDefinition = "TEXT", nullable = false)
-    private String body;
+    private String message;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
     private NotificationType type;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
+    private NotificationCategory category;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private NotificationPriority priority;
 
     @Builder.Default
     @Column(name = "is_read", nullable = false)
     private boolean isRead = false;
 
     @Builder.Default
-    @Column(name = "sent_at", nullable = false, updatable = false)
-    private LocalDateTime sentAt = LocalDateTime.now();
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column(name = "read_at")
+    private LocalDateTime readAt;
+
+    @Column(name = "action_url", length = 500)
+    private String actionUrl;
+
+    @Column(columnDefinition = "TEXT")
+    private String metadata;
 
     public enum NotificationType {
-        BUDGET_ALERT, UNUSUAL_SPENDING, AI_RECOMMENDATION, BILL_REMINDER, INVESTMENT_ALERT
+        INFO, SUCCESS, WARNING, ALERT
+    }
+
+    public enum NotificationCategory {
+        FINANCE, INVESTMENTS, NEWS, AI, SYSTEM
+    }
+
+    public enum NotificationPriority {
+        LOW, MEDIUM, HIGH, CRITICAL
     }
 }

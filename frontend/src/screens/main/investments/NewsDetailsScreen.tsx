@@ -1,3 +1,4 @@
+import { useErrorToast } from '../../../contexts/ErrorToastContext';
 import React, { useState, useEffect } from 'react';
 import {
   View, Text, TouchableOpacity, ScrollView, Image, Linking, Share, StyleSheet,
@@ -9,6 +10,7 @@ import { Colors } from '../../../constants/colors';
 import { newsService, NewsArticle, NewsArticleAnalysis } from '../../../services/news.service';
 
 export function NewsDetailsScreen({ navigation, route }: any) {
+  const { showError } = useErrorToast();
   const { article, symbol } = route.params;
   const [analysis, setAnalysis] = useState<NewsArticleAnalysis | null>(null);
   const [loading, setLoading] = useState(true);
@@ -20,7 +22,7 @@ export function NewsDetailsScreen({ navigation, route }: any) {
         const data = await newsService.getArticleAnalysis(article, symbol);
         setAnalysis(data);
       } catch (err) {
-        console.error('Failed to load analysis', err);
+        showError(err, 'Failed to load analysis');
       } finally {
         setLoading(false);
       }
@@ -55,7 +57,7 @@ export function NewsDetailsScreen({ navigation, route }: any) {
         title: article.title,
       });
     } catch (error) {
-      console.error('Error sharing', error);
+      showError(error, 'Error sharing');
     }
   };
 

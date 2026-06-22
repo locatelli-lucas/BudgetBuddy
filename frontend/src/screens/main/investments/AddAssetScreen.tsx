@@ -184,7 +184,7 @@ export function AddAssetScreen({ navigation, route }: any) {
       const data = await investmentService.getInstitutions();
       setInstitutions(data);
     } catch (err) {
-      console.error('Failed to load institutions', err);
+      showError(err, 'Failed to load institutions');
     } finally {
       setFetchingInstitutions(false);
     }

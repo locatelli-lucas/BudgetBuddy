@@ -65,7 +65,7 @@ export function NewTransactionScreen({ navigation, route }: any) {
           setSelectedCategoryId(data[0].id);
         }
       } catch (err) {
-        console.error('Failed to load categories', err);
+        showError(err, 'Failed to load categories');
       } finally {
         setFetchingCategories(false);
       }

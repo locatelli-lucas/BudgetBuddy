@@ -1,25 +1,34 @@
 package com.budgetbuddy.infrastructure.fcm;
 
 import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class FcmService {
 
-    // FirebaseMessaging would be injected here if Firebase was initialized
+    private final FirebaseMessaging firebaseMessaging;
+
+    @Autowired
+    public FcmService(@Autowired(required = false) FirebaseMessaging firebaseMessaging) {
+        this.firebaseMessaging = firebaseMessaging;
+    }
     
     public void sendPushNotification(String token, String title, String body, Map<String, String> data) {
         if (token == null || token.isEmpty()) {
             log.debug("Cannot send push notification, user FCM token is null");
+            return;
+        }
+
+        if (firebaseMessaging == null) {
+            log.warn("FirebaseMessaging is not initialized. Mocking notification for token {}: {} - {}", token, title, body);
             return;
         }
 
@@ -39,14 +48,11 @@ public class FcmService {
 
             Message message = messageBuilder.build();
             
-            // In a real scenario with Firebase configured:
-            // String response = FirebaseMessaging.getInstance().send(message);
-            // log.info("Successfully sent FCM message: {}", response);
+            String response = firebaseMessaging.send(message);
+            log.info("Successfully sent FCM message: {}", response);
             
-            log.info("Mock FCM notification sent to token {}: {} - {}", token, title, body);
-
         } catch (Exception e) {
-            log.error("Failed to send FCM notification", e);
+            log.error("Failed to send FCM notification to token {}", token, e);
         }
     }
 }

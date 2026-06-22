@@ -1,5 +1,6 @@
 package com.budgetbuddy.domain.user;
 
+import com.budgetbuddy.domain.notification.dto.NotificationPreferenceRequest;
 import com.budgetbuddy.domain.notification.dto.NotificationPreferenceResponse;
 import com.budgetbuddy.domain.user.dto.ChangePasswordRequest;
 import com.budgetbuddy.domain.user.dto.DeleteAccountRequest;
@@ -69,7 +70,7 @@ public class UserController {
     @PutMapping("/me/notification-preferences")
     public ResponseEntity<ApiResponse<NotificationPreferenceResponse>> updateNotificationPreferences(
             @AuthenticationPrincipal UserDetails userDetails,
-            @Valid @RequestBody NotificationPreferenceResponse request) {
+            @Valid @RequestBody NotificationPreferenceRequest request) {
         return ResponseEntity.ok(ApiResponse.success(
                 userService.updateNotificationPreferences(userDetails.getUsername(), request)));
     }

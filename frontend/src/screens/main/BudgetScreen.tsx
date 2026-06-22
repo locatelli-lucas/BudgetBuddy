@@ -1,3 +1,4 @@
+import { useErrorToast } from '../../contexts/ErrorToastContext';
 import React, { useState, useCallback } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl, Modal, Pressable } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
@@ -14,6 +15,7 @@ const MONTHS = [
 ];
 
 export function BudgetScreen({ navigation }: any) {
+  const { showError } = useErrorToast();
   const insets = useSafeAreaInsets();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [loading, setLoading] = useState(true);
@@ -35,7 +37,7 @@ export function BudgetScreen({ navigation }: any) {
       setBudgets(statusData.filter((b) => b.id !== null));
       setForecast(forecastData);
     } catch (err) {
-      console.error('Failed to load budget data', err);
+      showError(err, 'Failed to load budget data');
     } finally {
       setLoading(false);
     }

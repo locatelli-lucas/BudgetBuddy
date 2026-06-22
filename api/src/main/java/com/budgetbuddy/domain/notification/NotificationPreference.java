@@ -1,20 +1,8 @@
 package com.budgetbuddy.domain.notification;
 
 import com.budgetbuddy.domain.user.User;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
 
 import java.util.UUID;
 
@@ -36,22 +24,46 @@ public class NotificationPreference {
     private User user;
 
     @Builder.Default
-    @Column(name = "budget_alerts", nullable = false)
-    private boolean budgetAlerts = true;
+    @Column(name = "push_enabled", nullable = false)
+    private boolean pushEnabled = true;
 
     @Builder.Default
-    @Column(name = "unusual_spending_alerts", nullable = false)
-    private boolean unusualSpendingAlerts = true;
+    @Column(name = "finance_enabled", nullable = false)
+    private boolean financeEnabled = true;
 
     @Builder.Default
-    @Column(name = "ai_insights", nullable = false)
-    private boolean aiInsights = true;
+    @Column(name = "investment_enabled", nullable = false)
+    private boolean investmentEnabled = true;
 
     @Builder.Default
-    @Column(name = "bill_reminders", nullable = false)
-    private boolean billReminders = true;
+    @Column(name = "news_enabled", nullable = false)
+    private boolean newsEnabled = true;
 
     @Builder.Default
-    @Column(name = "investment_alerts", nullable = false)
-    private boolean investmentAlerts = true;
+    @Column(name = "ai_enabled", nullable = false)
+    private boolean aiEnabled = true;
+
+    @Builder.Default
+    @Column(name = "system_enabled", nullable = false)
+    private boolean systemEnabled = true;
+
+    @Builder.Default
+    @Column(name = "price_alert_enabled", nullable = false)
+    private boolean priceAlertEnabled = true;
+
+    @Builder.Default
+    @Column(name = "dividend_alert_enabled", nullable = false)
+    private boolean dividendAlertEnabled = true;
+
+    @Builder.Default
+    @Column(name = "daily_summary_enabled", nullable = false)
+    private boolean dailySummaryEnabled = true;
+
+    @Builder.Default
+    @Column(name = "weekly_summary_enabled", nullable = false)
+    private boolean weeklySummaryEnabled = true;
+
+    @Builder.Default
+    @Column(name = "monthly_summary_enabled", nullable = false)
+    private boolean monthlySummaryEnabled = true;
 }

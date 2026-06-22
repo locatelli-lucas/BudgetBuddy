@@ -1,124 +1,160 @@
 package com.budgetbuddy.domain.user;
 
 import com.budgetbuddy.shared.exception.BusinessException;
+import com.budgetbuddy.shared.security.EncryptionService;
+import dev.samstevens.totp.code.CodeVerifier;
+import dev.samstevens.totp.code.DefaultCodeGenerator;
+import dev.samstevens.totp.code.DefaultCodeVerifier;
+import dev.samstevens.totp.qr.QrData;
+import dev.samstevens.totp.qr.QrGenerator;
+import dev.samstevens.totp.qr.ZxingPngQrGenerator;
+import dev.samstevens.totp.secret.DefaultSecretGenerator;
+import dev.samstevens.totp.secret.SecretGenerator;
+import dev.samstevens.totp.time.SystemTimeProvider;
+import dev.samstevens.totp.time.TimeProvider;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
+import java.util.List;
 import java.util.Map;
+import java.util.Random;
+import java.util.stream.Collectors;
+
+import static dev.samstevens.totp.util.Utils.getDataUriForImage;
 
 @Service
 @RequiredArgsConstructor
 public class TwoFactorService {
 
     private final UserRepository userRepository;
+    private final UserSecurityRepository userSecurityRepository;
+    private final EncryptionService encryptionService;
+    private final PasswordEncoder passwordEncoder;
 
-    @Transactional(readOnly = true)
+    private final SecretGenerator secretGenerator = new DefaultSecretGenerator();
+    private final QrGenerator qrGenerator = new ZxingPngQrGenerator();
+    private final TimeProvider timeProvider = new SystemTimeProvider();
+    private final CodeVerifier codeVerifier = new DefaultCodeVerifier(new DefaultCodeGenerator(), timeProvider);
+
+    @Transactional
     public Map<String, String> setupTwoFactor(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BusinessException("User not found"));
 
-        if (user.isTwoFactorEnabled()) {
+        UserSecurity security = userSecurityRepository.findByUserId(user.getId())
+                .orElseGet(() -> UserSecurity.builder().user(user).build());
+
+        if (security.isTwoFactorEnabled()) {
             throw new BusinessException("2FA is already enabled. Disable it first to regenerate.");
         }
 
-        byte[] secretBytes = new byte[20];
-        new SecureRandom().nextBytes(secretBytes);
-        String secret = Base64.getEncoder().encodeToString(secretBytes);
+        String secret = secretGenerator.generate();
+        security.setTotpSecret(encryptionService.encrypt(secret));
+        userSecurityRepository.save(security);
 
-        user.setTwoFactorSecret(secret);
-        userRepository.save(user);
+        QrData data = new QrData.Builder()
+                .label(user.getEmail())
+                .secret(secret)
+                .issuer("BudgetBuddy")
+                .build();
 
-        String qrCodeUrl = generateQrCodeUrl(user.getEmail(), secret);
-        return Map.of("secret", secret, "qrCodeUrl", qrCodeUrl);
+        try {
+            byte[] imageData = qrGenerator.generate(data);
+            String qrCodeBase64 = getDataUriForImage(imageData, qrGenerator.getImageMimeType());
+            return Map.of("secret", secret, "qrCode", qrCodeBase64);
+        } catch (Exception e) {
+            throw new BusinessException("Failed to generate QR code");
+        }
     }
 
     @Transactional
-    public void enableTwoFactor(String email, String code) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new BusinessException("User not found"));
+    public List<String> enableTwoFactor(String email, String code) {
+        UserSecurity security = userSecurityRepository.findByUserEmail(email)
+                .orElseThrow(() -> new BusinessException("2FA setup not initiated"));
 
-        if (user.getTwoFactorSecret() == null) {
+        if (security.getTotpSecret() == null) {
             throw new BusinessException("2FA setup not initiated. Call /setup first.");
         }
 
-        if (!verifyTotp(user.getTwoFactorSecret(), code)) {
+        String secret = encryptionService.decrypt(security.getTotpSecret());
+
+        if (!codeVerifier.isValidCode(secret, code)) {
             throw new BusinessException("Invalid verification code");
         }
 
-        user.setTwoFactorEnabled(true);
-        userRepository.save(user);
+        List<String> backupCodes = generateBackupCodes();
+        security.setBackupCodes(backupCodes.stream()
+                .map(passwordEncoder::encode)
+                .collect(Collectors.joining(",")));
+        security.setTwoFactorEnabled(true);
+        userSecurityRepository.save(security);
+
+        return backupCodes;
     }
 
     @Transactional
     public void disableTwoFactor(String email, String code) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new BusinessException("User not found"));
+        UserSecurity security = userSecurityRepository.findByUserEmail(email)
+                .orElseThrow(() -> new BusinessException("User security not found"));
 
-        if (!user.isTwoFactorEnabled()) {
+        if (!security.isTwoFactorEnabled()) {
             throw new BusinessException("2FA is not enabled");
         }
 
-        if (!verifyTotp(user.getTwoFactorSecret(), code)) {
+        String secret = encryptionService.decrypt(security.getTotpSecret());
+
+        if (!codeVerifier.isValidCode(secret, code)) {
             throw new BusinessException("Invalid verification code");
         }
 
-        user.setTwoFactorEnabled(false);
-        user.setTwoFactorSecret(null);
-        userRepository.save(user);
+        security.setTwoFactorEnabled(false);
+        security.setTotpSecret(null);
+        security.setBackupCodes(null);
+        userSecurityRepository.save(security);
     }
 
-    public boolean verifyTotp(String secret, String code) {
-        try {
-            long currentTimeSeconds = System.currentTimeMillis() / 1000;
-            // Allow 30-second window with 1 step tolerance (check current and previous)
-            return checkCode(secret, code, currentTimeSeconds / 30)
-                    || checkCode(secret, code, (currentTimeSeconds / 30) - 1)
-                    || checkCode(secret, code, (currentTimeSeconds / 30) + 1);
-        } catch (Exception e) {
-            return false;
-        }
+    public boolean verifyTotp(String email, String code) {
+        return userSecurityRepository.findByUserEmail(email)
+                .map(security -> {
+                    if (!security.isTwoFactorEnabled()) return false;
+                    
+                    // Check TOTP
+                    String secret = encryptionService.decrypt(security.getTotpSecret());
+                    if (codeVerifier.isValidCode(secret, code)) {
+                        return true;
+                    }
+
+                    // Check Backup Codes
+                    if (security.getBackupCodes() != null) {
+                        List<String> hashedCodes = new ArrayList<>(Arrays.asList(security.getBackupCodes().split(",")));
+                        for (int i = 0; i < hashedCodes.size(); i++) {
+                            if (passwordEncoder.matches(code, hashedCodes.get(i))) {
+                                hashedCodes.remove(i);
+                                security.setBackupCodes(String.join(",", hashedCodes));
+                                userSecurityRepository.save(security);
+                                return true;
+                            }
+                        }
+                    }
+                    return false;
+                }).orElse(false);
     }
 
-    private boolean checkCode(String secret, String code, long counter) throws Exception {
-        byte[] key = Base64.getDecoder().decode(secret);
-        byte[] data = new byte[8];
-        long value = counter;
-        for (int i = 8; i-- > 0; value >>>= 8) {
-            data[i] = (byte) value;
+    private List<String> generateBackupCodes() {
+        List<String> codes = new ArrayList<>();
+        Random random = new Random();
+        for (int i = 0; i < 10; i++) {
+            StringBuilder sb = new StringBuilder();
+            for (int j = 0; j < 8; j++) {
+                sb.append(Integer.toHexString(random.nextInt(16)).toUpperCase());
+            }
+            codes.add(sb.toString());
         }
-
-        Mac mac = Mac.getInstance("HmacSHA1");
-        mac.init(new SecretKeySpec(key, "HmacSHA1"));
-        byte[] hash = mac.doFinal(data);
-
-        int offset = hash[hash.length - 1] & 0xF;
-        long truncatedHash = 0;
-        for (int i = 0; i < 4; ++i) {
-            truncatedHash <<= 8;
-            truncatedHash |= (hash[offset + i] & 0xFF);
-        }
-        truncatedHash &= 0x7FFFFFFF;
-        truncatedHash %= 1_000_000;
-
-        String expectedCode = String.format("%06d", truncatedHash);
-        return expectedCode.equals(code);
-    }
-
-    private String generateQrCodeUrl(String email, String secret) {
-        String encodedIssuer = URLEncoder.encode("BudgetBuddy", StandardCharsets.UTF_8);
-        String encodedEmail = URLEncoder.encode(email, StandardCharsets.UTF_8);
-        String otpAuthUrl = String.format(
-                "otpauth://totp/%s:%s?secret=%s&issuer=%s",
-                encodedIssuer, encodedEmail, secret, encodedIssuer);
-        return String.format(
-                "https://chart.googleapis.com/chart?chs=200x200&chld=M|0&cht=qr&chl=%s",
-                URLEncoder.encode(otpAuthUrl, StandardCharsets.UTF_8));
+        return codes;
     }
 }

@@ -147,7 +147,7 @@ export function InvestmentsScreen({ navigation }: any) {
         <Pressable className="flex-1 bg-black/50" onPress={() => setMenuVisible(false)}>
           <View
             className="absolute right-0 mr-4 w-60 bg-surface-container rounded-xl border border-outline-variant/30 shadow-lg overflow-hidden"
-            style={{ marginTop: insets.top + 60 }}
+            style={{ marginTop: insets.top + 45 }}
           >
             <TouchableOpacity
               className="flex-row items-center gap-3 px-4 py-3 border-b border-outline-variant/20"

@@ -2,13 +2,12 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   View, Text, TouchableOpacity, ScrollView, FlatList,
   ActivityIndicator, Image, TextInput, RefreshControl, Modal,
-  Share,
+  Share, StyleSheet,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Colors } from '../../../constants/colors';
-import { newsService, NewsArticle, NewsAiSummary } from '../../../services/news.service';
+import { newsService, NewsArticle, NewsAiSummary, AssetNewsOverview } from '../../../services/news.service';
 
 type DateFilter = 'ANY' | '24H' | '7D' | '30D';
 type SortOrder = 'NEWEST' | 'OLDEST';
@@ -24,10 +23,9 @@ export function AssetNewsScreen({ navigation, route }: any) {
   const [dateFilter, setDateFilter] = useState<DateFilter>('ANY');
   const [sortOrder, setSortOrder] = useState<SortOrder>('NEWEST');
 
-  // AI Summary State
-  const [aiSummary, setAiSummary] = useState<NewsAiSummary | null>(null);
-  const [generatingSummary, setGeneratingSummary] = useState(false);
-  const [summaryModalVisible, setSummaryModalVisible] = useState(false);
+  // AI & Stats State
+  const [overview, setOverview] = useState<AssetNewsOverview | null>(null);
+  const [loadingOverview, setLoadingOverview] = useState(false);
 
   const loadNews = useCallback(async (query: string) => {
     if (!query.trim()) {
@@ -46,46 +44,35 @@ export function AssetNewsScreen({ navigation, route }: any) {
     }
   }, []);
 
+  const loadOverview = useCallback(async (query: string) => {
+    if (!query.trim()) return;
+    setLoadingOverview(true);
+    try {
+      const data = await newsService.getAssetOverview(query.toUpperCase());
+      setOverview(data);
+    } catch (err) {
+      console.error('Failed to load overview', err);
+    } finally {
+      setLoadingOverview(false);
+    }
+  }, []);
+
   useEffect(() => {
     if (symbolParam) {
       loadNews(symbolParam);
+      loadOverview(symbolParam);
     }
-  }, [symbolParam, loadNews]);
+  }, [symbolParam, loadNews, loadOverview]);
 
   const onRefresh = () => {
     setRefreshing(true);
     loadNews(searchQuery);
+    loadOverview(searchQuery);
   };
 
   const handleSearchSubmit = () => {
     loadNews(searchQuery);
-  };
-
-  const handleGenerateSummary = async () => {
-    if (!searchQuery.trim()) return;
-    setGeneratingSummary(true);
-    try {
-      const summary = await newsService.getAssetSummary(searchQuery.toUpperCase());
-      setAiSummary(summary);
-      setSummaryModalVisible(true);
-    } catch (err) {
-      console.error('Failed to generate summary', err);
-    } finally {
-      setGeneratingSummary(false);
-    }
-  };
-
-  const handleShareSummary = async () => {
-    if (!aiSummary) return;
-    const displayName = nameParam || searchQuery.toUpperCase();
-    const message = `Resumo AI - ${displayName}\n\n` +
-      `Sentimento: ${aiSummary.sentiment}\n\n` +
-      `Principais Desenvolvimentos:\n${aiSummary.keyDevelopments.map(d => `• ${d}`).join('\n')}\n\n` +
-      `Riscos:\n${aiSummary.risks.map(r => `• ${r}`).join('\n')}\n\n` +
-      `Oportunidades:\n${aiSummary.opportunities.map(o => `• ${o}`).join('\n')}\n\n` +
-      `Impacto no Mercado:\n${aiSummary.marketImpact}`;
-
-    await Share.share({ message });
+    loadOverview(searchQuery);
   };
 
   const filteredArticles = useMemo(() => {
@@ -115,38 +102,62 @@ export function AssetNewsScreen({ navigation, route }: any) {
       });
   }, [articles, searchQuery, dateFilter, sortOrder]);
 
+  const sentimentStats = useMemo(() => {
+    if (articles.length === 0) return null;
+    const pos = articles.filter(a => a.sentiment === 'POSITIVE').length;
+    const neg = articles.filter(a => a.sentiment === 'NEGATIVE').length;
+    const neu = articles.filter(a => a.sentiment === 'NEUTRAL').length;
+
+    let overall = 'Neutro';
+    let color = Colors.outline;
+    if (pos > neg && pos > neu) { overall = 'Positivo'; color = Colors.success; }
+    else if (neg > pos && neg > neu) { overall = 'Negativo'; color = Colors.error; }
+
+    return { pos, neg, neu, overall, color };
+  }, [articles]);
+
   const renderArticle = ({ item }: { item: NewsArticle }) => (
     <TouchableOpacity
-      className="bg-surface-container rounded-xl overflow-hidden mb-4 border border-outline-variant/10"
-      onPress={() => navigation.navigate('NewsDetails', { article: item })}
+      style={styles.articleCard}
+      onPress={() => navigation.navigate('NewsDetails', { article: item, symbol: symbolParam || searchQuery })}
     >
-      <View className="p-4">
-        <View className="flex-row justify-between items-center mb-2">
-          <Text className="text-label-sm text-primary font-bold">{item.source}</Text>
-          <Text className="text-[10px] text-on-surface-variant">
-            {new Date(item.publishedAt).toLocaleDateString('pt-BR')}
-          </Text>
+      <View style={styles.articleContent}>
+        <View style={styles.articleMeta}>
+          <Text style={styles.articleSource}>{item.source}</Text>
+          <View style={styles.metaRight}>
+            <View style={[styles.sentimentBadge, { backgroundColor: getSentimentColor(item.sentiment) + '20' }]}>
+              <View style={[styles.sentimentDot, { backgroundColor: getSentimentColor(item.sentiment) }]} />
+              <Text style={[styles.sentimentText, { color: getSentimentColor(item.sentiment) }]}>
+                {item.sentiment === 'POSITIVE' ? 'Positivo' : item.sentiment === 'NEGATIVE' ? 'Negativo' : 'Neutro'}
+              </Text>
+            </View>
+            <Text style={styles.articleDate}>
+              {new Date(item.publishedAt).toLocaleDateString('pt-BR')}
+            </Text>
+          </View>
         </View>
-        <Text className="text-body-md font-bold text-on-surface mb-2" numberOfLines={2}>{item.title}</Text>
-        <Text className="text-label-md text-on-surface-variant" numberOfLines={3}>{item.summary}</Text>
+        <Text style={styles.articleTitle} numberOfLines={2}>{item.title}</Text>
+        <Text style={styles.articleSummary} numberOfLines={2}>{item.summary}</Text>
       </View>
     </TouchableOpacity>
   );
 
+  const getSentimentColor = (s: string) => {
+    if (s === 'POSITIVE') return Colors.success;
+    if (s === 'NEGATIVE') return Colors.error;
+    return Colors.outline;
+  };
+
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header */}
-      <View className="flex-row items-center px-5 h-20 border-b border-outline-variant/10">
-        <TouchableOpacity onPress={() => navigation.goBack()} className="p-2 -ml-2 rounded-full">
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
           <MaterialIcons name="arrow-back" size={26} color={Colors.onSurface} />
         </TouchableOpacity>
-        <View className="ml-2">
-          <Text className="text-headline-md font-bold text-on-surface leading-tight uppercase">
-            {symbolParam ? nameParam : 'Notícias do Mercado'}
-          </Text>
-          <Text className="text-label-md text-on-surface-variant font-bold tracking-widest">
-            {symbolParam ? symbolParam : 'BUSCAR ATIVO'}
-          </Text>
+        <View style={styles.headerText}>
+          <Text style={styles.headerTitle}>{symbolParam ? nameParam : 'Notícias do Mercado'}</Text>
+          <Text style={styles.headerSubtitle}>{symbolParam ? symbolParam : 'BUSCAR ATIVO'}</Text>
         </View>
       </View>
 
@@ -154,64 +165,93 @@ export function AssetNewsScreen({ navigation, route }: any) {
         data={filteredArticles}
         keyExtractor={(item) => item.id}
         renderItem={renderArticle}
-        contentContainerStyle={{ padding: 20, paddingBottom: 100 }}
+        contentContainerStyle={styles.listContent}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.primary} />
         }
         ListHeaderComponent={
-          <View className="mb-6">
-            {/* Action Buttons */}
-            <View className="flex-row gap-3 mb-6">
-              <TouchableOpacity
-                onPress={onRefresh}
-                activeOpacity={0.7}
-                className="flex-1 h-14 bg-surface-variant rounded-2xl flex-row items-center justify-center gap-2"
-              >
-                <MaterialIcons name="refresh" size={20} color={Colors.onSurfaceVariant} />
-                <Text className="text-on-surface-variant font-bold text-label-md">Atualizar</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={handleGenerateSummary}
-                disabled={generatingSummary || articles.length === 0}
-                className="flex-1"
-                activeOpacity={0.8}
-              >
-                <View
-                  className="h-14 flex-row items-center justify-center gap-2 px-4"
-                  style={{
-                    backgroundColor: generatingSummary || articles.length === 0 ? Colors.surfaceVariant : '#7c69ef',
-                    opacity: generatingSummary || articles.length === 0 ? 0.6 : 1,
-                    borderRadius: 16
-                  }}
-                >
-                  {generatingSummary ? (
-                    <ActivityIndicator color="#1a1c2e" size="small" />
-                  ) : (
-                    <MaterialIcons
-                      name="auto-awesome"
-                      size={20}
-                      color={generatingSummary || articles.length === 0 ? Colors.onSurfaceVariant : "#1a1c2e"}
-                    />
-                  )}
-                  <Text
-                    className="font-bold text-label-md"
-                    style={{
-                      color: generatingSummary || articles.length === 0 ? Colors.onSurfaceVariant : '#1a1c2e'
-                    }}
-                  >
-                    Resumo com IA
-                  </Text>
+          <View style={styles.listHeader}>
+             {/* Stats Bar */}
+             {sentimentStats && (
+              <View style={styles.statsBar}>
+                <View style={styles.statItem}>
+                  <Text style={styles.statLabel}>Artigos</Text>
+                  <Text style={styles.statValue}>{articles.length}</Text>
                 </View>
-              </TouchableOpacity>
-            </View>
+                <View style={styles.statDivider} />
+                <View style={styles.statItem}>
+                  <Text style={styles.statLabel}>Sentimento</Text>
+                  <Text style={[styles.statValue, { color: sentimentStats.color }]}>{sentimentStats.overall}</Text>
+                </View>
+                <View style={styles.statDivider} />
+                <View style={styles.statItem}>
+                  <Text style={styles.statLabel}>Atualizado</Text>
+                  <Text style={styles.statValue}>Agora</Text>
+                </View>
+              </View>
+            )}
+
+            {/* Weekly Overview Card */}
+            {(symbolParam || searchQuery) && (
+              <View style={styles.overviewCard}>
+                <View style={styles.overviewHeader}>
+                  <View style={styles.overviewTitleRow}>
+                    <MaterialIcons name="auto-awesome" size={20} color={Colors.primary} />
+                    <Text style={styles.overviewTitle}>Panorama Semanal</Text>
+                  </View>
+                  {loadingOverview ? (
+                    <ActivityIndicator size="small" color={Colors.primary} />
+                  ) : overview && (
+                    <View style={[styles.sentimentBadge, { backgroundColor: getSentimentColor(overview.overallSentiment) + '20' }]}>
+                      <Text style={[styles.sentimentText, { color: getSentimentColor(overview.overallSentiment) }]}>
+                        {overview.overallSentiment === 'POSITIVE' ? 'Positivo' : overview.overallSentiment === 'NEGATIVE' ? 'Negativo' : 'Neutro'}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+
+                {loadingOverview ? (
+                  <View style={styles.overviewLoading}>
+                    <Text style={styles.loadingText}>Gerando análise inteligente...</Text>
+                  </View>
+                ) : overview ? (
+                  <View style={styles.overviewContent}>
+                    <Text style={styles.overviewSummary}>{overview.summary}</Text>
+
+                    <View style={styles.overviewGrid}>
+                      <View style={styles.overviewSection}>
+                        <Text style={styles.sectionLabel}>Tópicos Principais</Text>
+                        {overview.mainTopics.map((t, i) => (
+                          <Text key={i} style={styles.bulletItem}>• {t}</Text>
+                        ))}
+                      </View>
+                    </View>
+
+                    <View style={styles.overviewRow}>
+                       <View style={styles.halfSection}>
+                        <Text style={[styles.sectionLabel, { color: Colors.error }]}>Riscos</Text>
+                        {overview.risks.slice(0, 2).map((r, i) => (
+                          <Text key={i} style={styles.bulletItem}>• {r}</Text>
+                        ))}
+                      </View>
+                      <View style={styles.halfSection}>
+                        <Text style={[styles.sectionLabel, { color: Colors.success }]}>Oportunidades</Text>
+                        {overview.opportunities.slice(0, 2).map((o, i) => (
+                          <Text key={i} style={styles.bulletItem}>• {o}</Text>
+                        ))}
+                      </View>
+                    </View>
+                  </View>
+                ) : null}
+              </View>
+            )}
 
             {/* Search & Filters */}
-            <View className="flex-row gap-2 mb-6">
-              <View className="flex-1 bg-surface-container-low rounded-xl px-4 flex-row items-center border border-outline-variant/10">
+            <View style={styles.searchRow}>
+              <View style={styles.searchContainer}>
                 <MaterialIcons name="search" size={22} color={Colors.outline} />
                 <TextInput
-                  className="flex-1 h-12 ml-2 text-on-surface text-label-md"
+                  style={styles.searchInput}
                   placeholder="Buscar ticker (ex: PETR4)..."
                   placeholderTextColor={Colors.outline}
                   value={searchQuery}
@@ -222,26 +262,30 @@ export function AssetNewsScreen({ navigation, route }: any) {
                 />
               </View>
               <TouchableOpacity
-                className="bg-surface-container-low w-12 h-12 rounded-xl items-center justify-center border border-outline-variant/10"
+                style={styles.filterButton}
                 onPress={() => setSortOrder(sortOrder === 'NEWEST' ? 'OLDEST' : 'NEWEST')}
               >
                 <MaterialIcons name="filter-list" size={22} color={Colors.outline} />
               </TouchableOpacity>
             </View>
 
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              <View className="flex-row gap-2">
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filtersScroll}>
+              <View style={styles.filtersContainer}>
                 {(['ANY', '24H', '7D', '30D'] as DateFilter[]).map((f) => {
                   const active = dateFilter === f;
                   return (
                     <TouchableOpacity
                       key={f}
                       onPress={() => setDateFilter(f)}
-                       className={`px-4 py-2 rounded-full border ${
-                           active ? 'bg-white border-transparent' : 'bg-surface-container-low border-outline-variant/30'
-                      }`}
+                      style={[
+                        styles.filterChip,
+                        active ? styles.filterChipActive : styles.filterChipInactive
+                      ]}
                     >
-                      <Text className={`text-[12px] font-bold ${active ? 'text-black' : 'text-on-surface-variant'}`}>
+                      <Text style={[
+                        styles.filterChipText,
+                        active ? styles.filterChipTextActive : styles.filterChipTextInactive
+                      ]}>
                         {f === 'ANY' ? 'Sempre' : f === '24H' ? 'Últimas 24h' : f === '7D' ? '7 dias' : '30 dias'}
                       </Text>
                     </TouchableOpacity>
@@ -253,110 +297,304 @@ export function AssetNewsScreen({ navigation, route }: any) {
         }
         ListEmptyComponent={
           loading ? (
-            <View className="py-20 items-center">
+            <View style={styles.emptyState}>
               <ActivityIndicator color={Colors.primary} size="large" />
-              <Text className="text-on-surface-variant text-label-md mt-4">Carregando notícias...</Text>
+              <Text style={styles.emptyText}>Carregando notícias...</Text>
             </View>
           ) : (
-            <View className="py-20 items-center">
-              <MaterialIcons name="newspaper" size={48} color={Colors.outline} />
-              <Text className="text-on-surface-variant text-body-md mt-4">Nenhuma notícia encontrada.</Text>
+            <View style={styles.emptyState}>
+              <MaterialIcons name="newspaper" size={64} color={Colors.outline} />
+              <Text style={styles.emptyTitle}>Nenhuma notícia encontrada</Text>
+              <Text style={styles.emptySubtitle}>Tente buscar por outro ativo ou termo.</Text>
             </View>
           )
         }
       />
-
-      {/* AI Summary Modal */}
-      <Modal
-        visible={summaryModalVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setSummaryModalVisible(false)}
-      >
-        <View className="flex-1 justify-end bg-black/60">
-          <View className="bg-surface rounded-t-3xl p-6 max-h-[85%]">
-            <View className="flex-row justify-between items-center mb-6">
-              <View className="flex-row items-center gap-2">
-                <MaterialIcons name="auto-awesome" size={24} color={Colors.primary} />
-                <Text className="text-headline-md font-bold text-on-surface">Resumo IA</Text>
-              </View>
-              <TouchableOpacity onPress={() => setSummaryModalVisible(false)} className="p-2">
-                <MaterialIcons name="close" size={24} color={Colors.onSurface} />
-              </TouchableOpacity>
-            </View>
-
-            {aiSummary && (
-              <ScrollView showsVerticalScrollIndicator={false}>
-                <View className="mb-6">
-                  <Text className="text-label-md text-on-surface-variant uppercase tracking-wider mb-2">Sentimento Geral</Text>
-                  <View className={`self-start px-3 py-1 rounded-full flex-row items-center gap-1.5 ${
-                    aiSummary.sentiment === 'POSITIVE' ? 'bg-success/10' :
-                    aiSummary.sentiment === 'NEGATIVE' ? 'bg-error/10' : 'bg-outline-variant/20'
-                  }`}>
-                    <View className={`w-2.5 h-2.5 rounded-full ${
-                      aiSummary.sentiment === 'POSITIVE' ? 'bg-success' :
-                      aiSummary.sentiment === 'NEGATIVE' ? 'bg-error' : 'bg-outline'
-                    }`} />
-                    <Text className={`text-label-md font-bold ${
-                      aiSummary.sentiment === 'POSITIVE' ? 'text-success' :
-                      aiSummary.sentiment === 'NEGATIVE' ? 'text-error' : 'text-on-surface-variant'
-                    }`}>
-                      {aiSummary.sentiment === 'POSITIVE' ? 'Positivo' : aiSummary.sentiment === 'NEGATIVE' ? 'Negativo' : 'Neutro'}
-                    </Text>
-                  </View>
-                </View>
-
-                <View className="mb-6">
-                  <Text className="text-label-md text-on-surface-variant uppercase tracking-wider mb-3">Principais Desenvolvimentos</Text>
-                  {aiSummary.keyDevelopments.map((item, index) => (
-                    <View key={index} className="flex-row items-start gap-2 mb-2">
-                      <Text className="text-primary font-bold mt-0.5">•</Text>
-                      <Text className="text-body-md text-on-surface flex-1">{item}</Text>
-                    </View>
-                  ))}
-                </View>
-
-                {aiSummary.risks.length > 0 && (
-                  <View className="mb-6">
-                    <Text className="text-label-md text-error uppercase tracking-wider mb-3">Riscos Potenciais</Text>
-                    {aiSummary.risks.map((item, index) => (
-                      <View key={index} className="flex-row items-start gap-2 mb-2">
-                        <Text className="text-error font-bold mt-0.5">•</Text>
-                        <Text className="text-body-md text-on-surface flex-1">{item}</Text>
-                      </View>
-                    ))}
-                  </View>
-                )}
-
-                {aiSummary.opportunities.length > 0 && (
-                  <View className="mb-6">
-                    <Text className="text-label-md text-success uppercase tracking-wider mb-3">Oportunidades</Text>
-                    {aiSummary.opportunities.map((item, index) => (
-                      <View key={index} className="flex-row items-start gap-2 mb-2">
-                        <Text className="text-success font-bold mt-0.5">•</Text>
-                        <Text className="text-body-md text-on-surface flex-1">{item}</Text>
-                      </View>
-                    ))}
-                  </View>
-                )}
-
-                <View className="mb-8 p-4 bg-surface-container-low rounded-2xl border border-outline-variant/10">
-                  <Text className="text-label-md text-on-surface-variant uppercase tracking-wider mb-2">Impacto no Mercado</Text>
-                  <Text className="text-body-md text-on-surface leading-6">{aiSummary.marketImpact}</Text>
-                </View>
-
-                <TouchableOpacity
-                  onPress={handleShareSummary}
-                  className="w-full h-14 bg-primary-container rounded-xl flex-row items-center justify-center gap-2 mb-4"
-                >
-                  <MaterialIcons name="share" size={20} color={Colors.onPrimaryContainer} />
-                  <Text className="text-on-primary-container font-bold text-label-md">Compartilhar Resumo</Text>
-                </TouchableOpacity>
-              </ScrollView>
-            )}
-          </View>
-        </View>
-      </Modal>
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#11131b',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    height: 80,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(67, 70, 85, 0.2)',
+  },
+  backButton: {
+    padding: 8,
+    marginLeft: -8,
+  },
+  headerText: {
+    marginLeft: 12,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#e1e2ed',
+    textTransform: 'uppercase',
+  },
+  headerSubtitle: {
+    fontSize: 12,
+    color: '#c3c6d7',
+    fontWeight: 'bold',
+    letterSpacing: 1,
+  },
+  listContent: {
+    padding: 20,
+    paddingBottom: 100,
+  },
+  listHeader: {
+    marginBottom: 24,
+  },
+  statsBar: {
+    flexDirection: 'row',
+    backgroundColor: '#1d1f27',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(67, 70, 85, 0.2)',
+  },
+  statItem: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  statDivider: {
+    width: 1,
+    height: '100%',
+    backgroundColor: 'rgba(67, 70, 85, 0.3)',
+  },
+  statLabel: {
+    fontSize: 10,
+    color: '#c3c6d7',
+    textTransform: 'uppercase',
+    marginBottom: 4,
+  },
+  statValue: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#e1e2ed',
+  },
+  overviewCard: {
+    backgroundColor: '#1d1f27',
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(180, 197, 255, 0.1)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  overviewHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  overviewTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  overviewTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#b4c5ff',
+  },
+  overviewLoading: {
+    padding: 20,
+    alignItems: 'center',
+  },
+  loadingText: {
+    color: '#c3c6d7',
+    fontSize: 14,
+    fontStyle: 'italic',
+  },
+  overviewContent: {
+    gap: 16,
+  },
+  overviewSummary: {
+    fontSize: 14,
+    color: '#e1e2ed',
+    lineHeight: 22,
+  },
+  overviewGrid: {
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(67, 70, 85, 0.2)',
+    paddingTop: 16,
+  },
+  overviewSection: {
+    marginBottom: 8,
+  },
+  sectionLabel: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#c3c6d7',
+    textTransform: 'uppercase',
+    marginBottom: 8,
+  },
+  bulletItem: {
+    fontSize: 13,
+    color: '#c3c6d7',
+    marginBottom: 4,
+  },
+  overviewRow: {
+    flexDirection: 'row',
+    gap: 16,
+  },
+  halfSection: {
+    flex: 1,
+  },
+  searchRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 16,
+  },
+  searchContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#191b23',
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    height: 56,
+    borderWidth: 1,
+    borderColor: 'rgba(67, 70, 85, 0.2)',
+  },
+  searchInput: {
+    flex: 1,
+    marginLeft: 12,
+    color: '#e1e2ed',
+    fontSize: 14,
+  },
+  filterButton: {
+    width: 56,
+    height: 56,
+    backgroundColor: '#191b23',
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(67, 70, 85, 0.2)',
+  },
+  filtersScroll: {
+    marginBottom: 8,
+  },
+  filtersContainer: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  filterChip: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
+    borderWidth: 1,
+  },
+  filterChipActive: {
+    backgroundColor: '#ffffff',
+    borderColor: '#ffffff',
+  },
+  filterChipInactive: {
+    backgroundColor: '#32343d',
+    borderColor: 'transparent',
+  },
+  filterChipText: {
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  filterChipTextActive: {
+    color: '#11131b',
+  },
+  filterChipTextInactive: {
+    color: '#c3c6d7',
+  },
+  articleCard: {
+    backgroundColor: '#1d1f27',
+    borderRadius: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(67, 70, 85, 0.2)',
+    overflow: 'hidden',
+  },
+  articleContent: {
+    padding: 16,
+  },
+  articleMeta: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  articleSource: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#b4c5ff',
+  },
+  metaRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  sentimentBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    gap: 4,
+  },
+  sentimentDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
+  sentimentText: {
+    fontSize: 10,
+    fontWeight: 'bold',
+  },
+  articleDate: {
+    fontSize: 10,
+    color: '#c3c6d7',
+  },
+  articleTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#e1e2ed',
+    marginBottom: 8,
+    lineHeight: 22,
+  },
+  articleSummary: {
+    fontSize: 14,
+    color: '#c3c6d7',
+    lineHeight: 20,
+  },
+  emptyState: {
+    paddingVertical: 60,
+    alignItems: 'center',
+  },
+  emptyText: {
+    color: '#c3c6d7',
+    marginTop: 16,
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#e1e2ed',
+    marginTop: 16,
+  },
+  emptySubtitle: {
+    fontSize: 14,
+    color: '#c3c6d7',
+    marginTop: 8,
+  },
+});

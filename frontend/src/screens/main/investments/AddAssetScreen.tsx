@@ -435,7 +435,7 @@ export function AddAssetScreen({ navigation, route }: any) {
           onRequestClose={() => setMenuVisible(false)}
         >
           <Pressable className="flex-1 bg-black/50" onPress={() => setMenuVisible(false)}>
-            <View className="absolute top-0 right-0 mt-14 mr-4 w-56 bg-surface-container rounded-xl border border-outline-variant/30 shadow-lg overflow-hidden">
+            <View className="absolute top-0 right-0 mt-10 mr-4 w-56 bg-surface-container rounded-xl border border-outline-variant/30 shadow-lg overflow-hidden">
               <TouchableOpacity
                 className="flex-row items-center gap-3 px-4 py-3 border-b border-outline-variant/20"
                 onPress={() => {

@@ -26,6 +26,7 @@ public class InvestmentService {
     private final InvestmentRepository investmentRepository;
     private final UserService userService;
     private final MarketService marketService;
+    private final PortfolioSnapshotService snapshotService;
 
     @Transactional(readOnly = true)
     public List<InvestmentResponse> getInvestments(String email) {
@@ -50,6 +51,10 @@ public class InvestmentService {
                 .build();
 
         investment = investmentRepository.save(investment);
+        
+        // Refresh snapshots after update
+        snapshotService.generateSnapshotForUser(user);
+        
         return mapToResponseWithMarketData(investment);
     }
 
@@ -67,6 +72,10 @@ public class InvestmentService {
         investment.setPurchaseDate(request.getPurchaseDate());
 
         investment = investmentRepository.save(investment);
+        
+        // Refresh snapshots after update
+        snapshotService.generateSnapshotForUser(user);
+        
         return mapToResponseWithMarketData(investment);
     }
 
@@ -76,6 +85,9 @@ public class InvestmentService {
         Investment investment = investmentRepository.findByIdAndUserId(id, user.getId())
                 .orElseThrow(() -> new EntityNotFoundException("Investment", id.toString()));
         investmentRepository.delete(investment);
+        
+        // Refresh snapshots after deletion
+        snapshotService.generateSnapshotForUser(user);
     }
 
     @Transactional(readOnly = true)

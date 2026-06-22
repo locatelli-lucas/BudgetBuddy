@@ -38,4 +38,18 @@ public class GroqAiProvider implements AiProvider {
         log.info("Mock Groq chat with user: {}", userId);
         return "Olá! Sou seu assistente financeiro alimentado pelo Groq Llama-3.1.";
     }
+
+    @Override
+    public String generateSummary(String prompt) {
+        log.info("Mock Groq generating summary");
+        return """
+                {
+                  "sentiment": "POSITIVE",
+                  "keyDevelopments": ["Exemplo de desenvolvimento positivo 1", "Exemplo de desenvolvimento positivo 2"],
+                  "risks": ["Risco de exemplo 1"],
+                  "opportunities": ["Oportunidade de exemplo 1"],
+                  "marketImpact": "Impacto positivo esperado no curto prazo."
+                }
+                """;
+    }
 }

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, ScrollView, FlatList,
-  Alert, ActivityIndicator, KeyboardAvoidingView, Platform, Image,
+  Alert, ActivityIndicator, KeyboardAvoidingView, Platform, Image, Modal, Pressable,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -26,6 +26,12 @@ function formatMoney(val: number): string {
 function formatDateDisplay(dateStr: string): string {
   const [y, m, d] = dateStr.split('-').map(Number);
   return `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}/${y}`;
+}
+
+function formatCurrencyInput(value: string): string {
+  const digits = value.replace(/\D/g, '');
+  const numberValue = parseInt(digits || '0', 10);
+  return (numberValue / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
 }
 
 function getAssetLogoUrl(ticker: string): string {
@@ -77,19 +83,24 @@ function simplifyAssetName(name: string): string {
 /** Detect asset type from symbol */
 function detectType(symbol: string): InvestmentType {
   const s = symbol.toUpperCase();
-  if (s.endsWith('-USD') || s.startsWith('BTC') || s.startsWith('ETH')) return 'CRYPTO';
-  if (s.match(/[A-Z]{4}11$/)) return 'FII';
-  if (s.match(/[A-Z]{4}11$/)) return 'ETF'; // fall through to FII for Brazilian ETFs
+  if (s.endsWith('-USD') || s.startsWith('BTC') || s.startsWith('ETH') || s.includes('USDT')) return 'CRYPTO';
+
+  // Common Brazilian ETFs (terminating in 11)
+  const commonETFs = ['BOVA11', 'IVVB11', 'SMAL11', 'HASH11', 'XINA11', 'ECOO11', 'BRAX11'];
+  if (commonETFs.includes(s.replace('.SA', ''))) return 'ETF';
+
+  if (s.match(/[A-Z]{4}11$/) || s.match(/[A-Z]{4}11\.SA$/)) return 'FII';
   if (s.endsWith('.SA') && s.match(/[A-Z]{4}\d/)) return 'STOCK';
   return 'STOCK';
 }
 
 // ─── Type Config ─────────────────────────────────────────────────────────
 
-const ASSET_CONFIGS: AssetTypeConfig[] = [
+const ASSET_CONFIGS: (AssetTypeConfig & { searchPlaceholder: string })[] = [
   {
     type: 'STOCK', label: 'Ações', icon: 'show-chart',
     description: 'Acompanhe ações e valorização de capital.',
+    searchPlaceholder: 'Digite o código ou nome (ex: PETR4, VALE3)',
     showQuantity: true, showAvgPrice: true, showTicker: true,
     showExchange: false, showWallet: false,
     showFixedIncomeFields: false, fractionalQuantity: false,
@@ -97,6 +108,7 @@ const ASSET_CONFIGS: AssetTypeConfig[] = [
   {
     type: 'FII', label: 'FIIs', icon: 'domain',
     description: 'Monitore rendimentos e performance de fundos imobiliários.',
+    searchPlaceholder: 'Busque por FIIs (ex: HGLG11, MXRF11)',
     showQuantity: true, showAvgPrice: true, showTicker: true,
     showExchange: false, showWallet: false,
     showFixedIncomeFields: false, fractionalQuantity: false,
@@ -104,6 +116,7 @@ const ASSET_CONFIGS: AssetTypeConfig[] = [
   {
     type: 'ETF', label: 'ETFs', icon: 'pie-chart',
     description: 'Acompanhe exposição diversificada ao mercado.',
+    searchPlaceholder: 'Busque por ETFs (ex: IVVB11, BOVA11)',
     showQuantity: true, showAvgPrice: true, showTicker: true,
     showExchange: false, showWallet: false,
     showFixedIncomeFields: false, fractionalQuantity: false,
@@ -111,6 +124,7 @@ const ASSET_CONFIGS: AssetTypeConfig[] = [
   {
     type: 'CRYPTO', label: 'Cripto', icon: 'currency-bitcoin',
     description: 'Acompanhe cotações de exchanges e carteiras.',
+    searchPlaceholder: 'Busque criptomoedas (ex: BTC, ETH, SOL)',
     showQuantity: true, showAvgPrice: true, showTicker: true,
     showExchange: true, showWallet: true,
     showFixedIncomeFields: false, fractionalQuantity: true,
@@ -118,6 +132,7 @@ const ASSET_CONFIGS: AssetTypeConfig[] = [
   {
     type: 'FIXED_INCOME', label: 'Renda Fixa', icon: 'account-balance',
     description: 'Simule retornos baseados em contratos de renda fixa.',
+    searchPlaceholder: '',
     showQuantity: false, showAvgPrice: false, showTicker: false,
     showExchange: false, showWallet: false,
     showFixedIncomeFields: true, fractionalQuantity: false,
@@ -144,6 +159,7 @@ export function AddAssetScreen({ navigation, route }: any) {
   const [loading, setLoading] = useState(false);
   const [fetchingInstitutions, setFetchingInstitutions] = useState(true);
   const [toastVisible, setToastVisible] = useState(false);
+  const [menuVisible, setMenuVisible] = useState(false);
   const { showError } = useErrorToast();
 
   // Search
@@ -188,7 +204,14 @@ export function AddAssetScreen({ navigation, route }: any) {
       setSearchQuery(editingAsset.ticker);
       setSelectedType(editingAsset.type);
       setQuantity(String(editingAsset.quantity));
-      setAvgPrice(String(editingAsset.avgPrice));
+
+      const formattedAvgPrice = editingAsset.avgPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+      setAvgPrice(formattedAvgPrice);
+
+      if (editingAsset.type === 'FIXED_INCOME') {
+        setFiInvestedAmount(formattedAvgPrice);
+      }
+
       setPurchaseDate(editingAsset.purchaseDate);
       setSelectedInstitutionId(editingAsset.institutionId || '');
     }
@@ -196,7 +219,11 @@ export function AddAssetScreen({ navigation, route }: any) {
 
   // ─── Calculations ───────────────────────────────────────────────────
   const qty = parseFloat(quantity.replace(',', '.'));
-  const price = parseFloat(avgPrice.replace(',', '.'));
+  const parseCurrency = (val: string) => {
+    const cleaned = val.replace(/\./g, '').replace(',', '.');
+    return parseFloat(cleaned);
+  };
+  const price = parseCurrency(avgPrice);
   const invested = !isNaN(qty) && !isNaN(price) ? qty * price : 0;
   const curPrice = currentPrice ?? price;
   const currentVal = !isNaN(qty) ? qty * curPrice : 0;
@@ -204,7 +231,7 @@ export function AddAssetScreen({ navigation, route }: any) {
   const profitPct = invested > 0 ? (profit / invested) * 100 : 0;
 
   // Fixed income sim
-  const fiInvested = parseFloat(fiInvestedAmount.replace(',', '.'));
+  const fiInvested = parseCurrency(fiInvestedAmount);
   const fiRateNum = parseFloat(fiRate.replace(',', '.'));
   const fiMaturityEst = useMemo(() => {
     if (isNaN(fiInvested) || isNaN(fiRateNum) || !fiMaturityDate) return null;
@@ -243,8 +270,19 @@ export function AddAssetScreen({ navigation, route }: any) {
       setSearching(true);
       try {
         const results = await investmentService.searchMarketAssets(text.trim());
-        setSearchResults(results);
-        setShowResults(results.length > 0);
+
+        // Filter results based on selected category
+        const filtered = results.filter(r => {
+          const detected = detectType(r.symbol);
+          // Special case: FIIs and ETFs are often similar in code, let's be more flexible
+          if (selectedType === 'FII' || selectedType === 'ETF') {
+            return detected === 'FII' || detected === 'ETF';
+          }
+          return detected === selectedType;
+        });
+
+        setSearchResults(filtered);
+        setShowResults(filtered.length > 0);
         setMarketUnavailable(false);
       } catch {
         setSearchResults([]);
@@ -254,7 +292,7 @@ export function AddAssetScreen({ navigation, route }: any) {
         setSearching(false);
       }
     }, 400);
-  }, []);
+  }, [editingAsset]);
 
   const handleSelectAsset = useCallback(async (result: AssetSearchResult) => {
     setTicker(result.symbol);
@@ -269,7 +307,10 @@ export function AddAssetScreen({ navigation, route }: any) {
     try {
       const quote = await investmentService.getMarketQuote(result.symbol);
       setCurrentPrice(quote.price);
-      if (!avgPrice) setAvgPrice(quote.price.toFixed(2).replace('.', ','));
+      if (!avgPrice || avgPrice === '0,00') {
+        const formattedPrice = quote.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+        setAvgPrice(formattedPrice);
+      }
     } catch {
       // Keep current price null
     }
@@ -283,7 +324,11 @@ export function AddAssetScreen({ navigation, route }: any) {
     }
 
     const parsedQty = parseFloat(quantity.replace(',', '.'));
-    const parsedPrice = parseFloat(avgPrice.replace(',', '.'));
+    const parseCurrencySave = (val: string) => {
+      const cleaned = val.replace(/\./g, '').replace(',', '.');
+      return parseFloat(cleaned);
+    };
+    const parsedPrice = parseCurrencySave(avgPrice);
 
     if (config.showQuantity && (isNaN(parsedQty) || parsedQty <= 0)) {
       showError(new Error('Informe uma quantidade válida'));
@@ -294,7 +339,7 @@ export function AddAssetScreen({ navigation, route }: any) {
       return;
     }
     if (config.showFixedIncomeFields) {
-      const fiAmt = parseFloat(fiInvestedAmount.replace(',', '.'));
+      const fiAmt = parseCurrencySave(fiInvestedAmount);
       if (isNaN(fiAmt) || fiAmt <= 0) {
         showError(new Error('Informe o valor investido'));
         return;
@@ -313,7 +358,7 @@ export function AddAssetScreen({ navigation, route }: any) {
             name: name.trim() || 'Renda Fixa',
             type: 'FIXED_INCOME',
             quantity: 1,
-            avgPrice: parseFloat(fiInvestedAmount.replace(',', '.')),
+            avgPrice: parseCurrencySave(fiInvestedAmount),
             purchaseDate,
             institutionId: selectedInstitutionId || undefined,
           }
@@ -376,11 +421,44 @@ export function AddAssetScreen({ navigation, route }: any) {
             {investmentId ? 'Editar Ativo' : 'Adicionar Ativo'}
           </Text>
           {investmentId ? (
-            <TouchableOpacity onPress={handleDelete} className="p-2">
-              <MaterialIcons name="delete" size={24} color={Colors.error} />
+            <TouchableOpacity onPress={() => setMenuVisible(true)} className="p-2">
+              <MaterialIcons name="more-vert" size={24} color={Colors.primary} />
             </TouchableOpacity>
           ) : <View className="w-10" />}
         </View>
+
+        {/* Overflow Menu Modal */}
+        <Modal
+          visible={menuVisible}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setMenuVisible(false)}
+        >
+          <Pressable className="flex-1 bg-black/50" onPress={() => setMenuVisible(false)}>
+            <View className="absolute top-0 right-0 mt-14 mr-4 w-56 bg-surface-container rounded-xl border border-outline-variant/30 shadow-lg overflow-hidden">
+              <TouchableOpacity
+                className="flex-row items-center gap-3 px-4 py-3 border-b border-outline-variant/20"
+                onPress={() => {
+                  setMenuVisible(false);
+                  navigation.navigate('AssetNews', { symbol: ticker, name, type: selectedType });
+                }}
+              >
+                <MaterialIcons name="newspaper" size={20} color={Colors.onSurface} />
+                <Text className="text-body-md text-on-surface">Notícias do Ativo</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                className="flex-row items-center gap-3 px-4 py-3"
+                onPress={() => {
+                  setMenuVisible(false);
+                  handleDelete();
+                }}
+              >
+                <MaterialIcons name="delete" size={20} color={Colors.error} />
+                <Text className="text-body-md text-error">Deletar Ativo</Text>
+              </TouchableOpacity>
+            </View>
+          </Pressable>
+        </Modal>
 
         <ScrollView
           className="flex-1"
@@ -390,77 +468,81 @@ export function AddAssetScreen({ navigation, route }: any) {
         >
           {/* ─── Summary Card ────────────────────────────────────────── */}
           {(ticker !== '' || name !== '') && (
-            <View className="mx-5 mt-4 bg-[#1E293B] rounded-xl p-4 border border-outline-variant/30">
-              <View className="flex-row items-center gap-3 mb-3">
-                <View className="bg-primary-container px-2 py-1 rounded-full">
-                  <Text className="text-label-sm text-on-primary-container font-medium">{config.label}</Text>
-                </View>
-                <Text className="text-body-md text-on-surface font-medium flex-1" numberOfLines={1}>
-                  {name || ticker || '—'}
-                </Text>
-              </View>
-              <View className="flex-row justify-between">
-                <View>
-                  <Text className="text-label-sm text-on-surface-variant">Total investido</Text>
-                  <Text className="text-body-lg text-on-surface font-semibold">{formatMoney(invested)}</Text>
-                </View>
-                {!config.showFixedIncomeFields && currentPrice && (
-                  <View>
-                    <Text className="text-label-sm text-on-surface-variant">Valor atual</Text>
-                    <Text className="text-body-lg text-on-surface font-semibold">{formatMoney(currentVal)}</Text>
+            <View>
+              <View className="mx-5 mt-4 bg-[#1E293B] rounded-xl p-4 border border-outline-variant/30">
+                <View className="flex-row items-center gap-3 mb-3">
+                  <View className="bg-primary-container px-2 py-1 rounded-full">
+                    <Text className="text-label-sm text-on-primary-container font-medium">{config.label}</Text>
                   </View>
-                )}
-                <View className="items-end">
-                  <Text className="text-label-sm text-on-surface-variant">
-                    {config.showFixedIncomeFields ? 'Estimado no venc.' : 'Lucro'}
+                  <Text className="text-body-md text-on-surface font-medium flex-1" numberOfLines={1}>
+                    {name || ticker || '—'}
                   </Text>
-                  <Text className={`text-body-lg font-semibold ${profit >= 0 ? 'text-primary' : 'text-error'}`}>
-                    {config.showFixedIncomeFields
-                      ? fiMaturityEst ? formatMoney(fiMaturityEst) : '—'
-                      : `${profit >= 0 ? '+' : ''}${profitPct.toFixed(1)}%`
-                    }
-                  </Text>
+                </View>
+                <View className="flex-row justify-between">
+                  <View>
+                    <Text className="text-label-sm text-on-surface-variant">Total investido</Text>
+                    <Text className="text-body-lg text-on-surface font-semibold">{formatMoney(invested)}</Text>
+                  </View>
+                  {!config.showFixedIncomeFields && currentPrice && (
+                    <View>
+                      <Text className="text-label-sm text-on-surface-variant">Valor atual</Text>
+                      <Text className="text-body-lg text-on-surface font-semibold">{formatMoney(currentVal)}</Text>
+                    </View>
+                  )}
+                  <View className="items-end">
+                    <Text className="text-label-sm text-on-surface-variant">
+                      {config.showFixedIncomeFields ? 'Estimado no venc.' : 'Lucro'}
+                    </Text>
+                    <Text className={`text-body-lg font-semibold ${profit >= 0 ? 'text-primary' : 'text-error'}`}>
+                      {config.showFixedIncomeFields
+                        ? fiMaturityEst ? formatMoney(fiMaturityEst) : '—'
+                        : `${profit >= 0 ? '+' : ''}${profitPct.toFixed(1)}%`
+                      }
+                    </Text>
+                  </View>
                 </View>
               </View>
             </View>
           )}
 
           {/* ─── Category Selector ───────────────────────────────────── */}
-          <View className="px-5 mt-4 mb-4">
-            <Text className="text-label-md text-on-surface-variant uppercase tracking-wider mb-3">Categoria</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              <View className="flex-row gap-2">
-                {ASSET_CONFIGS.map((cfg) => {
-                  const active = selectedType === cfg.type;
-                  return (
-                    <TouchableOpacity
-                      key={cfg.type}
-                      onPress={() => setSelectedType(cfg.type)}
-                      className={`h-10 px-4 rounded-xl flex-row items-center gap-1.5 border ${
-                        active ? 'bg-primary-container border-transparent' : 'bg-surface-container border-outline-variant/30'
-                      }`}
-                    >
-                      <MaterialIcons name={cfg.icon as any} size={18} color={active ? Colors.onPrimaryContainer : Colors.primary} />
-                      <Text className={`text-label-md ${active ? 'text-on-primary-container font-semibold' : 'text-on-surface'}`}>
-                        {cfg.label}
-                      </Text>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-            </ScrollView>
-            <Text className="text-label-sm text-on-surface-variant mt-2">{config.description}</Text>
-          </View>
+          {!investmentId && (
+            <View className="px-5 mt-4 mb-4">
+              <Text className="text-label-md text-on-surface-variant uppercase tracking-wider mb-3">Categoria</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                <View className="flex-row gap-2">
+                  {ASSET_CONFIGS.map((cfg) => {
+                    const active = selectedType === cfg.type;
+                    return (
+                      <TouchableOpacity
+                        key={cfg.type}
+                        onPress={() => setSelectedType(cfg.type)}
+                        className={`h-10 px-4 rounded-xl flex-row items-center gap-1.5 border ${
+                          active ? 'bg-primary-container border-transparent' : 'bg-surface-container border-outline-variant/30'
+                        }`}
+                      >
+                        <MaterialIcons name={cfg.icon as any} size={18} color={active ? Colors.onPrimaryContainer : Colors.primary} />
+                        <Text className={`text-label-md ${active ? 'text-on-primary-container font-semibold' : 'text-on-surface'}`}>
+                          {cfg.label}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+              </ScrollView>
+              <Text className="text-label-sm text-on-surface-variant mt-2">{config.description}</Text>
+            </View>
+          )}
 
           {/* ─── Form ────────────────────────────────────────────────── */}
           <View className="px-5 gap-4">
             {/* Asset Search (stocks/FIIs/ETFs/crypto) */}
-            {config.showTicker && (
+            {config.showTicker && !investmentId && (
               <View className="mb-1 relative">
                 <Text className="text-label-sm text-on-surface-variant mb-2">Buscar Ativo</Text>
                 <TextInput
                   className="w-full bg-[#1E293B] border border-outline-variant rounded-xl py-3 px-4 font-body-md text-on-surface"
-                  placeholder="Digite o código ou nome (ex: PETR4, VALE3)"
+                  placeholder={config.searchPlaceholder}
                   placeholderTextColor={Colors.outline}
                   autoCapitalize="characters"
                   value={searchQuery}
@@ -505,7 +587,7 @@ export function AddAssetScreen({ navigation, route }: any) {
 
             {/* Symbol (read-only after search) */}
             {config.showTicker && ticker ? (
-              <View className="mb-1 bg-[#1E293B] rounded-xl py-3 px-4 border border-outline-variant/20">
+              <View className="mb-1 mt-3 bg-[#1E293B] rounded-xl py-3 px-4 border border-outline-variant/20">
                 <Text className="text-label-sm text-on-surface-variant">Código</Text>
                 <Text className="text-body-md text-on-surface font-medium">{ticker}</Text>
               </View>
@@ -541,9 +623,9 @@ export function AddAssetScreen({ navigation, route }: any) {
                     className="w-full bg-[#1E293B] border border-outline-variant rounded-xl py-3 px-4 font-body-md text-on-surface"
                     placeholder="0,00"
                     placeholderTextColor={Colors.outline}
-                    keyboardType="decimal-pad"
+                    keyboardType="numeric"
                     value={avgPrice}
-                    onChangeText={setAvgPrice}
+                    onChangeText={(text) => setAvgPrice(formatCurrencyInput(text))}
                   />
                 </View>
               </View>
@@ -589,9 +671,9 @@ export function AddAssetScreen({ navigation, route }: any) {
                     className="w-full bg-[#1E293B] border border-outline-variant rounded-xl py-3 px-4 font-body-md text-on-surface"
                     placeholder="0,00"
                     placeholderTextColor={Colors.outline}
-                    keyboardType="decimal-pad"
+                    keyboardType="numeric"
                     value={fiInvestedAmount}
-                    onChangeText={setFiInvestedAmount}
+                    onChangeText={(text) => setFiInvestedAmount(formatCurrencyInput(text))}
                   />
                 </View>
 

@@ -96,6 +96,40 @@ public class PortfolioSnapshotService {
 
         snapshotRepository.save(snapshot);
         log.debug("Snapshot created for user {}: value={}, P&L={}", user.getId(), totalCurrentValue, profitLoss);
+
+        // Backfill historical snapshots for all unique purchase dates
+        backfillHistoricalSnapshots(user, investments);
+    }
+
+    private void backfillHistoricalSnapshots(User user, List<Investment> investments) {
+        List<LocalDate> purchaseDates = investments.stream()
+                .map(Investment::getPurchaseDate)
+                .distinct()
+                .filter(date -> date.isBefore(LocalDate.now()))
+                .sorted()
+                .toList();
+
+        for (LocalDate date : purchaseDates) {
+            if (!snapshotRepository.existsByUserIdAndSnapshotDate(user.getId(), date)) {
+                // Calculate value on that date: sum of (qty * avgPrice) for investments on or before that date
+                BigDecimal valueAtDate = investments.stream()
+                        .filter(i -> !i.getPurchaseDate().isAfter(date))
+                        .map(i -> i.getAvgPrice().multiply(i.getQuantity()))
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+                PortfolioSnapshot snapshot = PortfolioSnapshot.builder()
+                        .user(user)
+                        .portfolioValue(valueAtDate)
+                        .investedAmount(valueAtDate)
+                        .profitLoss(BigDecimal.ZERO)
+                        .profitLossPercentage(BigDecimal.ZERO)
+                        .snapshotDate(date)
+                        .build();
+
+                snapshotRepository.save(snapshot);
+                log.info("Backfilled snapshot for user {} on {}", user.getId(), date);
+            }
+        }
     }
 
     /**

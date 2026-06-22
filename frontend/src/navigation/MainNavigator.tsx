@@ -27,6 +27,8 @@ import { IconGalleryScreen } from '../screens/main/budgets/IconGalleryScreen';
 import { AddAssetScreen } from '../screens/main/investments/AddAssetScreen';
 import { RegisteredInstitutionsScreen } from '../screens/main/investments/RegisteredInstitutionsScreen';
 import { InvestmentOptionsScreen } from '../screens/main/investments/InvestmentOptionsScreen';
+import { AssetNewsScreen } from '../screens/main/investments/AssetNewsScreen';
+import { NewsDetailsScreen } from '../screens/main/investments/NewsDetailsScreen';
 
 // Profile sub-screens
 import { PersonalDataScreen } from '../screens/profile/PersonalDataScreen';
@@ -102,7 +104,7 @@ function MainTabs() {
       <Tab.Screen 
         name="Investments" 
         component={InvestmentsScreen} 
-        options={{ tabBarLabel: 'Investir' }}
+        options={{ tabBarLabel: 'Investimentos' }}
       />
       <Tab.Screen 
         name="Profile" 
@@ -145,7 +147,9 @@ export function MainNavigator() {
       <Stack.Screen name="AddAsset" component={AddAssetScreen} />
       <Stack.Screen name="RegisteredInstitutions" component={RegisteredInstitutionsScreen} />
       <Stack.Screen name="InvestmentOptions" component={InvestmentOptionsScreen} />
-      
+      <Stack.Screen name="AssetNews" component={AssetNewsScreen} />
+      <Stack.Screen name="NewsDetails" component={NewsDetailsScreen} />
+
       {/* Profile */}
       <Stack.Screen name="PersonalData" component={PersonalDataScreen} />
       <Stack.Screen name="Security" component={SecurityScreen} />

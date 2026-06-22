@@ -34,6 +34,10 @@ public class PortfolioController {
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam(defaultValue = "1M") String period) {
         User user = userService.getUserByEmail(userDetails.getUsername());
+        
+        // Ensure we have a snapshot for today to show the latest data
+        snapshotService.generateSnapshotForUser(user);
+
         List<PortfolioSnapshot> snapshots = snapshotService.getPerformance(user.getId(), period);
         List<PortfolioPerformancePoint> points = snapshots.stream()
                 .map(s -> new PortfolioPerformancePoint(

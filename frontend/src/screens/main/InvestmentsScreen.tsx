@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl, Image } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl, Image, Modal, Pressable } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -62,6 +62,7 @@ export function InvestmentsScreen({ navigation }: any) {
   const [investments, setInvestments] = useState<Investment[]>([]);
   const [performance, setPerformance] = useState<PortfolioPerformancePoint[]>([]);
   const [selectedPeriod, setSelectedPeriod] = useState<string>('1M');
+  const [menuVisible, setMenuVisible] = useState(false);
 
   const loadData = useCallback(async () => {
     try {
@@ -93,12 +94,27 @@ export function InvestmentsScreen({ navigation }: any) {
   }, [loadData]);
 
   // Build chart data from real performance points
-  const chartData = performance.length > 0
-    ? performance.map((p) => ({
+  const chartData = React.useMemo(() => {
+    if (performance.length === 0) return [{ value: 0, label: '' }];
+
+    const points = performance.map((p) => {
+      const [, m, d] = p.date.split('-');
+      return {
         value: p.value,
-        label: p.date.substring(8, 10), // day only
-      }))
-    : [{ value: 0, label: '' }];
+        label: `${d}/${m}`,
+      };
+    });
+
+    // If only one point exists (e.g., first day), duplicate it to show a flat line
+    if (points.length === 1) {
+      return [
+        { value: points[0].value, label: '' },
+        { ...points[0] }
+      ];
+    }
+
+    return points;
+  }, [performance]);
 
   return (
     <View className="flex-1 bg-background" style={{ flex: 1, backgroundColor: Colors.background }}>
@@ -115,11 +131,47 @@ export function InvestmentsScreen({ navigation }: any) {
         </View>
         <TouchableOpacity 
           className="w-10 h-10 items-center justify-center rounded-full"
-          onPress={() => navigation.navigate('RegisteredInstitutions')}
+          onPress={() => setMenuVisible(true)}
         >
-          <MaterialIcons name="account-balance" size={24} color={Colors.primary} />
+          <MaterialIcons name="more-vert" size={24} color={Colors.primary} />
         </TouchableOpacity>
       </View>
+
+      {/* Overflow Menu Modal */}
+      <Modal
+        visible={menuVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setMenuVisible(false)}
+      >
+        <Pressable className="flex-1 bg-black/50" onPress={() => setMenuVisible(false)}>
+          <View
+            className="absolute right-0 mr-4 w-60 bg-surface-container rounded-xl border border-outline-variant/30 shadow-lg overflow-hidden"
+            style={{ marginTop: insets.top + 60 }}
+          >
+            <TouchableOpacity
+              className="flex-row items-center gap-3 px-4 py-3 border-b border-outline-variant/20"
+              onPress={() => {
+                setMenuVisible(false);
+                navigation.navigate('AssetNews', { symbol: '', name: '' });
+              }}
+            >
+              <MaterialIcons name="newspaper" size={20} color={Colors.onSurface} />
+              <Text className="text-body-md text-on-surface">Notícias do Mercado</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              className="flex-row items-center gap-3 px-4 py-3"
+              onPress={() => {
+                setMenuVisible(false);
+                navigation.navigate('RegisteredInstitutions');
+              }}
+            >
+              <MaterialIcons name="account-balance" size={20} color={Colors.onSurface} />
+              <Text className="text-body-md text-on-surface">Minhas Corretoras</Text>
+            </TouchableOpacity>
+          </View>
+        </Pressable>
+      </Modal>
 
       {loading ? (
         <View className="flex-1 justify-center items-center">
@@ -214,7 +266,7 @@ export function InvestmentsScreen({ navigation }: any) {
               ) : (
                 <LineChart
                   data={chartData}
-                  width={270}
+                  width={280}
                   height={120}
                   thickness={3}
                   color={Colors.primary}
@@ -222,6 +274,9 @@ export function InvestmentsScreen({ navigation }: any) {
                   hideYAxisText
                   hideRules
                   hideAxesAndRules
+                  initialSpacing={20}
+                  endSpacing={20}
+                  curved
                   xAxisLabelTextStyle={{ color: Colors.onSurfaceVariant, fontSize: 10 }}
                 />
               )}

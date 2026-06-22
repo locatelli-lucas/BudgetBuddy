@@ -23,4 +23,9 @@ public interface AiProvider {
      * Chat interface for the AI financial assistant.
      */
     String chat(String userId, String message, List<ChatMessage> history);
+
+    /**
+     * Generates a structured summary of news articles.
+     */
+    String generateSummary(String prompt);
 }

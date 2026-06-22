@@ -39,4 +39,18 @@ public class OpenAiProvider implements AiProvider {
         log.info("Mock OpenAI chat with user: {}", userId);
         return "Olá! Sou seu assistente financeiro alimentado pelo OpenAI GPT-4o-mini.";
     }
+
+    @Override
+    public String generateSummary(String prompt) {
+        log.info("Mock OpenAI generating summary");
+        return """
+                {
+                  "sentiment": "NEUTRAL",
+                  "keyDevelopments": ["Análise OpenAI em andamento"],
+                  "risks": [],
+                  "opportunities": [],
+                  "marketImpact": "Aguardando processamento real."
+                }
+                """;
+    }
 }

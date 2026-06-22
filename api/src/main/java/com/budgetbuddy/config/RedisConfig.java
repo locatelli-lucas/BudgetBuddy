@@ -1,5 +1,6 @@
 package com.budgetbuddy.config;
 
+import org.springframework.boot.autoconfigure.cache.RedisCacheManagerBuilderCustomizer;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,5 +20,12 @@ public class RedisConfig {
                 .entryTtl(Duration.ofMinutes(5))
                 .disableCachingNullValues()
                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()));
+    }
+
+    @Bean
+    public RedisCacheManagerBuilderCustomizer redisCacheManagerBuilderCustomizer() {
+        return (builder) -> builder
+                .withCacheConfiguration("news",
+                        RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofMinutes(15)));
     }
 }

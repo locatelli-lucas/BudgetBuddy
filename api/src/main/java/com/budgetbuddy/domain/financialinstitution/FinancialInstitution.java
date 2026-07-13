@@ -1,4 +1,4 @@
-package com.budgetbuddy.domain.institution;
+package com.budgetbuddy.domain.financialinstitution;
 
 import com.budgetbuddy.domain.user.User;
 import jakarta.persistence.Column;
@@ -19,13 +19,13 @@ import lombok.Setter;
 import java.util.UUID;
 
 @Entity
-@Table(name = "institutions")
+@Table(name = "financial_institutions")
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Institution {
+public class FinancialInstitution {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

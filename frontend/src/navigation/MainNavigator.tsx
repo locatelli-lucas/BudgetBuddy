@@ -49,6 +49,11 @@ import { LeaveAccountScreen } from '../screens/profile/LeaveAccountScreen';
 // Report sub-screens
 import { CustomDateScreen } from '../screens/report/CustomDateScreen';
 
+// Payment Methods & Installments
+import { FinancialResourceFormScreen } from '../screens/main/payment-methods/FinancialResourceFormScreen';
+import { InstallmentPurchaseDetailScreen } from '../screens/main/installments/InstallmentPurchaseDetailScreen';
+import { FinancialAccountsScreen } from '../screens/main/financial-accounts/FinancialAccountsScreen';
+
 import { Colors } from '../constants/colors';
 import { MaterialIcons } from '@expo/vector-icons';
 
@@ -168,6 +173,11 @@ export function MainNavigator() {
       <Stack.Screen name="DeleteAccountConfirm" component={DeleteAccountConfirmScreen} />
       <Stack.Screen name="DeletedAccount" component={DeletedAccountScreen} />
       <Stack.Screen name="LeaveAccount" component={LeaveAccountScreen} />
+
+      {/* Payment Methods & Installments */}
+      <Stack.Screen name="FinancialResourceForm" component={FinancialResourceFormScreen} />
+      <Stack.Screen name="InstallmentPurchaseDetail" component={InstallmentPurchaseDetailScreen} />
+      <Stack.Screen name="FinancialAccounts" component={FinancialAccountsScreen} />
     </Stack.Navigator>
   );
 }

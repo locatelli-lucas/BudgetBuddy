@@ -84,7 +84,7 @@ Provider abstraction layer:
 
 Initial provider:
 
-- OpenAI API or Groq API
+- Gemini API (Google)
 
 Used for:
 

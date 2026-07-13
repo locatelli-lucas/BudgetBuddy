@@ -20,6 +20,9 @@ import { formatCurrency } from '../../utils/currency';
 import { formatSmartDate, formatRelativeTime } from '../../utils/dates';
 import { notificationService } from '../../services/notification.service';
 import { Notification } from '../../types/notification';
+import { financialResourceService } from '../../services/financialResourceService';
+import { FinancialResource } from '../../types/financialResource';
+import { AccountsAndCardsWidget } from '../../components/dashboard/AccountsAndCardsWidget';
 
 export function DashboardScreen({ navigation }: any) {
   const insets = useSafeAreaInsets();
@@ -34,22 +37,25 @@ export function DashboardScreen({ navigation }: any) {
   const [budgetStatus, setBudgetStatus] = useState<BudgetStatusResponse[]>([]);
   const [recentNotifications, setRecentNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [financialResources, setFinancialResources] = useState<FinancialResource[]>([]);
 
   const loadDashboardData = useCallback(async () => {
     try {
       setError(null);
-      const [summaryData, recentData, budgetData, notificationsData, count] = await Promise.all([
+      const [summaryData, recentData, budgetData, notificationsData, count, pmData] = await Promise.all([
         transactionService.getSummary(),
         transactionService.getRecentTransactions(5),
         budgetService.getBudgetStatus(),
         notificationService.getNotifications(undefined, false, 0, 3),
         notificationService.getUnreadCount(),
+        financialResourceService.getAll(),
       ]);
       setSummary(summaryData);
       setRecentTransactions(recentData);
       setBudgetStatus(budgetData);
       setRecentNotifications(notificationsData.content);
       setUnreadCount(count);
+      setFinancialResources(pmData);
     } catch (err) {
       const msg = getErrorMessage(err, 'Falha ao carregar dados do dashboard.');
       setError(msg);
@@ -212,16 +218,25 @@ export function DashboardScreen({ navigation }: any) {
             </TouchableOpacity>
           </View>
         )}
-        {/* Main Balance Card */}
-        <View className="bg-surface-variant rounded-xl p-6 shadow-md mb-6 relative overflow-hidden">
+        {/* Main Balance Card - Net Worth (Tappable) */}
+        <TouchableOpacity
+          className="bg-surface-variant rounded-xl p-6 shadow-md mb-6 relative overflow-hidden"
+          onPress={() => navigation.navigate('FinancialAccounts')}
+          activeOpacity={0.7}
+        >
           <LinearGradient
             colors={[`${Colors.primary}20`, 'rgba(0,0,0,0)']}
             style={{ position: 'absolute', right: -40, top: -40, width: 220, height: 220, borderRadius: 110 }}
           />
-          <Text className="text-label-md text-on-surface-variant">Saldo atual</Text>
-          <Text className="text-numeric-display font-medium text-on-surface mt-1">
-            {formatCurrency(summary?.netBalance || 0)}
-          </Text>
+          <View className="flex-row justify-between items-start">
+            <View>
+              <Text className="text-label-md text-on-surface-variant">Patrimônio Líquido</Text>
+              <Text className="text-numeric-display font-medium text-on-surface mt-1">
+                {formatCurrency(financialResources.filter(m => m.type !== 'CREDIT_CARD').reduce((acc, curr) => acc + (curr.currentBalance || 0), 0))}
+              </Text>
+            </View>
+            <MaterialIcons name="chevron-right" size={24} color={Colors.outline} />
+          </View>
           <View className="flex-row items-center gap-1 mt-2">
             <MaterialIcons
               name={(summary?.savingsRate || 0) >= 0 ? "trending-up" : "trending-down"}
@@ -232,7 +247,7 @@ export function DashboardScreen({ navigation }: any) {
               Taxa de poupança: {summary?.savingsRate?.toFixed(1) || '0'}%
             </Text>
           </View>
-        </View>
+        </TouchableOpacity>
 
         {/* Quick Summary Grid */}
         <View className="flex-row justify-between mb-8 gap-3">

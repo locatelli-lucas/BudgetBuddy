@@ -1,4 +1,4 @@
-package com.budgetbuddy.domain.institution.dto;
+package com.budgetbuddy.domain.financialinstitution.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,7 +11,7 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class InstitutionResponse {
+public class FinancialInstitutionResponse {
     private UUID id;
     private String name;
     private String brokerCode;

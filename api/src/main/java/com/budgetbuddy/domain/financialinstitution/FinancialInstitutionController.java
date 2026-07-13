@@ -1,7 +1,7 @@
-package com.budgetbuddy.domain.institution;
+package com.budgetbuddy.domain.financialinstitution;
 
-import com.budgetbuddy.domain.institution.dto.InstitutionRequest;
-import com.budgetbuddy.domain.institution.dto.InstitutionResponse;
+import com.budgetbuddy.domain.financialinstitution.dto.FinancialInstitutionRequest;
+import com.budgetbuddy.domain.financialinstitution.dto.FinancialInstitutionResponse;
 import com.budgetbuddy.shared.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,33 +21,33 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/institutions")
+@RequestMapping("/api/v1/financial-institutions")
 @RequiredArgsConstructor
-public class InstitutionController {
+public class FinancialInstitutionController {
 
-    private final InstitutionService institutionService;
+    private final FinancialInstitutionService financialInstitutionService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<InstitutionResponse>>> getInstitutions(
+    public ResponseEntity<ApiResponse<List<FinancialInstitutionResponse>>> getInstitutions(
             @AuthenticationPrincipal UserDetails userDetails) {
         return ResponseEntity.ok(ApiResponse.success(
-                institutionService.getInstitutions(userDetails.getUsername())));
+                financialInstitutionService.getInstitutions(userDetails.getUsername())));
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<InstitutionResponse>> createInstitution(
+    public ResponseEntity<ApiResponse<FinancialInstitutionResponse>> createInstitution(
             @AuthenticationPrincipal UserDetails userDetails,
-            @Valid @RequestBody InstitutionRequest request) {
+            @Valid @RequestBody FinancialInstitutionRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success(
-                        institutionService.createInstitution(userDetails.getUsername(), request)));
+                        financialInstitutionService.createInstitution(userDetails.getUsername(), request)));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteInstitution(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable UUID id) {
-        institutionService.deleteInstitution(userDetails.getUsername(), id);
+        financialInstitutionService.deleteInstitution(userDetails.getUsername(), id);
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 }

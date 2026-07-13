@@ -1,7 +1,6 @@
-package com.budgetbuddy.domain.transaction;
+package com.budgetbuddy.domain.financialresource;
 
-import com.budgetbuddy.domain.category.Category;
-import com.budgetbuddy.domain.financialresource.FinancialResource;
+import com.budgetbuddy.domain.financialinstitution.FinancialInstitution;
 import com.budgetbuddy.domain.user.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -23,18 +22,17 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "transactions")
+@Table(name = "financial_resources")
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Transaction {
+public class FinancialResource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -45,39 +43,40 @@ public class Transaction {
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id", nullable = false)
-    private Category category;
+    @JoinColumn(name = "financial_institution_id")
+    private FinancialInstitution financialInstitution;
+
+    @Column(nullable = false, length = 150)
+    private String name;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    private TransactionType type;
+    @Column(nullable = false, length = 30)
+    private FinancialResourceType type;
 
-    @Column(nullable = false, precision = 15, scale = 2)
-    private BigDecimal amount;
+    @Column(length = 50)
+    private String brand;
 
-    @Column(nullable = false, length = 255)
-    private String description;
+    @Column(length = 20)
+    private String color;
 
-    @Column(columnDefinition = "TEXT")
-    private String notes;
+    @Column(name = "last_four_digits", length = 4)
+    private String lastFourDigits;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "financial_resource_id")
-    private FinancialResource financialResource;
+    @Column(name = "credit_limit", precision = 15, scale = 2)
+    private BigDecimal creditLimit;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "payment_method", nullable = false, length = 30)
-    private PaymentMethod paymentMethod;
+    @Column(name = "current_balance", precision = 15, scale = 2)
+    private BigDecimal currentBalance;
 
-    @Column(nullable = false)
-    private LocalDate date;
+    @Column(name = "invoice_closing_day")
+    private Integer invoiceClosingDay;
+
+    @Column(name = "invoice_due_day")
+    private Integer invoiceDueDay;
 
     @Builder.Default
-    @Column(name = "is_recurring", nullable = false)
-    private boolean isRecurring = false;
-
-    @Column(name = "recurrence_rule", length = 100)
-    private String recurrenceRule; // RRULE string
+    @Column(name = "is_active", nullable = false)
+    private boolean isActive = true;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -94,9 +93,5 @@ public class Transaction {
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
-    }
-
-    public enum TransactionType {
-        EXPENSE, INCOME
     }
 }

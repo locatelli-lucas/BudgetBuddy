@@ -1,4 +1,4 @@
-package com.budgetbuddy.domain.institution.dto;
+package com.budgetbuddy.domain.financialinstitution.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class InstitutionRequest {
+public class FinancialInstitutionRequest {
 
     @NotBlank(message = "Name is required")
     @Size(min = 1, max = 150, message = "Name must be between 1 and 150 characters")

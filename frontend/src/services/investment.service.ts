@@ -56,17 +56,17 @@ export const investmentService = {
 
   // Institutions (User approved Option A: new backend entity)
   getInstitutions: async (): Promise<Institution[]> => {
-    const response = await api.get<ApiResponse<Institution[]>>('/api/v1/institutions');
+    const response = await api.get<ApiResponse<Institution[]>>('/api/v1/financial-institutions');
     return response.data.data;
   },
 
   createInstitution: async (request: InstitutionRequest): Promise<Institution> => {
-    const response = await api.post<ApiResponse<Institution>>('/api/v1/institutions', request);
+    const response = await api.post<ApiResponse<Institution>>('/api/v1/financial-institutions', request);
     return response.data.data;
   },
 
   deleteInstitution: async (id: string): Promise<void> => {
-    await api.delete(`/api/v1/institutions/${id}`);
+    await api.delete(`/api/v1/financial-institutions/${id}`);
   },
 
   // Market data

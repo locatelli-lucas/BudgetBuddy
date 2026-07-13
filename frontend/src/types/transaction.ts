@@ -1,4 +1,5 @@
 // src/types/transaction.ts
+import { FinancialResource } from './financialResource';
 
 export type TransactionType = 'INCOME' | 'EXPENSE';
 
@@ -22,6 +23,7 @@ export interface Transaction {
   amount: number;
   description: string;
   notes?: string;
+  financialResource?: FinancialResource;
   paymentMethod: PaymentMethod;
   date: string; // ISO date string YYYY-MM-DD
   isRecurring: boolean;
@@ -35,6 +37,7 @@ export interface TransactionRequest {
   amount: number;
   description: string;
   notes?: string;
+  financialResourceId?: string;
   paymentMethod: PaymentMethod;
   date: string;
   isRecurring: boolean;

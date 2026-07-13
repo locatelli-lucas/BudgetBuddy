@@ -1,6 +1,6 @@
 package com.budgetbuddy.domain.transaction.dto;
 
-import com.budgetbuddy.domain.transaction.Transaction.PaymentMethod;
+import com.budgetbuddy.domain.transaction.PaymentMethod;
 import com.budgetbuddy.domain.transaction.Transaction.TransactionType;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
@@ -34,6 +34,8 @@ public class TransactionRequest {
     private String description;
 
     private String notes;
+
+    private UUID financialResourceId;
 
     @NotNull(message = "Payment method is required")
     private PaymentMethod paymentMethod;

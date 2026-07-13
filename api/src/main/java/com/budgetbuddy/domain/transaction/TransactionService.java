@@ -3,6 +3,10 @@ package com.budgetbuddy.domain.transaction;
 import com.budgetbuddy.domain.category.Category;
 import com.budgetbuddy.domain.category.CategoryService;
 import com.budgetbuddy.domain.category.dto.CategoryResponse;
+import com.budgetbuddy.domain.financialresource.FinancialResource;
+import com.budgetbuddy.domain.financialresource.FinancialResourceRepository;
+import com.budgetbuddy.domain.financialresource.FinancialResourceService;
+import com.budgetbuddy.domain.financialresource.FinancialResourceType;
 import com.budgetbuddy.domain.transaction.dto.TransactionFilter;
 import com.budgetbuddy.domain.transaction.dto.TransactionRequest;
 import com.budgetbuddy.domain.transaction.dto.TransactionResponse;
@@ -36,6 +40,8 @@ public class TransactionService {
     private final TransactionRepository transactionRepository;
     private final UserService userService;
     private final CategoryService categoryService;
+    private final FinancialResourceRepository financialResourceRepository;
+    private final FinancialResourceService financialResourceService;
 
     @Transactional(readOnly = true)
     public PageResponse<TransactionResponse> getTransactions(String email, TransactionFilter filter, int page, int size, String[] sort) {
@@ -91,6 +97,14 @@ public class TransactionService {
         User user = userService.getUserByEmail(email);
         Category category = categoryService.getCategoryEntity(request.getCategoryId(), user.getId());
         
+        FinancialResource financialResource = null;
+        if (request.getFinancialResourceId() != null) {
+            financialResource = financialResourceRepository.findByIdAndUserId(request.getFinancialResourceId(), user.getId())
+                    .orElseThrow(() -> new EntityNotFoundException("FinancialResource", request.getFinancialResourceId().toString()));
+            
+            updateBalance(financialResource, request.getAmount(), request.getType());
+        }
+
         Transaction transaction = Transaction.builder()
                 .user(user)
                 .category(category)
@@ -98,6 +112,7 @@ public class TransactionService {
                 .amount(request.getAmount())
                 .description(request.getDescription())
                 .notes(request.getNotes())
+                .financialResource(financialResource)
                 .paymentMethod(request.getPaymentMethod())
                 .date(request.getDate())
                 .isRecurring(request.isRecurring())
@@ -106,6 +121,18 @@ public class TransactionService {
                 
         transaction = transactionRepository.save(transaction);
         return mapToResponse(transaction);
+    }
+
+    private void updateBalance(FinancialResource fr, BigDecimal amount, Transaction.TransactionType type) {
+        if (fr.getType() == FinancialResourceType.CREDIT_CARD) return;
+
+        BigDecimal current = fr.getCurrentBalance() != null ? fr.getCurrentBalance() : BigDecimal.ZERO;
+        if (type == Transaction.TransactionType.INCOME) {
+            fr.setCurrentBalance(current.add(amount));
+        } else {
+            fr.setCurrentBalance(current.subtract(amount));
+        }
+        financialResourceRepository.save(fr);
     }
 
     @Transactional
@@ -117,11 +144,24 @@ public class TransactionService {
                 
         Category category = categoryService.getCategoryEntity(request.getCategoryId(), user.getId());
         
+        // Reverse old balance update if needed
+        if (transaction.getFinancialResource() != null) {
+            reverseBalance(transaction.getFinancialResource(), transaction.getAmount(), transaction.getType());
+        }
+
+        FinancialResource financialResource = null;
+        if (request.getFinancialResourceId() != null) {
+            financialResource = financialResourceRepository.findByIdAndUserId(request.getFinancialResourceId(), user.getId())
+                    .orElseThrow(() -> new EntityNotFoundException("FinancialResource", request.getFinancialResourceId().toString()));
+            updateBalance(financialResource, request.getAmount(), request.getType());
+        }
+
         transaction.setCategory(category);
         transaction.setType(request.getType());
         transaction.setAmount(request.getAmount());
         transaction.setDescription(request.getDescription());
         transaction.setNotes(request.getNotes());
+        transaction.setFinancialResource(financialResource);
         transaction.setPaymentMethod(request.getPaymentMethod());
         transaction.setDate(request.getDate());
         transaction.setRecurring(request.isRecurring());
@@ -131,12 +171,29 @@ public class TransactionService {
         return mapToResponse(transaction);
     }
 
+    private void reverseBalance(FinancialResource fr, BigDecimal amount, Transaction.TransactionType type) {
+        if (fr.getType() == FinancialResourceType.CREDIT_CARD) return;
+
+        BigDecimal current = fr.getCurrentBalance() != null ? fr.getCurrentBalance() : BigDecimal.ZERO;
+        if (type == Transaction.TransactionType.INCOME) {
+            fr.setCurrentBalance(current.subtract(amount));
+        } else {
+            fr.setCurrentBalance(current.add(amount));
+        }
+        financialResourceRepository.save(fr);
+    }
+
     @Transactional
     @CacheEvict(value = {"userSummary", "budgetStatus"}, allEntries = true)
     public void deleteTransaction(String email, UUID id) {
         User user = userService.getUserByEmail(email);
         Transaction transaction = transactionRepository.findByIdAndUserId(id, user.getId())
                 .orElseThrow(() -> new EntityNotFoundException("Transaction", id.toString()));
+        
+        if (transaction.getFinancialResource() != null) {
+            reverseBalance(transaction.getFinancialResource(), transaction.getAmount(), transaction.getType());
+        }
+        
         transactionRepository.delete(transaction);
     }
 
@@ -187,6 +244,7 @@ public class TransactionService {
                 .amount(transaction.getAmount())
                 .description(transaction.getDescription())
                 .notes(transaction.getNotes())
+                .financialResource(transaction.getFinancialResource() != null ? financialResourceService.mapToResponse(transaction.getFinancialResource()) : null)
                 .paymentMethod(transaction.getPaymentMethod())
                 .date(transaction.getDate())
                 .isRecurring(transaction.isRecurring())

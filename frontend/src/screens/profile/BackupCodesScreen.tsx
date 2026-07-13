@@ -6,9 +6,10 @@ import { Colors } from '../../constants/colors';
 import * as Clipboard from 'expo-clipboard';
 
 export function BackupCodesScreen({ route, navigation }: any) {
-  const { codes } = route.params;
+  const { codes = [] } = route.params || {};
 
   const handleCopyAll = async () => {
+    if (codes.length === 0) return;
     await Clipboard.setStringAsync(codes.join('\n'));
     Alert.alert('Sucesso', 'Códigos copiados para a área de transferência');
   };
@@ -39,19 +40,26 @@ export function BackupCodesScreen({ route, navigation }: any) {
 
         <View className="bg-surface rounded-2xl p-6 border border-outline-variant/10 shadow-sm">
           <View className="flex-row flex-wrap justify-between gap-y-4">
-            {codes.map((code: string, index: number) => (
-              <View key={index} className="w-[48%] bg-surface-container rounded-lg p-3 items-center border border-outline-variant/5">
-                <Text className="text-body-lg font-mono font-bold text-on-surface">{code}</Text>
-              </View>
-            ))}
+            {codes && codes.length > 0 ? (
+              codes.map((code: string, index: number) => (
+                <View key={index} className="w-[48%] bg-surface-container rounded-lg p-3 items-center border border-outline-variant/5">
+                  <Text className="text-body-lg font-mono font-bold text-on-surface">{code}</Text>
+                </View>
+              ))
+            ) : (
+              <Text className="text-body-md text-on-surface-variant text-center w-full">
+                Nenhum código encontrado.
+              </Text>
+            )}
           </View>
         </View>
 
         <TouchableOpacity
           className="bg-primary rounded-xl py-4 items-center mt-8 flex-row justify-center"
           onPress={handleCopyAll}
+          disabled={codes.length === 0}
         >
-          <MaterialIcons name="content-copy" size={20} color={Colors.onPrimary} className="mr-2" />
+          <MaterialIcons name="content-copy" size={20} color={Colors.onPrimary} />
           <Text className="text-body-md text-on-primary font-bold ml-2">Copiar Tudo</Text>
         </TouchableOpacity>
 

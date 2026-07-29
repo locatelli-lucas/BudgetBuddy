@@ -78,7 +78,7 @@ public class PriceMonitoringScheduler {
 
     private void triggerAlertNotification(PriceAlert alert, BigDecimal currentPrice) {
         String conditionText = alert.getCondition() == PriceAlert.AlertCondition.ABOVE ? "acima de" : "abaixo de";
-        java.util.Locale ptBR = new java.util.Locale("pt", "BR");
+        java.util.Locale ptBR = java.util.Locale.of("pt", "BR");
         String message = String.format(ptBR, "O ativo %s está %s R$ %,.2f (Preço atual: R$ %,.2f)", 
                 alert.getSymbol(), conditionText, alert.getTargetPrice(), currentPrice);
         

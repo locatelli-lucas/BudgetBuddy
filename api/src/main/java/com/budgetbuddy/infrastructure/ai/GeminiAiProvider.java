@@ -3,50 +3,97 @@ package com.budgetbuddy.infrastructure.ai;
 import com.budgetbuddy.domain.insight.AiInsight;
 import com.budgetbuddy.infrastructure.ai.dto.ChatMessage;
 import com.budgetbuddy.infrastructure.ai.dto.UserFinancialSummary;
+import com.google.genai.Client;
+import com.google.genai.types.GenerateContentResponse;
+import io.github.cdimascio.dotenv.Dotenv;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Component
 public class GeminiAiProvider implements AiProvider {
 
-    private final WebClient webClient;
+    static {
+        log.info("!!!!! CLASS LOADED: GeminiAiProvider class is being loaded by the JVM !!!!!");
+    }
+
     private final ObjectMapper objectMapper;
+    private final String apiKey;
+    private final String model;
+    private Client client;
 
-    @Value("${ai.gemini.api-key}")
-    private String apiKey;
-
-    @Value("${ai.gemini.model}")
-    private String model;
-
-    public GeminiAiProvider(WebClient.Builder webClientBuilder, ObjectMapper objectMapper,
-                            @Value("${ai.gemini.base-url}") String baseUrl) {
-        this.webClient = webClientBuilder.baseUrl(baseUrl).build();
+    public GeminiAiProvider(
+            ObjectMapper objectMapper,
+            @Value("${ai.gemini.api-key:}") String apiKey,
+            @Value("${ai.gemini.model:}") String model) {
         this.objectMapper = objectMapper;
+        this.apiKey = apiKey;
+        this.model = model;
+        
+        log.info("!!!!! CONSTRUCTOR EXECUTED !!!!! Instance: {}. Key: '{}'. Model: '{}'", 
+                 System.identityHashCode(this), 
+                 (apiKey == null ? "null" : (apiKey.isBlank() ? "BLANK" : "HAS_VALUE")), 
+                 model);
+        
+        initializeClient();
+    }
+
+    private void initializeClient() {
+        String finalKey = apiKey;
+        
+        // Fallback: If Spring injection failed (empty string), try loading manually with Dotenv
+        if (finalKey == null || finalKey.isBlank() || finalKey.startsWith("${")) {
+            log.info("Spring failed to inject GEMINI_API_KEY. Attempting manual load from .env file...");
+            try {
+                // Try to load .env from common locations
+                Dotenv dotenv = Dotenv.configure()
+                        .directory("./api") // Try from root
+                        .ignoreIfMissing()
+                        .load();
+                
+                String envKey = dotenv.get("GEMINI_API_KEY");
+                if (envKey == null) {
+                    dotenv = Dotenv.configure().ignoreIfMissing().load(); // Try from current dir
+                    envKey = dotenv.get("GEMINI_API_KEY");
+                }
+                
+                if (envKey != null && !envKey.isBlank()) {
+                    finalKey = envKey;
+                    log.info("Successfully loaded GEMINI_API_KEY manually via Dotenv.");
+                }
+            } catch (Exception e) {
+                log.warn("Manual .env loading failed: {}", e.getMessage());
+            }
+        }
+
+        if (finalKey == null || finalKey.isBlank() || finalKey.startsWith("${")) {
+            log.error("CRITICAL: GEMINI_API_KEY is still not configured. Value: '{}'.", finalKey);
+            return;
+        }
+
+        try {
+            this.client = Client.builder().apiKey(finalKey).build();
+            String maskedKey = finalKey.substring(0, Math.min(finalKey.length(), 4)) + "..." + 
+                               finalKey.substring(Math.max(0, finalKey.length() - 4));
+            log.info("GeminiAiProvider successfully initialized. Key: {}", maskedKey);
+        } catch (Exception e) {
+            log.error("Failed to initialize Gemini Client: {}", e.getMessage());
+        }
     }
 
     @PostConstruct
-    public void init() {
-        if (apiKey == null || apiKey.isBlank() || apiKey.startsWith("${")) {
-            log.warn("GEMINI_API_KEY is not set correctly. AI features will not work.");
-        } else {
-            String maskedKey = apiKey.substring(0, Math.min(apiKey.length(), 4)) + "..." + 
-                               apiKey.substring(Math.max(0, apiKey.length() - 4));
-            log.info("GeminiAiProvider initialized with model: {} and API key: {}", model, maskedKey);
-        }
+    public void verify() {
+        log.info("GeminiAiProvider @PostConstruct verify. Instance: {}, Client initialized: {}", 
+                 System.identityHashCode(this), (client != null));
     }
 
     @Override
@@ -110,7 +157,7 @@ public class GeminiAiProvider implements AiProvider {
             return callGemini(context.toString());
         } catch (Exception e) {
             log.error("Gemini chat error: {}", e.getMessage());
-            return "Desculpe, tive um problema ao processar sua solicitação. Por favor, tente novamente mais tarde.";
+            return "Desculpe, tive um problema ao processar sua solicitação. Verifique se a chave da API do Gemini está configurada corretamente.";
         }
     }
 
@@ -126,42 +173,30 @@ public class GeminiAiProvider implements AiProvider {
     }
 
     private String callGemini(String prompt) {
+        log.info("callGemini() called on instance: {}. Client status: {}", 
+                 System.identityHashCode(this), (client != null ? "INITIALIZED" : "NULL"));
+
+        if (client == null) {
+            log.error("CRITICAL: Attempted to call Gemini on instance {} but client is null. API Key in memory: {}", 
+                      System.identityHashCode(this), (apiKey != null ? "PRESENT" : "NULL"));
+            throw new RuntimeException("Gemini client not initialized. Check your GEMINI_API_KEY configuration.");
+        }
+        
         log.debug("Calling Gemini API with prompt: {}", prompt);
         
-        Map<String, Object> part = Map.of("text", prompt);
-        Map<String, Object> content = Map.of("parts", List.of(part));
-        Map<String, Object> requestBody = Map.of("contents", List.of(content));
-
-        String responseBody = webClient.post()
-            .uri(uriBuilder -> uriBuilder
-                .path("/models/" + model + ":generateContent")
-                .queryParam("key", apiKey)
-                .build())
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(requestBody)
-            .retrieve()
-            .onStatus(status -> status.isError(), response -> 
-                response.bodyToMono(String.class).flatMap(errorBody -> {
-                    log.error("Gemini API Error: Status Code: {}, Body: {}", response.statusCode(), errorBody);
-                    return Mono.error(new RuntimeException("Gemini API Error: " + response.statusCode()));
-                })
-            )
-            .bodyToMono(String.class)
-            .block();
-
         try {
-            JsonNode root = objectMapper.readTree(responseBody);
-            JsonNode textNode = root.path("candidates").get(0).path("content").path("parts").get(0).path("text");
+            GenerateContentResponse response = client.models.generateContent(model, prompt, null);
+            String text = response.text();
             
-            if (textNode.isMissingNode()) {
-                log.warn("Gemini returned empty or unexpected structure: {}", responseBody);
-                throw new RuntimeException("Unexpected response structure from Gemini");
+            if (text == null || text.isBlank()) {
+                log.warn("Gemini returned empty text for prompt: {}", prompt);
+                throw new RuntimeException("Empty response from Gemini");
             }
             
-            return textNode.asText();
+            return text;
         } catch (Exception e) {
-            log.error("Failed to parse Gemini response: {}", e.getMessage());
-            throw new RuntimeException("Error processing Gemini response", e);
+            log.error("Gemini API Error: {}", e.getMessage());
+            throw new RuntimeException("Gemini API Error: " + e.getMessage(), e);
         }
     }
 

@@ -67,7 +67,7 @@ public class InvestmentAlertScheduler {
 
                     String direction = changePct > 0 ? "subiu" : "caiu";
                     String arrow     = changePct > 0 ? "📈" : "📉";
-                    java.util.Locale ptBR = new java.util.Locale("pt", "BR");
+                    java.util.Locale ptBR = java.util.Locale.of("pt", "BR");
                     String title     = String.format(ptBR, "%s %s %,.1f%% hoje", ticker, arrow, Math.abs(changePct));
                     String message   = String.format(ptBR,
                             "%s %s %,.2f%% no pregão de hoje. Cotação atual: R$ %,.2f.",

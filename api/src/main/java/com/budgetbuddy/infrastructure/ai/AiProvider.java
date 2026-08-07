@@ -25,7 +25,23 @@ public interface AiProvider {
     String chat(String userId, String message, List<ChatMessage> history);
 
     /**
-     * Generates a structured summary of news articles.
+     * Summarizes an article or text.
+     */
+    String summarize(String content);
+
+    /**
+     * Generates a structured summary/analysis based on a custom prompt.
+     * Often used for news analysis.
      */
     String generateSummary(String prompt);
+
+    /**
+     * Generates content for a monthly financial report.
+     */
+    String generateMonthlyReport(UserFinancialSummary data);
+
+    /**
+     * Generic method for analysis (Portfolio, Spending, etc.)
+     */
+    String analyze(String type, String data);
 }

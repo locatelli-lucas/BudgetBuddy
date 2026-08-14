@@ -75,7 +75,7 @@ ai:
   provider: ${AI_PROVIDER:groq}
   groq:
     api-key: ${GROQ_API_KEY:}
-    model: ${GROQ_MODEL:llama-3.3-70b-versatile}
+    model: ${GROQ_MODEL:}
     base-url: https://api.groq.com/openai/v1
   max-tokens: 2048
 

@@ -13,7 +13,17 @@ import java.util.List;
 @AllArgsConstructor
 public class AiReportAnalysis {
     private String executiveSummary;
+    private List<InsightItem> topInsights;
     private List<String> strengths;
     private List<String> attentionPoints;
     private List<String> recommendations;
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class InsightItem {
+        private String title;
+        private String description;
+    }
 }

@@ -12,8 +12,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Locale;
-import java.util.Locale;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -21,7 +20,6 @@ import java.util.Locale;
 public class PdfReportGenerator {
 
     private final ReportService reportService;
-    private static final String CURRENCY_FORMAT = "R$ %,.2f";
 
     public byte[] generateMonthlyPdfReport(String email, int month, int year) {
         MonthlyReportResponse reportData = reportService.getMonthlyReport(email, month, year);
@@ -40,208 +38,206 @@ public class PdfReportGenerator {
         StringBuilder html = new StringBuilder();
         html.append("<!DOCTYPE html><html><head>");
         html.append("<meta charset='UTF-8'>");
-        html.append("<style>");
-        html.append("body { font-family: 'Helvetica', sans-serif; color: #1e293b; margin: 0; padding: 0; line-height: 1.5; }");
-        html.append(".page { padding: 40px; page-break-after: always; }");
-        html.append(".no-break { page-break-inside: avoid; }");
-        
-        // Colors
-        html.append(".text-primary { color: #2563eb; }");
-        html.append(".text-success { color: #16a34a; }");
-        html.append(".text-danger { color: #dc2626; }");
-        html.append(".text-muted { color: #64748b; }");
-        html.append(".bg-light { background-color: #f8fafc; }");
-        
-        // Components
-        html.append(".card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 20px; }");
-        html.append(".header { text-align: center; margin-bottom: 50px; padding-top: 100px; }");
-        html.append(".logo { font-size: 32px; font-weight: bold; color: #2563eb; margin-bottom: 10px; }");
-        html.append(".section-title { font-size: 18px; font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; }");
-        
-        // Grid (simulated with table for better PDF rendering)
-        html.append(".grid-3 { width: 100%; border-collapse: collapse; }");
-        html.append(".grid-3 td { width: 33.33%; padding: 10px; vertical-align: top; }");
-        
-        // Stats
-        html.append(".stat-label { font-size: 12px; text-transform: uppercase; color: #64748b; margin-bottom: 5px; }");
-        html.append(".stat-value { font-size: 24px; font-weight: bold; }");
-        
-        // Progress Bars
-        html.append(".progress-container { background: #f1f5f9; border-radius: 8px; height: 12px; width: 100%; margin: 8px 0; overflow: hidden; }");
-        html.append(".progress-bar { height: 100%; border-radius: 8px; }");
-        
-        // Lists
-        html.append(".ai-list { list-style: none; padding: 0; }");
-        html.append(".ai-list li { margin-bottom: 10px; padding-left: 20px; position: relative; }");
-        html.append(".ai-list li:before { content: '•'; position: absolute; left: 0; color: #2563eb; font-weight: bold; }");
-        
-        // Table
-        html.append("table.data-table { width: 100%; border-collapse: collapse; margin-top: 10px; }");
-        html.append("table.data-table th { text-align: left; background: #f8fafc; padding: 10px; border-bottom: 2px solid #e2e8f0; font-size: 12px; }");
-        html.append("table.data-table td { padding: 10px; border-bottom: 1px solid #f1f5f9; font-size: 13px; }");
-        
-        html.append("</style></head><body>");
+        html.append("<style>").append(PdfTheme.getGlobalStyles()).append("</style>");
+        html.append("</head><body>");
 
-        // --- PAGE 1: COVER ---
-        html.append("<div class='page'>");
-        html.append("<div class='header'>");
-        html.append("<div class='logo'>BudgetBuddy</div>");
-        html.append("<h1 style='font-size: 36px; margin: 20px 0;'>Relatório Financeiro Mensal</h1>");
-        html.append("<p style='font-size: 20px;' class='text-muted'>").append(getMonthName(data.getMonth())).append(" ").append(data.getYear()).append("</p>");
-        html.append("<div style='margin-top: 100px;'>");
-        html.append("<p class='text-muted'>Preparado para</p>");
-        html.append("<h2 style='font-size: 24px;'>").append(data.getUserName()).append("</h2>");
-        html.append("</div>");
-        html.append("<div style='margin-top: 200px; font-size: 12px;' class='text-muted'>");
-        html.append("Gerado em ").append(LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
-        html.append("</div></div></div>");
+        int pageNum = 1;
 
-        // --- PAGE 2: EXECUTIVE SUMMARY & AI ---
-        html.append("<div class='page'>");
-        html.append("<div class='section-title'>Resumo Executivo</div>");
+        // --- PAGE 1: EXECUTIVE SUMMARY ---
+        ReportComponents.startPage(html, "Sumário Executivo", getMonthName(data.getMonth()) + " " + data.getYear());
         
-        html.append("<table class='grid-3'><tr>");
-        appendStatCard(html, "Receita Total", data.getSummary().getTotalIncome(), "text-success");
-        appendStatCard(html, "Despesa Total", data.getSummary().getTotalExpense(), "text-danger");
-        appendStatCard(html, "Saldo Líquido", data.getSummary().getNetSavings(), "");
-        html.append("</tr></table>");
-
-        html.append("<div class='card bg-light' style='margin-top: 20px;'>");
-        html.append("<div style='font-weight: bold; color: #2563eb; margin-bottom: 10px;'>Insight do Consultor AI</div>");
-        html.append("<p style='font-style: italic; font-size: 14px;'>").append(data.getAiAnalysis().getExecutiveSummary()).append("</p>");
+        // Main Metrics
+        html.append("<div style='display: flex; gap: 20pt; margin-bottom: 30pt; border-bottom: 1px solid ").append(PdfTheme.COLOR_BORDER).append("; padding-bottom: 20pt;'>");
+        ReportComponents.appendMetric(html, "Receita Total", data.getSummary().getTotalIncome(), data.getComparison().getIncomeVariation(), true);
+        ReportComponents.appendMetric(html, "Despesa Total", data.getSummary().getTotalExpense(), data.getComparison().getExpenseVariation(), false);
+        ReportComponents.appendMetric(html, "Resultado Líquido", data.getSummary().getNetSavings(), null, true);
+        ReportComponents.appendMetric(html, "Taxa de Economia", data.getSummary().getSavingsRate(), data.getComparison().getSavingsRateVariation(), true);
         html.append("</div>");
 
-        html.append("<div style='margin-top: 30px;' class='no-break'>");
-        html.append("<table class='grid-3'><tr>");
-        html.append("<td colspan='2'>");
-        html.append("<div class='section-title'>Forças Financeiras</div>");
-        html.append("<ul class='ai-list'>");
-        for (String s : data.getAiAnalysis().getStrengths()) html.append("<li>").append(s).append("</li>");
-        html.append("</ul></td>");
-        html.append("<td>");
-        html.append("<div class='section-title'>Pontos de Atenção</div>");
-        html.append("<ul class='ai-list'>");
-        for (String a : data.getAiAnalysis().getAttentionPoints()) html.append("<li>").append(a).append("</li>");
-        html.append("</ul></td></tr></table></div>");
-
-        html.append("<div style='margin-top: 30px;' class='no-break'>");
-        html.append("<div class='section-title'>Recomendações Práticas</div>");
-        html.append("<div class='card'>");
-        html.append("<ul class='ai-list'>");
-        for (String r : data.getAiAnalysis().getRecommendations()) html.append("<li>").append(r).append("</li>");
-        html.append("</ul></div></div>");
-        html.append("</div>");
-
-        // --- PAGE 3: DETAILED ANALYSIS ---
-        html.append("<div class='page'>");
-        
-        // Categories
-        html.append("<div class='section-title'>Distribuição de Gastos</div>");
-        html.append("<div class='card'>");
-        for (MonthlyReportResponse.CategoryBreakdown cat : data.getCategories().stream().limit(8).toList()) {
-            html.append("<div style='margin-bottom: 12px;'>");
-            html.append("<div style='display: flex; justify-content: space-between; font-size: 12px;'>");
-            html.append("<span>").append(cat.getName()).append("</span>");
-            html.append("<span style='float: right;'>").append(String.format(CURRENCY_FORMAT, cat.getAmount())).append(" (").append(cat.getPercentage()).append("%)</span>");
-            html.append("</div>");
-            html.append("<div class='progress-container'>");
-            html.append("<div class='progress-bar' style='width: ").append(cat.getPercentage()).append("%; background-color: ").append(cat.getColor() != null ? cat.getColor() : "#2563eb").append(";'></div>");
-            html.append("</div></div>");
-        }
-        html.append("</div>");
-
-        // Comparisons
-        html.append("<div style='margin-top: 30px;' class='no-break'>");
-        html.append("<div class='section-title'>Comparativo Mensal</div>");
-        html.append("<table class='grid-3'><tr>");
-        appendVariationCard(html, "Variação de Renda", data.getComparison().getIncomeVariation());
-        appendVariationCard(html, "Variação de Despesa", data.getComparison().getExpenseVariation());
-        html.append("<td><div class='card'><div class='stat-label'>Taxa de Economia</div><div class='stat-value'>")
-            .append(data.getSummary().getSavingsRate()).append("%</div></div></td>");
-        html.append("</tr></table></div>");
-
-        // Credit Cards
-        if (!data.getCreditCards().isEmpty()) {
-            html.append("<div style='margin-top: 30px;' class='no-break'>");
-            html.append("<div class='section-title'>Uso de Cartão de Crédito</div>");
-            html.append("<table class='data-table'>");
-            html.append("<tr><th>Cartão</th><th>Limite</th><th>Fatura Atual</th><th>Uso (%)</th></tr>");
-            for (MonthlyReportResponse.CreditCardData card : data.getCreditCards()) {
-                html.append("<tr>");
-                html.append("<td>").append(card.getName()).append("</td>");
-                html.append("<td>").append(String.format(CURRENCY_FORMAT, card.getLimit())).append("</td>");
-                html.append("<td>").append(String.format(CURRENCY_FORMAT, card.getCurrentBalance())).append("</td>");
-                html.append("<td>").append(card.getUtilizationPercentage()).append("%</td>");
-                html.append("</tr>");
+        // AI Insights
+        if (data.getAiAnalysis() != null) {
+            html.append("<div class='card bg-light'>");
+            html.append("<h3 class='text-accent' style='margin-top: 0;'>Análise do Consultor AI</h3>");
+            html.append("<p style='font-size: 11pt; margin-bottom: 20pt;'>").append(data.getAiAnalysis().getExecutiveSummary()).append("</p>");
+            
+            if (data.getAiAnalysis().getTopInsights() != null && !data.getAiAnalysis().getTopInsights().isEmpty()) {
+                html.append("<div style='display: flex; gap: 15pt;'>");
+                for (MonthlyReportResponse.AiAnalysis.InsightItem insight : data.getAiAnalysis().getTopInsights()) {
+                    html.append("<div style='flex: 1; border-left: 2pt solid ").append(PdfTheme.COLOR_ACCENT).append("; padding-left: 10pt;'>")
+                        .append("<div style='font-weight: 700; font-size: 9pt; margin-bottom: 2pt;'>").append(insight.getTitle()).append("</div>")
+                        .append("<div style='font-size: 8.5pt; color: ").append(PdfTheme.COLOR_SECONDARY).append(";'>").append(insight.getDescription()).append("</div>")
+                        .append("</div>");
+                }
+                html.append("</div>");
             }
-            html.append("</table></div>");
+            html.append("</div>");
         }
+
+        // Strengths & Attention Points
+        html.append("<div style='display: flex; gap: 20pt; margin-top: 20pt;'>");
+        html.append("<div style='flex: 1;'><h3>Pontos Fortes</h3><ul>");
+        for (String s : data.getAiAnalysis().getStrengths()) html.append("<li style='margin-bottom: 5pt;'>").append(s).append("</li>");
+        html.append("</ul></div>");
+        html.append("<div style='flex: 1;'><h3>Pontos de Atenção</h3><ul>");
+        for (String a : data.getAiAnalysis().getAttentionPoints()) html.append("<li style='margin-bottom: 5pt;'>").append(a).append("</li>");
+        html.append("</ul></div>");
         html.append("</div>");
 
-        // --- PAGE 4: INVESTMENTS & FUTURE (Optional) ---
+        ReportComponents.endPage(html, pageNum++);
+
+        // --- PAGE 2: CASH FLOW & CATEGORIES ---
+        ReportComponents.startPage(html, "Fluxo de Caixa & Despesas", null);
+        
+        html.append("<h2>Distribuição por Categoria</h2>");
+        html.append("<div style='display: flex; gap: 40pt;'>");
+        
+        // Left column: Progress bars
+        html.append("<div style='flex: 1.5;'>");
+        for (MonthlyReportResponse.CategoryBreakdown cat : data.getCategories().stream().limit(10).toList()) {
+            ReportComponents.appendProgressBar(html, cat.getName(), cat.getPercentage(), 
+                cat.getColor() != null ? cat.getColor() : PdfTheme.COLOR_ACCENT, 
+                ReportComponents.formatCurrency(cat.getAmount()) + " (" + cat.getPercentage() + "%)");
+        }
+        html.append("</div>");
+        
+        // Right column: Table
+        html.append("<div style='flex: 1;'>");
+        html.append("<table><thead><tr><th>Categoria</th><th style='text-align: right;'>Valor</th></tr></thead><tbody>");
+        for (MonthlyReportResponse.CategoryBreakdown cat : data.getCategories().stream().limit(10).toList()) {
+            html.append("<tr><td>").append(cat.getName()).append("</td><td style='text-align: right;'>")
+                .append(ReportComponents.formatCurrency(cat.getAmount())).append("</td></tr>");
+        }
+        html.append("</tbody></table>");
+        html.append("</div></div>");
+
+        ReportComponents.endPage(html, pageNum++);
+
+        // --- PAGE 3: INSTITUTIONS & ACCOUNTS ---
+        if (data.getInstitutions() != null && !data.getInstitutions().isEmpty()) {
+            ReportComponents.startPage(html, "Instituições & Saldos", null);
+            
+            for (MonthlyReportResponse.InstitutionGroup inst : data.getInstitutions()) {
+                html.append("<div class='card no-break'>");
+                html.append("<div style='display: flex; justify-content: space-between; align-items: center; margin-bottom: 10pt;'>");
+                html.append("<h3 style='margin: 0;'>").append(inst.getName()).append("</h3>");
+                html.append("<div class='metric-value'>").append(ReportComponents.formatCurrency(inst.getTotalBalance())).append("</div>");
+                html.append("</div>");
+                
+                html.append("<table><tbody>");
+                for (MonthlyReportResponse.InstitutionGroup.ResourceSummary res : inst.getResources()) {
+                    html.append("<tr>")
+                        .append("<td style='border: none;'>").append(res.getName()).append(" <span class='text-muted' style='font-size: 8pt;'>(").append(res.getType()).append(")</span></td>")
+                        .append("<td style='text-align: right; border: none;'>").append(ReportComponents.formatCurrency(res.getBalance())).append("</td>")
+                        .append("</tr>");
+                }
+                html.append("</tbody></table>");
+                html.append("</div>");
+            }
+            
+            ReportComponents.endPage(html, pageNum++);
+        }
+
+        // --- PAGE 4: CREDIT CARDS & INSTALLMENTS ---
+        if (!data.getCreditCards().isEmpty() || !data.getInstallments().isEmpty()) {
+            ReportComponents.startPage(html, "Cartões & Parcelamentos", null);
+            
+            if (!data.getCreditCards().isEmpty()) {
+                html.append("<h2>Cartões de Crédito</h2>");
+                html.append("<table><thead><tr><th>Cartão</th><th>Limite</th><th>Saldo</th><th style='text-align: right;'>Uso</th></tr></thead><tbody>");
+                for (MonthlyReportResponse.CreditCardData card : data.getCreditCards()) {
+                    html.append("<tr>")
+                        .append("<td>").append(card.getName()).append("</td>")
+                        .append("<td>").append(ReportComponents.formatCurrency(card.getLimit())).append("</td>")
+                        .append("<td>").append(ReportComponents.formatCurrency(card.getCurrentBalance())).append("</td>")
+                        .append("<td style='text-align: right;'>").append(card.getUtilizationPercentage()).append("%</td>")
+                        .append("</tr>");
+                }
+                html.append("</tbody></table>");
+            }
+
+            if (!data.getInstallments().isEmpty()) {
+                html.append("<h2 style='margin-top: 30pt;'>Parcelamentos Ativos</h2>");
+                html.append("<table><thead><tr><th>Descrição</th><th>Parcela</th><th>Valor</th><th style='text-align: right;'>Total</th></tr></thead><tbody>");
+                for (MonthlyReportResponse.InstallmentData inst : data.getInstallments()) {
+                    html.append("<tr>")
+                        .append("<td>").append(inst.getDescription()).append("</td>")
+                        .append("<td>").append(inst.getCurrentInstallment()).append("/").append(inst.getTotalInstallments()).append("</td>")
+                        .append("<td>").append(ReportComponents.formatCurrency(inst.getInstallmentAmount())).append("</td>")
+                        .append("<td style='text-align: right;'>").append(ReportComponents.formatCurrency(inst.getTotalAmount())).append("</td>")
+                        .append("</tr>");
+                }
+                html.append("</tbody></table>");
+            }
+            
+            ReportComponents.endPage(html, pageNum++);
+        }
+
+        // --- PAGE 5: INVESTMENTS & FUTURE ---
         if (!data.getInvestments().isEmpty() || !data.getFutureCommitments().isEmpty()) {
-            html.append("<div class='page'>");
+            ReportComponents.startPage(html, "Investimentos & Compromissos", null);
             
             if (!data.getInvestments().isEmpty()) {
-                html.append("<div class='section-title'>Patrimônio e Investimentos</div>");
-                html.append("<div class='card'>");
-                html.append("<table class='data-table'>");
-                html.append("<tr><th>Tipo de Ativo</th><th>Valor Total</th><th>Alocação (%)</th></tr>");
+                html.append("<h2>Patrimônio e Investimentos</h2>");
+                html.append("<table><thead><tr><th>Tipo de Ativo</th><th style='text-align: right;'>Valor Total</th><th style='text-align: right;'>Alocação</th></tr></thead><tbody>");
                 for (MonthlyReportResponse.InvestmentData inv : data.getInvestments()) {
-                    html.append("<tr>");
-                    html.append("<td>").append(inv.getType()).append("</td>");
-                    html.append("<td>").append(String.format(CURRENCY_FORMAT, inv.getTotalValue())).append("</td>");
-                    html.append("<td>").append(inv.getPercentageOfPortfolio()).append("%</td>");
-                    html.append("</tr>");
+                    html.append("<tr>")
+                        .append("<td>").append(inv.getType()).append("</td>")
+                        .append("<td style='text-align: right;'>").append(ReportComponents.formatCurrency(inv.getTotalValue())).append("</td>")
+                        .append("<td style='text-align: right;'>").append(inv.getPercentageOfPortfolio()).append("%</td>")
+                        .append("</tr>");
                 }
-                html.append("</table></div>");
+                html.append("</tbody></table>");
             }
 
             if (!data.getFutureCommitments().isEmpty()) {
-                html.append("<div style='margin-top: 30px;'>");
-                html.append("<div class='section-title'>Compromissos Futuros Próximos</div>");
-                html.append("<table class='data-table'>");
-                html.append("<tr><th>Descrição</th><th>Data</th><th>Valor</th></tr>");
+                html.append("<h2 style='margin-top: 30pt;'>Compromissos Futuros</h2>");
+                html.append("<table><thead><tr><th>Descrição</th><th>Data</th><th style='text-align: right;'>Valor</th></tr></thead><tbody>");
                 for (MonthlyReportResponse.FutureCommitment comm : data.getFutureCommitments()) {
-                    html.append("<tr>");
-                    html.append("<td>").append(comm.getDescription()).append("</td>");
-                    html.append("<td>").append(comm.getDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))).append("</td>");
-                    html.append("<td class='text-danger'>").append(String.format(CURRENCY_FORMAT, comm.getAmount())).append("</td>");
-                    html.append("</tr>");
+                    html.append("<tr>")
+                        .append("<td>").append(comm.getDescription()).append("</td>")
+                        .append("<td>").append(comm.getDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))).append("</td>")
+                        .append("<td style='text-align: right; color: ").append(PdfTheme.COLOR_DANGER).append(";'>").append(ReportComponents.formatCurrency(comm.getAmount())).append("</td>")
+                        .append("</tr>");
                 }
-                html.append("</table></div>");
+                html.append("</tbody></table>");
             }
             
-            html.append("<div style='margin-top: 100px; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 20px;'>");
-            html.append("<p class='text-muted' style='font-size: 10px;'>Este relatório foi gerado automaticamente pelo BudgetBuddy AI e deve ser usado apenas para fins informativos.</p>");
-            html.append("</div>");
-            html.append("</div>");
+            ReportComponents.endPage(html, pageNum++);
+        }
+
+        // --- PAGE 6: HISTORICAL OUTLOOK ---
+        if (data.getHistoricalOutlook() != null && !data.getHistoricalOutlook().isEmpty()) {
+            ReportComponents.startPage(html, "Perspectiva Histórica", "Últimos 6 meses");
+            
+            html.append("<h2>Evolução Mensal</h2>");
+            html.append("<table><thead><tr><th>Mês</th><th>Receita</th><th>Despesa</th><th style='text-align: right;'>Taxa Econ.</th></tr></thead><tbody>");
+            for (MonthlyReportResponse.HistoricalOutlookPoint point : data.getHistoricalOutlook()) {
+                html.append("<tr>")
+                    .append("<td>").append(point.getLabel()).append("</td>")
+                    .append("<td>").append(ReportComponents.formatCurrency(point.getIncome())).append("</td>")
+                    .append("<td>").append(ReportComponents.formatCurrency(point.getExpense())).append("</td>")
+                    .append("<td style='text-align: right;'>").append(point.getSavingsRate()).append("%</td>")
+                    .append("</tr>");
+            }
+            html.append("</tbody></table>");
+
+            // Recommendations
+            if (data.getAiAnalysis() != null && data.getAiAnalysis().getRecommendations() != null) {
+                html.append("<div class='card' style='margin-top: 30pt;'>");
+                html.append("<h3 class='text-accent'>Recomendações Práticas</h3>");
+                html.append("<ul style='padding-left: 20pt;'>");
+                for (String r : data.getAiAnalysis().getRecommendations()) {
+                    html.append("<li style='margin-bottom: 8pt;'>").append(r).append("</li>");
+                }
+                html.append("</ul>");
+                html.append("</div>");
+            }
+            
+            ReportComponents.endPage(html, pageNum++);
         }
 
         html.append("</body></html>");
         return html.toString();
-    }
-
-    private void appendStatCard(StringBuilder html, String label, BigDecimal value, String colorClass) {
-        html.append("<td><div class='card'>");
-        html.append("<div class='stat-label'>").append(label).append("</div>");
-        html.append("<div class='stat-value ").append(colorClass).append("'>").append(String.format(CURRENCY_FORMAT, value)).append("</div>");
-        html.append("</div></td>");
-    }
-
-    private void appendVariationCard(StringBuilder html, String label, BigDecimal variation) {
-        String color = variation.compareTo(BigDecimal.ZERO) > 0 ? "text-danger" : "text-success";
-        // For income, positive variation is good
-        if (label.contains("Renda")) {
-            color = variation.compareTo(BigDecimal.ZERO) >= 0 ? "text-success" : "text-danger";
-        }
-        
-        String sign = variation.compareTo(BigDecimal.ZERO) >= 0 ? "+" : "";
-        
-        html.append("<td><div class='card'>");
-        html.append("<div class='stat-label'>").append(label).append("</div>");
-        html.append("<div class='stat-value ").append(color).append("'>").append(sign).append(variation).append("%</div>");
-        html.append("</div></td>");
     }
 
     private String getMonthName(int month) {

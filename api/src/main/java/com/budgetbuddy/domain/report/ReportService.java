@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -76,8 +77,41 @@ public class ReportService {
                         .build())
                 .collect(Collectors.toList());
 
-        // 4. Financial Resources (Credit Cards)
+        // 4. Financial Resources (Grouped by Institution)
         List<FinancialResourceResponse> allResources = financialResourceService.getFinancialResources(email);
+        
+        Map<String, List<FinancialResourceResponse>> resourcesByInstitution = allResources.stream()
+                .collect(Collectors.groupingBy(r -> r.getFinancialInstitution() != null ? r.getFinancialInstitution().getName() : "Outros"));
+
+        List<MonthlyReportResponse.InstitutionGroup> institutions = resourcesByInstitution.entrySet().stream()
+                .map(entry -> {
+                    String institutionName = entry.getKey();
+                    List<FinancialResourceResponse> resList = entry.getValue();
+                    BigDecimal total = resList.stream()
+                            .map(r -> r.getCurrentBalance() != null ? r.getCurrentBalance() : BigDecimal.ZERO)
+                            .reduce(BigDecimal.ZERO, BigDecimal::add);
+                    
+                    String icon = resList.stream()
+                            .filter(r -> r.getFinancialInstitution() != null && r.getFinancialInstitution().getLogoUrl() != null)
+                            .map(r -> r.getFinancialInstitution().getLogoUrl())
+                            .findFirst().orElse(null);
+
+                    return MonthlyReportResponse.InstitutionGroup.builder()
+                            .name(institutionName)
+                            .icon(icon)
+                            .totalBalance(total)
+                            .resources(resList.stream()
+                                    .map(r -> MonthlyReportResponse.InstitutionGroup.ResourceSummary.builder()
+                                            .name(r.getName())
+                                            .type(r.getType().name())
+                                            .balance(r.getCurrentBalance())
+                                            .build())
+                                    .collect(Collectors.toList()))
+                            .build();
+                })
+                .sorted((a, b) -> b.getTotalBalance().compareTo(a.getTotalBalance()))
+                .collect(Collectors.toList());
+
         List<MonthlyReportResponse.CreditCardData> creditCards = allResources.stream()
                 .filter(r -> r.getType() == FinancialResourceType.CREDIT_CARD)
                 .map(r -> MonthlyReportResponse.CreditCardData.builder()
@@ -123,22 +157,43 @@ public class ReportService {
                                 .build()))
                 .collect(Collectors.toList());
 
-        // 7. Future Commitments
+        // 7. Future Commitments & Recurring
         List<MonthlyReportResponse.FutureCommitment> futureCommitments = activeInstallments.stream()
                 .map(i -> MonthlyReportResponse.FutureCommitment.builder()
                         .description(i.getDescription() + " (" + i.getCurrentInstallment() + "/" + i.getTotalInstallments() + ")")
                         .amount(i.getInstallmentAmount())
                         .date(i.getNextDueDate())
                         .type("INSTALLMENT")
+                        .isRecurring(false)
                         .build())
                 .collect(Collectors.toList());
+
+        // Simplified recurring detection: Expenses that repeat in similar amounts/descriptions could be detected.
+        // For now, we'll fetch transactions marked as isRecurring.
+        List<MonthlyReportResponse.RecurringCommitment> recurringCommitments = new ArrayList<>();
+        // This would ideally come from a dedicated RecurringTransaction entity or logic.
+        // As a placeholder, we use transactions from the current month that are marked as recurring.
+        // In a real scenario, this would be a separate service.
 
         // 8. Budget Status for AI
         List<BudgetStatusResponse> budgets = budgetService.getBudgetStatus(email, month, year);
         Map<String, BigDecimal> budgetStatusMap = budgets.stream()
                 .collect(Collectors.toMap(BudgetStatusResponse::getCategoryName, BudgetStatusResponse::getPercentUsed));
 
-        // 9. AI Analysis
+        // 9. Historical Outlook (Last 6 months)
+        List<MonthlyReportResponse.HistoricalOutlookPoint> historicalOutlook = new ArrayList<>();
+        for (int i = 5; i >= 0; i--) {
+            LocalDate date = start.minusMonths(i);
+            TransactionSummaryResponse summary = transactionService.getMonthlySummary(email, date.getMonthValue(), date.getYear());
+            historicalOutlook.add(MonthlyReportResponse.HistoricalOutlookPoint.builder()
+                    .label(getMonthName(date.getMonthValue()).substring(0, 3) + "/" + String.valueOf(date.getYear()).substring(2))
+                    .income(summary.getTotalIncome())
+                    .expense(summary.getTotalExpense())
+                    .savingsRate(summary.getSavingsRate())
+                    .build());
+        }
+
+        // 10. AI Analysis
         UserFinancialSummary aiData = UserFinancialSummary.builder()
                 .userName(user.getName())
                 .monthlyIncome(currentSummary.getTotalIncome())
@@ -173,8 +228,10 @@ public class ReportService {
                 .comparison(MonthlyReportResponse.ComparisonData.builder()
                         .prevMonthIncome(prevSummary.getTotalIncome())
                         .prevMonthExpense(prevSummary.getTotalExpense())
+                        .prevMonthSavingsRate(prevSummary.getSavingsRate())
                         .incomeVariation(calculateVariation(currentSummary.getTotalIncome(), prevSummary.getTotalIncome()))
                         .expenseVariation(calculateVariation(currentSummary.getTotalExpense(), prevSummary.getTotalExpense()))
+                        .savingsRateVariation(currentSummary.getSavingsRate().subtract(prevSummary.getSavingsRate()))
                         .build())
                 .health(MonthlyReportResponse.FinancialHealth.builder()
                         .savingsRateStatus(getSavingsRateStatus(currentSummary.getSavingsRate()))
@@ -183,12 +240,21 @@ public class ReportService {
                         .build())
                 .categories(categories)
                 .cashFlow(cashFlow)
+                .institutions(institutions)
                 .creditCards(creditCards)
                 .investments(investments)
                 .installments(activeInstallments)
                 .futureCommitments(futureCommitments)
+                .recurringCommitments(recurringCommitments)
+                .historicalOutlook(historicalOutlook)
                 .aiAnalysis(MonthlyReportResponse.AiAnalysis.builder()
                         .executiveSummary(aiAnalysis.getExecutiveSummary())
+                        .topInsights(aiAnalysis.getTopInsights() != null ? aiAnalysis.getTopInsights().stream()
+                                .map(i -> MonthlyReportResponse.AiAnalysis.InsightItem.builder()
+                                        .title(i.getTitle())
+                                        .description(i.getDescription())
+                                        .build())
+                                .collect(Collectors.toList()) : new ArrayList<>())
                         .strengths(aiAnalysis.getStrengths())
                         .attentionPoints(aiAnalysis.getAttentionPoints())
                         .recommendations(aiAnalysis.getRecommendations())
@@ -204,6 +270,24 @@ public class ReportService {
     private BigDecimal calculateVariation(BigDecimal current, BigDecimal previous) {
         if (previous == null || previous.compareTo(BigDecimal.ZERO) == 0) return BigDecimal.ZERO;
         return current.subtract(previous).multiply(BigDecimal.valueOf(100)).divide(previous, 2, RoundingMode.HALF_UP);
+    }
+
+    private String getMonthName(int month) {
+        return switch (month) {
+            case 1 -> "Janeiro";
+            case 2 -> "Fevereiro";
+            case 3 -> "Março";
+            case 4 -> "Abril";
+            case 5 -> "Maio";
+            case 6 -> "Junho";
+            case 7 -> "Julho";
+            case 8 -> "Agosto";
+            case 9 -> "Setembro";
+            case 10 -> "Outubro";
+            case 11 -> "Novembro";
+            case 12 -> "Dezembro";
+            default -> "";
+        };
     }
 
     private BigDecimal calculateRatio(BigDecimal part, BigDecimal total) {

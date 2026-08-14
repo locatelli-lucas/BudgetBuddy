@@ -37,15 +37,25 @@ prompts:
     - Cartões de Crédito: {{creditCards}}
     - Investimentos: {{investments}}
     
-    Gere uma análise financeira profissional em formato JSON com a seguinte estrutura:
+    Gere uma análise financeira profissional e concisa em formato JSON. 
+    REGRAS CRÍTICAS:
+    - Não use frases motivacionais genéricas.
+    - O executiveSummary deve ter no máximo 4 linhas, focando no desempenho real.
+    - topInsights deve conter exatamente 3 observações cruciais sobre os dados.
+    - Use um tom profissional e direto.
+    
+    Estrutura JSON:
     {
-      "executiveSummary": "Um parágrafo conciso sobre o desempenho geral do mês, sendo encorajador mas realista.",
-      "strengths": ["Lista de 2-3 pontos positivos observados nos dados"],
-      "attentionPoints": ["Lista de 2-3 pontos que requerem atenção ou cuidado"],
-      "recommendations": ["Lista de 3 ações práticas e específicas para o próximo mês"]
+      "executiveSummary": "Resumo técnico e direto do mês.",
+      "topInsights": [
+        {"title": "Título curto", "description": "Descrição breve do insight"}
+      ],
+      "strengths": ["Ponto positivo 1", "Ponto positivo 2"],
+      "attentionPoints": ["Alerta 1", "Alerta 2"],
+      "recommendations": ["Ação prática 1", "Ação prática 2", "Ação prática 3"]
     }
     
-    Responda APENAS o JSON, sem textos explicativos antes ou depois. Use português do Brasil.
+    Responda APENAS o JSON. Use português do Brasil.
 
   portfolio-analysis: |
     Analise a seguinte carteira de investimentos e forneça observações sobre diversificação, concentração e riscos.

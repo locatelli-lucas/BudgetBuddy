@@ -7,9 +7,9 @@ spring:
       - optional:file:api/.env
 
   datasource:
-    url: ${DATABASE_URL:jdbc:h2:mem:budgetbuddy;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;NON_KEYWORDS=MONTH,YEAR;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE}
-    username: ${DATABASE_USER:sa}
-    password: ${DATABASE_PASSWORD:password}
+    url: ${DATABASE_URL:}
+    username: ${DATABASE_USER:}
+    password: ${DATABASE_PASSWORD:}
     driver-class-name: org.h2.Driver
     hikari:
       maximum-pool-size: 10
@@ -72,11 +72,11 @@ jwt:
 
 # ─── AI ───────────────────────────────────────────────────────────────────────
 ai:
-  provider: ${AI_PROVIDER:groq}
+  provider: ${AI_PROVIDER:}
   groq:
     api-key: ${GROQ_API_KEY:}
     model: ${GROQ_MODEL:}
-    base-url: https://api.groq.com/openai/v1
+    base-url: ${GROQ_BASE_URL:}
   max-tokens: 2048
 
 # ─── Firebase ─────────────────────────────────────────────────────────────────

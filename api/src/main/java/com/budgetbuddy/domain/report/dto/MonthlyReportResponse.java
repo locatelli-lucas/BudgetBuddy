@@ -24,10 +24,13 @@ public class MonthlyReportResponse {
     
     private List<CategoryBreakdown> categories;
     private List<CashFlowPoint> cashFlow;
+    private List<InstitutionGroup> institutions;
     private List<CreditCardData> creditCards;
     private List<InvestmentData> investments;
     private List<InstallmentData> installments;
     private List<FutureCommitment> futureCommitments;
+    private List<RecurringCommitment> recurringCommitments;
+    private List<HistoricalOutlookPoint> historicalOutlook;
     
     private AiAnalysis aiAnalysis;
 
@@ -49,8 +52,10 @@ public class MonthlyReportResponse {
     public static class ComparisonData {
         private BigDecimal prevMonthIncome;
         private BigDecimal prevMonthExpense;
+        private BigDecimal prevMonthSavingsRate;
         private BigDecimal incomeVariation; // percentage
         private BigDecimal expenseVariation; // percentage
+        private BigDecimal savingsRateVariation; // percentage points
     }
 
     @Data
@@ -130,6 +135,50 @@ public class MonthlyReportResponse {
         private BigDecimal amount;
         private LocalDate date;
         private String type; // FIXED_EXPENSE, INSTALLMENT
+        private boolean isRecurring;
+    }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class RecurringCommitment {
+        private String description;
+        private BigDecimal amount;
+        private String category;
+        private String frequency; // Monthly, Weekly, etc.
+    }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class InstitutionGroup {
+        private String name;
+        private String icon;
+        private BigDecimal totalBalance;
+        private List<ResourceSummary> resources;
+
+        @Data
+        @Builder
+        @NoArgsConstructor
+        @AllArgsConstructor
+        public static class ResourceSummary {
+            private String name;
+            private String type;
+            private BigDecimal balance;
+        }
+    }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class HistoricalOutlookPoint {
+        private String label; // Month/Year
+        private BigDecimal income;
+        private BigDecimal expense;
+        private BigDecimal savingsRate;
     }
 
     @Data
@@ -138,8 +187,18 @@ public class MonthlyReportResponse {
     @AllArgsConstructor
     public static class AiAnalysis {
         private String executiveSummary;
+        private List<InsightItem> topInsights;
         private List<String> strengths;
         private List<String> attentionPoints;
         private List<String> recommendations;
+
+        @Data
+        @Builder
+        @NoArgsConstructor
+        @AllArgsConstructor
+        public static class InsightItem {
+            private String title;
+            private String description;
+        }
     }
 }

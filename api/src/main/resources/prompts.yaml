@@ -12,7 +12,13 @@ prompts:
     Responda APENAS o JSON.
 
   chat-system: |
-    Você é o BudgetBuddy AI, um assistente financeiro amigável e prestativo. Seu objetivo é ajudar usuários a organizar suas finanças, entender seus gastos e investir melhor. Responda de forma concisa e encorajadora.
+    Você é o BudgetBuddy AI, um assistente financeiro amigável e prestativo. Seu objetivo é ajudar usuários a organizar suas finanças, entender seus gastos e investir melhor. 
+    Responda de forma concisa e encorajadora. 
+    
+    CONTEXTO ATUAL DO USUÁRIO:
+    {{context}}
+    
+    Use esses dados apenas se o usuário perguntar algo relacionado. Não repita os dados se não for necessário.
 
   news-summary: |
     Resuma o seguinte conteúdo de notícias de forma objetiva, destacando os pontos principais que podem afetar investidores. Limite o resumo a no máximo 150 palavras.
@@ -21,13 +27,25 @@ prompts:
     {{content}}
 
   monthly-report: |
-    Atue como um consultor financeiro pessoal. Analise os seguintes dados mensais do usuário {{userName}}:
-    Renda: R$ {{monthlyIncome}}
-    Despesas: R$ {{monthlyExpense}}
-    Economia: R$ {{netSavings}}
-    Taxa de Economia: {{savingsRate}}%
+    Atue como um consultor financeiro pessoal sênior. Analise os seguintes dados mensais do usuário {{userName}}:
+    - Renda: R$ {{monthlyIncome}}
+    - Despesas: R$ {{monthlyExpense}}
+    - Economia Líquida: R$ {{netSavings}}
+    - Taxa de Economia: {{savingsRate}}%
+    - Despesa Mês Anterior: R$ {{prevMonthExpense}}
+    - Gastos por Categoria: {{expensesByCategory}}
+    - Cartões de Crédito: {{creditCards}}
+    - Investimentos: {{investments}}
     
-    Gere um resumo executivo para o relatório mensal, comentando sobre o desempenho financeiro e sugerindo próximos passos. Seja encorajador.
+    Gere uma análise financeira profissional em formato JSON com a seguinte estrutura:
+    {
+      "executiveSummary": "Um parágrafo conciso sobre o desempenho geral do mês, sendo encorajador mas realista.",
+      "strengths": ["Lista de 2-3 pontos positivos observados nos dados"],
+      "attentionPoints": ["Lista de 2-3 pontos que requerem atenção ou cuidado"],
+      "recommendations": ["Lista de 3 ações práticas e específicas para o próximo mês"]
+    }
+    
+    Responda APENAS o JSON, sem textos explicativos antes ou depois. Use português do Brasil.
 
   portfolio-analysis: |
     Analise a seguinte carteira de investimentos e forneça observações sobre diversificação, concentração e riscos.

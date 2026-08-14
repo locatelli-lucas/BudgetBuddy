@@ -8,6 +8,9 @@ import com.budgetbuddy.domain.insight.dto.CategorizationResponse;
 import com.budgetbuddy.domain.insight.dto.ChatRequest;
 import com.budgetbuddy.domain.insight.dto.ChatResponse;
 import com.budgetbuddy.domain.insight.dto.InsightResponse;
+import com.budgetbuddy.domain.financialresource.FinancialResourceService;
+import com.budgetbuddy.domain.transaction.TransactionService;
+import com.budgetbuddy.domain.transaction.dto.TransactionSummaryResponse;
 import com.budgetbuddy.domain.user.User;
 import com.budgetbuddy.domain.user.UserService;
 import com.budgetbuddy.infrastructure.ai.AiProvider;
@@ -34,6 +37,8 @@ public class AiInsightService {
     private final UserService userService;
     private final CategoryRepository categoryRepository;
     private final AiProvider aiProvider;
+    private final FinancialResourceService financialResourceService;
+    private final TransactionService transactionService;
 
     @Transactional(readOnly = true)
     @Cacheable(value = "userInsights", key = "#email")
@@ -99,7 +104,29 @@ public class AiInsightService {
 
     public ChatResponse chat(String email, ChatRequest request) {
         User user = userService.getUserByEmail(email);
-        String reply = aiProvider.chat(user.getId().toString(), request.getMessage(), Collections.emptyList());
+        
+        // Enrich with current financial context
+        var resources = financialResourceService.getGroupedFinancialResources(email);
+        var now = LocalDateTime.now();
+        var monthlySummary = transactionService.getMonthlySummary(email, now.getMonthValue(), now.getYear());
+        
+        // Calculate total credit limit (netWorth only includes balances)
+        BigDecimal totalCreditLimit = resources.getInstitutions().stream()
+                .flatMap(inst -> inst.getFinancialResources().stream())
+                .filter(res -> res.getType() == com.budgetbuddy.domain.financialresource.FinancialResourceType.CREDIT_CARD)
+                .map(res -> res.getCreditLimit() != null ? res.getCreditLimit() : BigDecimal.ZERO)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        
+        StringBuilder context = new StringBuilder();
+        context.append(String.format("Saldo total em contas: R$ %.2f. ", resources.getNetWorth()));
+        context.append(String.format("Limite total em cartões: R$ %.2f. ", totalCreditLimit));
+        context.append(String.format("Resumo de %02d/%d: Receitas R$ %.2f, Despesas R$ %.2f, Saldo do mês R$ %.2f.",
+                now.getMonthValue(), now.getYear(),
+                monthlySummary.getTotalIncome(),
+                monthlySummary.getTotalExpense(),
+                monthlySummary.getNetBalance()));
+
+        String reply = aiProvider.chat(user.getId().toString(), request.getMessage(), Collections.emptyList(), context.toString());
                 
         return ChatResponse.builder()
                 .reply(reply)

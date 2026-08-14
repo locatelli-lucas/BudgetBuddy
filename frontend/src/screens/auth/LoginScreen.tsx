@@ -11,6 +11,7 @@ export function LoginScreen({ navigation }: any) {
   const { showError } = useErrorToast();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
 
@@ -90,10 +91,17 @@ export function LoginScreen({ navigation }: any) {
               className="flex-1 text-on-surface font-body-md"
               placeholder="Senha"
               placeholderTextColor="#8d90a0"
-              secureTextEntry
+              secureTextEntry={!showPassword}
               value={password}
               onChangeText={setPassword}
             />
+            <TouchableOpacity onPress={() => setShowPassword(!showPassword)} className="p-1">
+              <MaterialIcons
+                name={showPassword ? "visibility-off" : "visibility"}
+                size={20}
+                color="#8d90a0"
+              />
+            </TouchableOpacity>
           </View>
           
           <TouchableOpacity className="items-end">

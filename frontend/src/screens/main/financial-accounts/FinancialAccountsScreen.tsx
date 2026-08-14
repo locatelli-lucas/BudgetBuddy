@@ -210,7 +210,7 @@ function InstitutionCard({ inst, isExpanded, onToggle, onPressPM }: { inst: Fina
               <Text className="text-label-sm text-on-surface-variant">{inst.resourceCount} recurso(s) vinculado(s)</Text>
            </View>
         </View>
-        <View className="items-end">
+        <View className="flex-row items-center gap-2">
            <Text className="text-title-md font-bold text-on-surface">{formatCurrency(inst.totalBalance)}</Text>
            <MaterialIcons name={isExpanded ? "expand-less" : "expand-more"} size={20} color={Colors.onSurfaceVariant} />
         </View>

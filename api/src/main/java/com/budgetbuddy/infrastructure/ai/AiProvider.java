@@ -22,7 +22,7 @@ public interface AiProvider {
     /**
      * Chat interface for the AI financial assistant.
      */
-    String chat(String userId, String message, List<ChatMessage> history);
+    String chat(String userId, String message, List<ChatMessage> history, String context);
 
     /**
      * Summarizes an article or text.
@@ -38,7 +38,7 @@ public interface AiProvider {
     /**
      * Generates content for a monthly financial report.
      */
-    String generateMonthlyReport(UserFinancialSummary data);
+    com.budgetbuddy.infrastructure.ai.dto.AiReportAnalysis generateMonthlyReport(UserFinancialSummary data);
 
     /**
      * Generic method for analysis (Portfolio, Spending, etc.)

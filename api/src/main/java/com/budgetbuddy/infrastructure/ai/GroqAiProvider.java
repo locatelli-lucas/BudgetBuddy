@@ -50,35 +50,12 @@ public class GroqAiProvider implements AiProvider {
 
     @PostConstruct
     public void init() {
-        if (apiKey == null || apiKey.isBlank() || apiKey.startsWith("${")) {
-            log.info("Spring failed to inject GROQ_API_KEY. Attempting manual load from .env file...");
-            try {
-                Dotenv dotenv = Dotenv.configure()
-                        .directory("./api")
-                        .ignoreIfMissing()
-                        .load();
-                
-                String envKey = dotenv.get("GROQ_API_KEY");
-                if (envKey == null) {
-                    dotenv = Dotenv.configure().ignoreIfMissing().load();
-                    envKey = dotenv.get("GROQ_API_KEY");
-                }
-                
-                if (envKey != null && !envKey.isBlank()) {
-                    this.apiKey = envKey;
-                    log.info("Successfully loaded GROQ_API_KEY manually via Dotenv.");
-                }
-            } catch (Exception e) {
-                log.warn("Manual .env loading failed for Groq: {}", e.getMessage());
-            }
-        }
-        
         if (apiKey != null && !apiKey.isBlank()) {
             String maskedKey = apiKey.substring(0, Math.min(apiKey.length(), 4)) + "..." + 
                                apiKey.substring(Math.max(0, apiKey.length() - 4));
             log.info("GroqAiProvider initialized with model: {} and API key: {}", model, maskedKey);
         } else {
-            log.error("CRITICAL: GROQ_API_KEY is not set correctly. AI features will not work.");
+            log.warn("GROQ_API_KEY is not set. AI features will use fallback or fail.");
         }
     }
 
@@ -117,8 +94,8 @@ public class GroqAiProvider implements AiProvider {
     }
 
     @Override
-    public String chat(String userId, String message, List<ChatMessage> history) {
-        String systemPrompt = promptLoader.load("chat-system", Collections.emptyMap());
+    public String chat(String userId, String message, List<ChatMessage> history, String context) {
+        String systemPrompt = promptLoader.load("chat-system", Map.of("context", context != null ? context : "Nenhum dado financeiro disponível no momento."));
         
         List<Map<String, String>> messages = new ArrayList<>();
         messages.add(Map.of("role", "system", "content", systemPrompt));
@@ -144,15 +121,31 @@ public class GroqAiProvider implements AiProvider {
     }
 
     @Override
-    public String generateMonthlyReport(UserFinancialSummary data) {
+    public com.budgetbuddy.infrastructure.ai.dto.AiReportAnalysis generateMonthlyReport(UserFinancialSummary data) {
         String prompt = promptLoader.load("monthly-report", Map.of(
                 "userName", data.getUserName(),
                 "monthlyIncome", data.getMonthlyIncome(),
                 "monthlyExpense", data.getMonthlyExpense(),
                 "netSavings", data.getMonthlyIncome().subtract(data.getMonthlyExpense()),
-                "savingsRate", data.getSavingsRate()
+                "savingsRate", data.getSavingsRate(),
+                "prevMonthExpense", data.getPreviousMonthExpense() != null ? data.getPreviousMonthExpense() : "N/A",
+                "expensesByCategory", data.getExpensesByCategory() != null ? data.getExpensesByCategory().toString() : "{}",
+                "creditCards", data.getCreditCards() != null ? data.getCreditCards().toString() : "[]",
+                "investments", data.getInvestments() != null ? data.getInvestments().toString() : "[]"
         ));
-        return callGroq(null, prompt);
+        
+        try {
+            String response = callGroq(null, prompt);
+            return objectMapper.readValue(cleanJsonResponse(response), com.budgetbuddy.infrastructure.ai.dto.AiReportAnalysis.class);
+        } catch (Exception e) {
+            log.error("Error generating monthly report analysis with Groq", e);
+            return com.budgetbuddy.infrastructure.ai.dto.AiReportAnalysis.builder()
+                    .executiveSummary("Não foi possível gerar a análise detalhada no momento.")
+                    .strengths(List.of("Você manteve o controle de suas despesas."))
+                    .attentionPoints(List.of("Tente revisar seus gastos variáveis."))
+                    .recommendations(List.of("Continue acompanhando seus orçamentos pelo BudgetBuddy."))
+                    .build();
+        }
     }
 
     @Override
@@ -217,12 +210,52 @@ public class GroqAiProvider implements AiProvider {
     }
 
     private AiInsight mapJsonToInsight(JsonNode node) {
+        String typeStr = node.path("type").asText("RECOMMENDATION").toUpperCase();
+        AiInsight.InsightType type;
+        try {
+            type = AiInsight.InsightType.valueOf(typeStr);
+        } catch (IllegalArgumentException e) {
+            // Map common AI-generated values that don't match our strict Enum
+            type = switch (typeStr) {
+                case "WARNING", "ALERT", "DANGER" -> AiInsight.InsightType.ALERT;
+                case "TIPS", "TIP", "ADVICE" -> AiInsight.InsightType.RECOMMENDATION;
+                case "PROGRESS", "GOAL", "SUCCESS" -> AiInsight.InsightType.PROGRESS;
+                default -> AiInsight.InsightType.RECOMMENDATION;
+            };
+        }
+
+        String severityStr = node.path("severity").asText("INFO").toUpperCase();
+        AiInsight.InsightSeverity severity;
+        try {
+            severity = AiInsight.InsightSeverity.valueOf(severityStr);
+        } catch (IllegalArgumentException e) {
+            severity = switch (severityStr) {
+                case "WARNING", "ALERT" -> AiInsight.InsightSeverity.WARNING;
+                case "ERROR", "CRITICAL", "DANGER" -> AiInsight.InsightSeverity.ERROR;
+                case "SUCCESS", "GOOD" -> AiInsight.InsightSeverity.SUCCESS;
+                default -> AiInsight.InsightSeverity.INFO;
+            };
+        }
+
+        // Map icons to a safe set of MaterialIcons available in the app
+        String rawIcon = node.path("icon").asText("lightbulb").toLowerCase();
+        String safeIcon = switch (rawIcon) {
+            case "tips_and_updates", "lightbulb_outline", "idea" -> "lightbulb";
+            case "trending_down", "trending_flat", "money_off" -> "trending-down";
+            case "trending_up", "attach_money", "show_chart" -> "trending-up";
+            case "warning", "error", "report_problem" -> "warning";
+            case "check_circle", "done", "verified" -> "check-circle";
+            case "info", "help", "help_outline" -> "info";
+            case "savings", "account_balance_wallet", "wallet" -> "account-balance-wallet";
+            default -> "lightbulb"; // Default safe icon
+        };
+
         return AiInsight.builder()
                 .title(node.path("title").asText("Dica Financeira"))
                 .body(node.path("body").asText())
-                .type(AiInsight.InsightType.valueOf(node.path("type").asText("TIPS")))
-                .icon(node.path("icon").asText("lightbulb"))
-                .severity(AiInsight.InsightSeverity.valueOf(node.path("severity").asText("INFO")))
+                .type(type)
+                .icon(safeIcon)
+                .severity(severity)
                 .isRead(false)
                 .build();
     }

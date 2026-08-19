@@ -1,3 +1,4 @@
+import { useErrorToast } from '../../../contexts/ErrorToastContext';
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, FlatList, TouchableOpacity, TextInput, Alert, ActivityIndicator } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -7,6 +8,7 @@ import { investmentService } from '../../../services/investment.service';
 import { Institution } from '../../../types/investment';
 
 export function RegisteredInstitutionsScreen({ navigation }: any) {
+  const { showError } = useErrorToast();
   const [institutions, setInstitutions] = useState<Institution[]>([]);
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(true);
@@ -17,7 +19,7 @@ export function RegisteredInstitutionsScreen({ navigation }: any) {
       const data = await investmentService.getInstitutions();
       setInstitutions(data);
     } catch (err) {
-      console.error('Failed to load registered brokers', err);
+      showError(err, 'Failed to load registered brokers');
     } finally {
       setLoading(false);
     }
@@ -66,7 +68,7 @@ export function RegisteredInstitutionsScreen({ navigation }: any) {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-background" edges={['top']} style={{ flex: 1, backgroundColor: Colors.background }}>
       {/* Header */}
       <View className="flex-row items-center justify-between px-5 h-14 border-b border-outline-variant/20">
         <View className="flex-row items-center gap-4">

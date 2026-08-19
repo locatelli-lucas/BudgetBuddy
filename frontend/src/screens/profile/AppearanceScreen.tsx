@@ -11,10 +11,10 @@ const THEME_OPTIONS: { key: ThemeMode; label: string; icon: string; subtitle: st
 ];
 
 export function AppearanceScreen({ navigation }: any) {
-  const { themeMode, colors, setThemeMode } = useTheme();
+  const { themeMode, colors, theme, setThemeMode } = useTheme();
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-background" edges={['top']} style={{ flex: 1, backgroundColor: colors.background }}>
       <View className="flex-row items-center justify-between px-5 h-14">
         <TouchableOpacity onPress={() => navigation.goBack()} className="p-2 -ml-2 rounded-full">
           <MaterialIcons name="arrow-back" size={24} color={colors.primary} />

@@ -18,8 +18,8 @@ const getBaseUrl = (): string => {
 const BASE_URL = getBaseUrl();
 
 // Called by AuthContext to register its signOut — when tokens expire, we trigger re-login
-let onAuthExpired: (() => void) | null = null;
-export function setOnAuthExpired(cb: (() => void) | null) {
+let onAuthExpired: ((isForced?: boolean) => void) | null = null;
+export function setOnAuthExpired(cb: ((isForced?: boolean) => void) | null) {
   onAuthExpired = cb;
 }
 
@@ -54,7 +54,7 @@ api.interceptors.response.use(
     if (error.response?.status === 403 && !originalRequest._retry && !isLogoutRequest) {
       originalRequest._retry = true;
       await AsyncStorage.multiRemove(['accessToken', 'refreshToken', 'user']);
-      onAuthExpired?.();
+      onAuthExpired?.(true);
       return Promise.reject(error);
     }
 
@@ -70,7 +70,7 @@ api.interceptors.response.use(
       } catch {
         await AsyncStorage.multiRemove(['accessToken', 'refreshToken', 'user']);
         if (!isLogoutRequest) {
-          onAuthExpired?.();
+          onAuthExpired?.(true);
         }
       }
     }

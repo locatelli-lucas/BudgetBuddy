@@ -2,6 +2,7 @@ package com.budgetbuddy.domain.user;
 
 import com.budgetbuddy.domain.notification.NotificationPreference;
 import com.budgetbuddy.domain.notification.NotificationPreferenceRepository;
+import com.budgetbuddy.domain.notification.dto.NotificationPreferenceRequest;
 import com.budgetbuddy.domain.notification.dto.NotificationPreferenceResponse;
 import com.budgetbuddy.domain.user.dto.ChangePasswordRequest;
 import com.budgetbuddy.domain.user.dto.FcmTokenRequest;
@@ -64,22 +65,28 @@ public class UserService {
     @Transactional(readOnly = true)
     public NotificationPreferenceResponse getNotificationPreferences(String email) {
         User user = getUserByEmail(email);
-        NotificationPreference pref = notificationPreferenceRepository.findByUserEmail(email)
+        NotificationPreference pref = notificationPreferenceRepository.findByUserId(user.getId())
                 .orElseGet(() -> createDefaultPreferences(user));
         return mapToPreferenceResponse(pref);
     }
 
     @Transactional
-    public NotificationPreferenceResponse updateNotificationPreferences(String email, NotificationPreferenceResponse request) {
+    public NotificationPreferenceResponse updateNotificationPreferences(String email, NotificationPreferenceRequest request) {
         User user = getUserByEmail(email);
-        NotificationPreference pref = notificationPreferenceRepository.findByUserEmail(email)
+        NotificationPreference pref = notificationPreferenceRepository.findByUserId(user.getId())
                 .orElseGet(() -> NotificationPreference.builder().user(user).build());
 
-        pref.setBudgetAlerts(request.isBudgetAlerts());
-        pref.setUnusualSpendingAlerts(request.isUnusualSpendingAlerts());
-        pref.setAiInsights(request.isAiInsights());
-        pref.setBillReminders(request.isBillReminders());
-        pref.setInvestmentAlerts(request.isInvestmentAlerts());
+        pref.setPushEnabled(request.isPushEnabled());
+        pref.setFinanceEnabled(request.isFinanceEnabled());
+        pref.setInvestmentEnabled(request.isInvestmentEnabled());
+        pref.setNewsEnabled(request.isNewsEnabled());
+        pref.setAiEnabled(request.isAiEnabled());
+        pref.setSystemEnabled(request.isSystemEnabled());
+        pref.setPriceAlertEnabled(request.isPriceAlertEnabled());
+        pref.setDividendAlertEnabled(request.isDividendAlertEnabled());
+        pref.setDailySummaryEnabled(request.isDailySummaryEnabled());
+        pref.setWeeklySummaryEnabled(request.isWeeklySummaryEnabled());
+        pref.setMonthlySummaryEnabled(request.isMonthlySummaryEnabled());
 
         pref = notificationPreferenceRepository.save(pref);
         return mapToPreferenceResponse(pref);
@@ -92,12 +99,18 @@ public class UserService {
 
     private NotificationPreferenceResponse mapToPreferenceResponse(NotificationPreference pref) {
         return NotificationPreferenceResponse.builder()
-                .id(pref.getId().toString())
-                .budgetAlerts(pref.isBudgetAlerts())
-                .unusualSpendingAlerts(pref.isUnusualSpendingAlerts())
-                .aiInsights(pref.isAiInsights())
-                .billReminders(pref.isBillReminders())
-                .investmentAlerts(pref.isInvestmentAlerts())
+                .id(pref.getId())
+                .pushEnabled(pref.isPushEnabled())
+                .financeEnabled(pref.isFinanceEnabled())
+                .investmentEnabled(pref.isInvestmentEnabled())
+                .newsEnabled(pref.isNewsEnabled())
+                .aiEnabled(pref.isAiEnabled())
+                .systemEnabled(pref.isSystemEnabled())
+                .priceAlertEnabled(pref.isPriceAlertEnabled())
+                .dividendAlertEnabled(pref.isDividendAlertEnabled())
+                .dailySummaryEnabled(pref.isDailySummaryEnabled())
+                .weeklySummaryEnabled(pref.isWeeklySummaryEnabled())
+                .monthlySummaryEnabled(pref.isMonthlySummaryEnabled())
                 .build();
     }
 

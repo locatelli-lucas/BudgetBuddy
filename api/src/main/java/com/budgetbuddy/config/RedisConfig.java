@@ -1,5 +1,6 @@
 package com.budgetbuddy.config;
 
+import org.springframework.boot.autoconfigure.cache.RedisCacheManagerBuilderCustomizer;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,5 +20,22 @@ public class RedisConfig {
                 .entryTtl(Duration.ofMinutes(5))
                 .disableCachingNullValues()
                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()));
+    }
+
+    @Bean
+    public RedisCacheManagerBuilderCustomizer redisCacheManagerBuilderCustomizer() {
+        return (builder) -> builder
+                // Quotes expire in 5 min — aligned with the Yahoo Finance scheduler cycle
+                .withCacheConfiguration("market-quotes",
+                        RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofMinutes(5)))
+                // Search results change infrequently
+                .withCacheConfiguration("market-search",
+                        RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofMinutes(10)))
+                // Historical data is immutable within the day
+                .withCacheConfiguration("market-history",
+                        RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofMinutes(60)))
+                // News articles
+                .withCacheConfiguration("news",
+                        RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofMinutes(15)));
     }
 }

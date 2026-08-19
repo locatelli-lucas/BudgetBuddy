@@ -67,7 +67,7 @@ export function AddCategoryScreen({ navigation, route }: any) {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-background" edges={['top']} style={{ flex: 1, backgroundColor: Colors.background }}>
       <Toast visible={toastVisible} message={isEditing ? 'Categoria atualizada!' : 'Categoria criada!'} type="success" onHide={() => setToastVisible(false)} />
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1">
         <View className="flex-row items-center justify-between px-5 h-14">

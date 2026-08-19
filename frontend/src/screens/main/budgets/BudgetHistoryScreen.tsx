@@ -1,3 +1,4 @@
+import { useErrorToast } from '../../../contexts/ErrorToastContext';
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -7,6 +8,7 @@ import { budgetService } from '../../../services/budget.service';
 import { BudgetStatusResponse } from '../../../types/budget';
 
 export function BudgetHistoryScreen({ navigation }: any) {
+  const { showError } = useErrorToast();
   const insets = useSafeAreaInsets();
   const [months, setMonths] = useState<{ month: number; year: number; label: string }[]>([]);
   const [selectedMonth, setSelectedMonth] = useState<{ month: number; year: number } | null>(null);
@@ -35,7 +37,7 @@ export function BudgetHistoryScreen({ navigation }: any) {
       const data = await budgetService.getBudgetStatus(selectedMonth.month, selectedMonth.year);
       setBudgets(data);
     } catch (err) {
-      console.error('Failed to load history budget status', err);
+      showError(err, 'Failed to load history budget status');
     } finally {
       setLoading(false);
     }

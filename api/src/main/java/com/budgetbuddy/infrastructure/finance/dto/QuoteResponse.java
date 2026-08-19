@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class QuoteResponse {
     private String ticker;
+    private String name;
     private BigDecimal price;
     private BigDecimal change;
     private BigDecimal changePercent;

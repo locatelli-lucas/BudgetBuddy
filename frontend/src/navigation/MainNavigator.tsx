@@ -27,12 +27,17 @@ import { IconGalleryScreen } from '../screens/main/budgets/IconGalleryScreen';
 import { AddAssetScreen } from '../screens/main/investments/AddAssetScreen';
 import { RegisteredInstitutionsScreen } from '../screens/main/investments/RegisteredInstitutionsScreen';
 import { InvestmentOptionsScreen } from '../screens/main/investments/InvestmentOptionsScreen';
+import { AssetNewsScreen } from '../screens/main/investments/AssetNewsScreen';
+import { NewsDetailsScreen } from '../screens/main/investments/NewsDetailsScreen';
+import { PriceAlertsScreen } from '../screens/main/investments/PriceAlertsScreen';
 
 // Profile sub-screens
 import { PersonalDataScreen } from '../screens/profile/PersonalDataScreen';
 import { SecurityScreen } from '../screens/profile/SecurityScreen';
+import { ConnectedAccountsScreen } from '../screens/profile/ConnectedAccountsScreen';
 import { UpdatePasswordScreen } from '../screens/profile/UpdatePasswordScreen';
 import { TwoStepAuthScreen } from '../screens/profile/TwoStepAuthScreen';
+import { BackupCodesScreen } from '../screens/profile/BackupCodesScreen';
 import { NotificationSettingsScreen } from '../screens/profile/NotificationSettingsScreen';
 import { NotificationOptionsScreen } from '../screens/profile/NotificationOptionsScreen';
 import { AppearanceScreen } from '../screens/profile/AppearanceScreen';
@@ -43,6 +48,11 @@ import { LeaveAccountScreen } from '../screens/profile/LeaveAccountScreen';
 
 // Report sub-screens
 import { CustomDateScreen } from '../screens/report/CustomDateScreen';
+
+// Payment Methods & Installments
+import { FinancialResourceFormScreen } from '../screens/main/payment-methods/FinancialResourceFormScreen';
+import { InstallmentPurchaseDetailScreen } from '../screens/main/installments/InstallmentPurchaseDetailScreen';
+import { FinancialAccountsScreen } from '../screens/main/financial-accounts/FinancialAccountsScreen';
 
 import { Colors } from '../constants/colors';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -102,7 +112,7 @@ function MainTabs() {
       <Tab.Screen 
         name="Investments" 
         component={InvestmentsScreen} 
-        options={{ tabBarLabel: 'Investir' }}
+        options={{ tabBarLabel: 'Investimentos' }}
       />
       <Tab.Screen 
         name="Profile" 
@@ -145,12 +155,17 @@ export function MainNavigator() {
       <Stack.Screen name="AddAsset" component={AddAssetScreen} />
       <Stack.Screen name="RegisteredInstitutions" component={RegisteredInstitutionsScreen} />
       <Stack.Screen name="InvestmentOptions" component={InvestmentOptionsScreen} />
-      
+      <Stack.Screen name="AssetNews" component={AssetNewsScreen} />
+      <Stack.Screen name="NewsDetails" component={NewsDetailsScreen} />
+      <Stack.Screen name="PriceAlerts" component={PriceAlertsScreen} />
+
       {/* Profile */}
       <Stack.Screen name="PersonalData" component={PersonalDataScreen} />
       <Stack.Screen name="Security" component={SecurityScreen} />
+      <Stack.Screen name="ConnectedAccounts" component={ConnectedAccountsScreen} />
       <Stack.Screen name="UpdatePassword" component={UpdatePasswordScreen} />
       <Stack.Screen name="TwoStepAuth" component={TwoStepAuthScreen} />
+      <Stack.Screen name="BackupCodes" component={BackupCodesScreen} />
       <Stack.Screen name="NotificationSettings" component={NotificationSettingsScreen} />
       <Stack.Screen name="NotificationOptions" component={NotificationOptionsScreen} />
       <Stack.Screen name="Appearance" component={AppearanceScreen} />
@@ -158,6 +173,11 @@ export function MainNavigator() {
       <Stack.Screen name="DeleteAccountConfirm" component={DeleteAccountConfirmScreen} />
       <Stack.Screen name="DeletedAccount" component={DeletedAccountScreen} />
       <Stack.Screen name="LeaveAccount" component={LeaveAccountScreen} />
+
+      {/* Payment Methods & Installments */}
+      <Stack.Screen name="FinancialResourceForm" component={FinancialResourceFormScreen} />
+      <Stack.Screen name="InstallmentPurchaseDetail" component={InstallmentPurchaseDetailScreen} />
+      <Stack.Screen name="FinancialAccounts" component={FinancialAccountsScreen} />
     </Stack.Navigator>
   );
 }

@@ -1,6 +1,7 @@
 package com.budgetbuddy.domain.transaction;
 
 import com.budgetbuddy.domain.category.Category;
+import com.budgetbuddy.domain.financialresource.FinancialResource;
 import com.budgetbuddy.domain.user.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -60,6 +61,10 @@ public class Transaction {
     @Column(columnDefinition = "TEXT")
     private String notes;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "financial_resource_id")
+    private FinancialResource financialResource;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_method", nullable = false, length = 30)
     private PaymentMethod paymentMethod;
@@ -93,9 +98,5 @@ public class Transaction {
 
     public enum TransactionType {
         EXPENSE, INCOME
-    }
-
-    public enum PaymentMethod {
-        CREDIT_CARD, DEBIT_CARD, PIX, CASH, TRANSFER
     }
 }

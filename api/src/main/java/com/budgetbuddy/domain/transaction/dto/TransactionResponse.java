@@ -1,7 +1,8 @@
 package com.budgetbuddy.domain.transaction.dto;
 
 import com.budgetbuddy.domain.category.dto.CategoryResponse;
-import com.budgetbuddy.domain.transaction.Transaction.PaymentMethod;
+import com.budgetbuddy.domain.financialresource.dto.FinancialResourceResponse;
+import com.budgetbuddy.domain.transaction.PaymentMethod;
 import com.budgetbuddy.domain.transaction.Transaction.TransactionType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,6 +25,7 @@ public class TransactionResponse {
     private BigDecimal amount;
     private String description;
     private String notes;
+    private FinancialResourceResponse financialResource;
     private PaymentMethod paymentMethod;
     private LocalDate date;
     private boolean isRecurring;

@@ -14,8 +14,9 @@ export interface LoginResponse {
   accessToken: string;
   refreshToken: string;
   user: User;
-  requiresTwoFactor?: boolean;
-  twoFactorToken?: string; // Token used to verify OTP if enabled
+  requires2FA?: boolean;
+  temporaryToken?: string;
+  backupCodes?: string[];
 }
 
 export interface RefreshResponse {
@@ -25,5 +26,5 @@ export interface RefreshResponse {
 
 export interface TwoFactorSetupResponse {
   secret: string;
-  qrCodeUrl: string;
+  qrCode: string; // Base64 Data URI
 }

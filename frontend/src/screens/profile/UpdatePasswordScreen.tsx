@@ -45,7 +45,7 @@ export function UpdatePasswordScreen({ navigation }: any) {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-background" edges={['top']} style={{ flex: 1, backgroundColor: Colors.background }}>
       <Toast
         visible={toastVisible}
         message="Senha alterada com sucesso!"

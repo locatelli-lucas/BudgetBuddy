@@ -20,7 +20,7 @@ export const aiService = {
   },
 
   sendChatMessage: async (message: string): Promise<ChatResponse> => {
-    const response = await api.post<ApiResponse<ChatResponse>>('/api/v1/ai/insights/chat', {
+    const response = await api.post<ApiResponse<ChatResponse>>('/api/v1/ai/chat', {
       message,
     });
     return response.data.data;
@@ -28,7 +28,7 @@ export const aiService = {
 
   autoCategorize: async (request: CategorizationRequest): Promise<CategorizationResponse> => {
     const response = await api.post<ApiResponse<CategorizationResponse>>(
-      '/api/v1/ai/insights/categorize',
+      '/api/v1/ai/categorize',
       request
     );
     return response.data.data;

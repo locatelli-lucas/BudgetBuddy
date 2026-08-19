@@ -40,7 +40,7 @@ export function CustomDateScreen({ navigation, route }: any) {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-background" edges={['top']} style={{ flex: 1, backgroundColor: Colors.background }}>
       <View className="flex-row items-center justify-between px-5 h-14">
         <TouchableOpacity onPress={() => navigation.goBack()} className="p-2 -ml-2 rounded-full">
           <MaterialIcons name="arrow-back" size={24} color={Colors.primary} />

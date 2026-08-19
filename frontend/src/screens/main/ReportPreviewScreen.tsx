@@ -60,7 +60,7 @@ export function ReportPreviewScreen({ navigation, route }: Props) {
 
   if (loading) {
     return (
-      <SafeAreaView className="flex-1 bg-background items-center justify-center">
+      <SafeAreaView className="flex-1 bg-background items-center justify-center" style={{ flex: 1, backgroundColor: Colors.background }}>
         <ActivityIndicator size="large" color={Colors.primary} />
       </SafeAreaView>
     );
@@ -70,7 +70,7 @@ export function ReportPreviewScreen({ navigation, route }: Props) {
   const monthLabel = data ? `${monthNames[data.month - 1]} ${data.year}` : '';
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-background" edges={['top']} style={{ flex: 1, backgroundColor: Colors.background }}>
       {/* Header */}
       <View className="flex-row items-center justify-between px-5 h-16 bg-surface border-b border-outline-variant">
         <TouchableOpacity

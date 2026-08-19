@@ -9,7 +9,7 @@ export function ProfileScreen({ navigation }: any) {
   const { user, signOut } = useAuth();
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-background" edges={['top']} style={{ flex: 1, backgroundColor: Colors.background }}>
       {/* TopAppBar */}
       <View className="px-5 py-4 flex-row justify-between items-center z-50">
         <Text className="text-on-surface text-headline-lg font-bold">Perfil</Text>

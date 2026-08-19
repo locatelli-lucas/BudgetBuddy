@@ -1,3 +1,4 @@
+import { useErrorToast } from '../../../contexts/ErrorToastContext';
 import React, { useState, useCallback } from 'react';
 import {
   View, Text, FlatList, TouchableOpacity, Pressable, Alert, ActivityIndicator, RefreshControl,
@@ -10,6 +11,7 @@ import { transactionService } from '../../../services/transaction.service';
 import { Category } from '../../../types/transaction';
 
 export function ManageCategoriesScreen({ navigation }: any) {
+  const { showError } = useErrorToast();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -19,7 +21,7 @@ export function ManageCategoriesScreen({ navigation }: any) {
       const data = await transactionService.getCategories();
       setCategories(data);
     } catch (err) {
-      console.error('Failed to load categories', err);
+      showError(err, 'Failed to load categories');
     } finally {
       setLoading(false);
     }
@@ -61,7 +63,7 @@ export function ManageCategoriesScreen({ navigation }: any) {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-background" edges={['top']} style={{ flex: 1, backgroundColor: Colors.background }}>
       <View className="flex-row items-center justify-between px-5 h-14">
         <TouchableOpacity onPress={() => navigation.goBack()} className="p-2 -ml-2 rounded-full">
           <MaterialIcons name="arrow-back" size={24} color={Colors.primary} />

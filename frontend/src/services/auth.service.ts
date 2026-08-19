@@ -3,12 +3,41 @@ import { api } from './api';
 import { ApiResponse } from '../types/api';
 import { User, LoginResponse, TwoFactorSetupResponse } from '../types/auth';
 
+export type AuthProviderType = 'EMAIL' | 'GOOGLE';
+
 export const authService = {
-  login: async (email: string, password: string, twoFactorCode?: string): Promise<LoginResponse> => {
+  login: async (email: string, password: string): Promise<LoginResponse> => {
     const response = await api.post<ApiResponse<LoginResponse>>('/api/v1/auth/login', {
       email,
       password,
-      twoFactorCode,
+    });
+    return response.data.data;
+  },
+
+  googleLogin: async (idToken: string): Promise<LoginResponse> => {
+    const response = await api.post<ApiResponse<LoginResponse>>('/api/v1/auth/google', {
+      idToken,
+    });
+    return response.data.data;
+  },
+
+  linkGoogle: async (idToken: string): Promise<void> => {
+    await api.post('/api/v1/auth/google/link', { idToken });
+  },
+
+  unlinkGoogle: async (): Promise<void> => {
+    await api.delete('/api/v1/auth/google/unlink');
+  },
+
+  getConnectedProviders: async (): Promise<AuthProviderType[]> => {
+    const response = await api.get<ApiResponse<AuthProviderType[]>>('/api/v1/auth/providers');
+    return response.data.data;
+  },
+
+  verify2FA: async (temporaryToken: string, code: string): Promise<LoginResponse> => {
+    const response = await api.post<ApiResponse<LoginResponse>>('/api/v1/auth/2fa', {
+      temporaryToken,
+      code,
     });
     return response.data.data;
   },
@@ -45,8 +74,9 @@ export const authService = {
     return response.data.data;
   },
 
-  enable2FA: async (code: string): Promise<void> => {
-    await api.post('/api/v1/users/me/2fa/enable', { code });
+  enable2FA: async (code: string): Promise<string[]> => {
+    const response = await api.post<ApiResponse<string[]>>('/api/v1/users/me/2fa/enable', { code });
+    return response.data.data;
   },
 
   disable2FA: async (code: string): Promise<void> => {

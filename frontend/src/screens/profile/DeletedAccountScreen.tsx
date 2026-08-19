@@ -14,7 +14,7 @@ export function DeletedAccountScreen({ navigation }: any) {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-background" edges={['top']} style={{ flex: 1, backgroundColor: Colors.background }}>
       <View className="flex-1 px-5 pt-20 items-center gap-6">
         <View className="w-20 h-20 rounded-full bg-green-500/20 items-center justify-center">
           <MaterialIcons name="check-circle" size={48} color="#22C55E" />

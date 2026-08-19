@@ -54,6 +54,11 @@ public class ReportService {
         
         LocalDate prevMonthDate = start.minusMonths(1);
         TransactionSummaryResponse prevSummary = transactionService.getMonthlySummary(email, prevMonthDate.getMonthValue(), prevMonthDate.getYear());
+        
+        // Debug logs to trace comparison issues
+        log.info("Report for {}/{} (Current: Income={}, Expense={}) vs Previous {}/{} (Income={}, Expense={})", 
+                month, year, currentSummary.getTotalIncome(), currentSummary.getTotalExpense(),
+                prevMonthDate.getMonthValue(), prevMonthDate.getYear(), prevSummary.getTotalIncome(), prevSummary.getTotalExpense());
 
         // 2. Category Aggregation
         List<Object[]> categoryData = transactionRepository.aggregateExpensesByCategory(user.getId(), start, end);
@@ -215,6 +220,24 @@ public class ReportService {
 
         AiReportAnalysis aiAnalysis = aiProvider.generateMonthlyReport(aiData);
 
+        MonthlyReportResponse.ComparisonData comparison = null;
+        BigDecimal prevIncome = prevSummary.getTotalIncome();
+        BigDecimal prevExpense = prevSummary.getTotalExpense();
+        
+        // Use a small epsilon or just check if it's strictly greater than zero for both
+        if ((prevIncome != null && prevIncome.compareTo(BigDecimal.ZERO) != 0) || 
+            (prevExpense != null && prevExpense.compareTo(BigDecimal.ZERO) != 0)) {
+            
+            comparison = MonthlyReportResponse.ComparisonData.builder()
+                    .prevMonthIncome(prevIncome)
+                    .prevMonthExpense(prevExpense)
+                    .prevMonthSavingsRate(prevSummary.getSavingsRate())
+                    .incomeVariation(calculateVariation(currentSummary.getTotalIncome(), prevIncome))
+                    .expenseVariation(calculateVariation(currentSummary.getTotalExpense(), prevExpense))
+                    .savingsRateVariation(currentSummary.getSavingsRate().subtract(prevSummary.getSavingsRate()))
+                    .build();
+        }
+
         return MonthlyReportResponse.builder()
                 .month(month)
                 .year(year)
@@ -225,14 +248,7 @@ public class ReportService {
                         .netSavings(currentSummary.getNetBalance())
                         .savingsRate(currentSummary.getSavingsRate())
                         .build())
-                .comparison(MonthlyReportResponse.ComparisonData.builder()
-                        .prevMonthIncome(prevSummary.getTotalIncome())
-                        .prevMonthExpense(prevSummary.getTotalExpense())
-                        .prevMonthSavingsRate(prevSummary.getSavingsRate())
-                        .incomeVariation(calculateVariation(currentSummary.getTotalIncome(), prevSummary.getTotalIncome()))
-                        .expenseVariation(calculateVariation(currentSummary.getTotalExpense(), prevSummary.getTotalExpense()))
-                        .savingsRateVariation(currentSummary.getSavingsRate().subtract(prevSummary.getSavingsRate()))
-                        .build())
+                .comparison(comparison)
                 .health(MonthlyReportResponse.FinancialHealth.builder()
                         .savingsRateStatus(getSavingsRateStatus(currentSummary.getSavingsRate()))
                         .expenseToIncomeRatio(calculateRatio(currentSummary.getTotalExpense(), currentSummary.getTotalIncome()))

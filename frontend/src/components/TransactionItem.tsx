@@ -29,20 +29,22 @@ export function TransactionItem({ title, subtitle, amount, type, icon, onPress }
     <TouchableOpacity 
       activeOpacity={0.7}
       onPress={onPress}
-      className="flex-row items-center justify-between p-3 rounded-lg"
+      className="flex-row items-center p-3 rounded-lg"
     >
-      <View className="flex-row items-center gap-3">
+      <View className="flex-row items-center gap-3 flex-1">
         <View className={`w-10 h-10 rounded-full ${iconBgColor} flex items-center justify-center`}>
           <MaterialIcons name={icon} size={20} color={iconColor} />
         </View>
-        <View className="flex-col">
-          <Text className="text-body-md text-on-surface font-medium">{title}</Text>
-          <Text className="text-label-sm text-on-surface-variant mt-0.5">{subtitle}</Text>
+        <View className="flex-col flex-1">
+          <Text className="text-body-md text-on-surface font-medium" numberOfLines={1}>{title}</Text>
+          <Text className="text-label-sm text-on-surface-variant mt-0.5" numberOfLines={1}>{subtitle}</Text>
         </View>
       </View>
-      <Text className={`text-body-md font-medium ${amountColor}`}>
-        {formattedAmount}
-      </Text>
+      <View className="ml-2 items-end">
+        <Text className={`text-body-md font-medium ${amountColor}`}>
+          {formattedAmount}
+        </Text>
+      </View>
     </TouchableOpacity>
   );
 }

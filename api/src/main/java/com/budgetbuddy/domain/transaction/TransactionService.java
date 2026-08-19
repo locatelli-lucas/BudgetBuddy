@@ -198,7 +198,7 @@ public class TransactionService {
     }
 
     @Transactional(readOnly = true)
-    @Cacheable(value = "userSummary", key = "#email")
+    @Cacheable(value = "userSummary", key = "#email + '-' + #month + '-' + #year")
     public TransactionSummaryResponse getMonthlySummary(String email, int month, int year) {
         User user = userService.getUserByEmail(email);
         

@@ -46,6 +46,9 @@ public class YahooFinanceProvider implements MarketDataProvider {
         String normalized = normalizeSymbol(symbol);
         try {
             JsonNode root = fetchChart(normalized, "1d", "1d");
+            if (root == null || root.path("chart").path("result").isNull() || root.path("chart").path("result").isEmpty()) {
+                return createDummyQuote(symbol);
+            }
             JsonNode meta = root.path("chart").path("result").get(0).path("meta");
 
             BigDecimal price = decimal(meta.path("regularMarketPrice"));
@@ -72,8 +75,21 @@ public class YahooFinanceProvider implements MarketDataProvider {
                     .build();
         } catch (Exception e) {
             log.error("Failed to fetch quote for {}", symbol, e);
-            throw new MarketDataException("Failed to fetch quote for " + symbol, e);
+            return createDummyQuote(symbol);
         }
+    }
+
+    private QuoteResponse createDummyQuote(String symbol) {
+        return QuoteResponse.builder()
+                .symbol(symbol.toUpperCase())
+                .name(symbol.toUpperCase() + " (Price Unavailable)")
+                .price(BigDecimal.ZERO)
+                .change(BigDecimal.ZERO)
+                .changePercent(BigDecimal.ZERO)
+                .previousClose(BigDecimal.ZERO)
+                .currency("BRL")
+                .lastUpdated(Instant.now())
+                .build();
     }
 
     @Override
@@ -89,6 +105,9 @@ public class YahooFinanceProvider implements MarketDataProvider {
         String range = mapPeriod(period);
         try {
             JsonNode root = fetchChart(normalized, range, range);
+            if (root == null || root.path("chart").path("result").isNull() || root.path("chart").path("result").isEmpty()) {
+                return Collections.emptyList();
+            }
             JsonNode result = root.path("chart").path("result").get(0);
             JsonNode timestamps = result.path("timestamp");
             JsonNode quotes = result.path("indicators").path("quote").get(0);
@@ -155,18 +174,23 @@ public class YahooFinanceProvider implements MarketDataProvider {
     // ─── Helpers ─────────────────────────────────────────────────────────
 
     private JsonNode fetchChart(String symbol, String range, String interval) {
-        return webClient.get()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/v8/finance/chart/{symbol}")
-                        .queryParam("range", range)
-                        .queryParam("interval", interval)
-                        .build(symbol))
-                .retrieve()
-                .onStatus(HttpStatus.TOO_MANY_REQUESTS::equals,
-                        resp -> { throw new MarketDataException("Rate limited by Yahoo Finance"); })
-                .bodyToMono(JsonNode.class)
-                .retryWhen(Retry.backoff(3, Duration.ofSeconds(2)))
-                .block();
+        try {
+            return webClient.get()
+                    .uri(uriBuilder -> uriBuilder
+                            .path("/v8/finance/chart/{symbol}")
+                            .queryParam("range", range)
+                            .queryParam("interval", interval)
+                            .build(symbol))
+                    .retrieve()
+                    .onStatus(HttpStatus.TOO_MANY_REQUESTS::equals,
+                            resp -> { throw new MarketDataException("Rate limited by Yahoo Finance"); })
+                    .bodyToMono(JsonNode.class)
+                    .retryWhen(Retry.backoff(3, Duration.ofSeconds(2)))
+                    .block();
+        } catch (WebClientResponseException.NotFound e) {
+            log.warn("Symbol not found on Yahoo Finance: {}", symbol);
+            return null;
+        }
     }
 
     /** Normalize symbol for Yahoo Finance — Brazilian stocks get .SA suffix */

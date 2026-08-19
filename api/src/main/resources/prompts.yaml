@@ -43,6 +43,7 @@ prompts:
     - Cada objeto dentro de 'topInsights' DEVE ser fechado com '}'. 
     - Exemplo de estrutura correta para topInsights: [{"title": "T1", "description": "D1"}, {"title": "T2", "description": "D2"}]
     - Não use frases motivacionais genéricas.
+    - FORMATAÇÃO DE VALORES: Todos os valores monetários no texto devem usar obrigatoriamente o formato brasileiro: R$ X.XXX,XX (ex: R$ 6.300,00, R$ 1.755,40).
     
     Estrutura JSON esperada:
     {

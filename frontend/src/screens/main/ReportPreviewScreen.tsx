@@ -6,6 +6,7 @@ import { Colors } from '../../constants/colors';
 import { reportService, type MonthlyReportData } from '../../services/report-service';
 
 function formatCurrency(value: number): string {
+  if (value === undefined || value === null) return 'R$ 0,00';
   if (value >= 1000) {
     return `R$ ${(value / 1000).toFixed(1).replace('.', ',')}K`;
   }
@@ -13,6 +14,7 @@ function formatCurrency(value: number): string {
 }
 
 function formatCurrencyFull(value: number): string {
+  if (value === undefined || value === null) return 'R$ 0,00';
   return `R$ ${value.toFixed(2).replace('.', ',')}`;
 }
 
@@ -121,25 +123,52 @@ export function ReportPreviewScreen({ navigation, route }: Props) {
                 icon="arrow-downward"
                 iconColor={Colors.primary}
                 label="Receitas"
-                value={formatCurrency(data.totalIncome)}
+                value={formatCurrency(data.summary?.totalIncome ?? data.totalIncome)}
               />
               <SummaryCard
                 icon="arrow-upward"
                 iconColor={Colors.error}
                 label="Despesas"
-                value={formatCurrency(data.totalExpense)}
+                value={formatCurrency(data.summary?.totalExpense ?? data.totalExpense)}
               />
               <SummaryCard
                 icon="savings"
                 iconColor={Colors.tertiary}
                 label="Economias"
-                value={formatCurrency(data.netSavings)}
+                value={formatCurrency(data.summary?.netSavings ?? data.netSavings)}
               />
             </View>
           )}
 
+          {/* Comparativo com Mês Anterior */}
+          {data && data.comparison && (
+            <View className="gap-4">
+              <Text className="text-[13px] text-on-surface-variant uppercase tracking-widest border-b border-surface-variant pb-2">
+                Comparativo com Mês Anterior
+              </Text>
+              <View className="flex-row gap-3">
+                <VariationCard
+                  label="Receita"
+                  variation={data.comparison.incomeVariation}
+                  isPositiveBetter={true}
+                />
+                <VariationCard
+                  label="Despesas"
+                  variation={data.comparison.expenseVariation}
+                  isPositiveBetter={false}
+                />
+                <VariationCard
+                  label="Economia"
+                  variation={data.comparison.savingsRateVariation}
+                  isPositiveBetter={true}
+                  isPercentagePoints={true}
+                />
+              </View>
+            </View>
+          )}
+
           {/* Gastos por Categoria */}
-          {data && data.categories.length > 0 && (
+          {data && data.categories?.length > 0 && (
             <View className="gap-4">
               <Text className="text-[13px] text-on-surface-variant uppercase tracking-widest border-b border-surface-variant pb-2">
                 Gastos por Categoria
@@ -165,33 +194,108 @@ export function ReportPreviewScreen({ navigation, route }: Props) {
           )}
 
           {/* Fluxo de Caixa */}
-          {data && data.cashFlow.length > 0 && (
+          {data && data.cashFlow?.length > 0 && (
             <View className="gap-4">
-              <Text className="text-[13px] text-on-surface-variant uppercase tracking-widest border-b border-surface-variant pb-2">
-                Fluxo de Caixa
-              </Text>
-              <View className="h-24 bg-surface-container-low rounded-lg border border-surface-variant overflow-hidden flex-row items-end p-2 gap-1">
-                {data.cashFlow.slice(0, 12).map((point, i) => {
-                  const maxAmount = Math.max(...data.cashFlow.map(p => Math.abs(p.amount)), 1);
-                  const heightPct = Math.max(5, (Math.abs(point.amount) / maxAmount) * 80);
-                  return (
-                    <View
-                      key={i}
-                      className="flex-1 rounded-t-sm"
-                      style={{
-                        height: `${heightPct}%`,
-                        backgroundColor: point.amount >= 0 ? `${Colors.primary}40` : `${Colors.error}40`,
-                      }}
-                    />
-                  );
-                })}
-                {/* Simulated trend line via dots */}
+              <View>
+                <Text className="text-[13px] text-on-surface-variant uppercase tracking-widest border-b border-surface-variant pb-2">
+                  Fluxo de Caixa Diário
+                </Text>
+                <Text className="text-[11px] text-on-surface-variant mt-2 italic">
+                  Mostra o saldo líquido (Entradas - Saídas) em cada dia do mês.
+                </Text>
+              </View>
+
+              <View className="bg-surface-container-low rounded-lg border border-surface-variant p-4">
+                <View className="flex-row h-40">
+                  {/* Y-Axis Labels */}
+                  <View className="w-10 justify-between items-end pr-2 pb-6">
+                    {(() => {
+                      const daysInMonth = new Date(data.year, data.month, 0).getDate();
+                      const dailyAmounts = new Array(daysInMonth).fill(0);
+                      data.cashFlow.forEach(point => {
+                        const day = new Date(point.date).getDate();
+                        if (day >= 1 && day <= daysInMonth) dailyAmounts[day - 1] += point.amount;
+                      });
+                      const maxAbsAmount = Math.max(...dailyAmounts.map(Math.abs), 1);
+                      return (
+                        <>
+                          <Text className="text-[8px] text-on-surface-variant font-bold">R$ {Math.round(maxAbsAmount / 1000)}k</Text>
+                          <Text className="text-[8px] text-on-surface-variant/60">R$ {Math.round(maxAbsAmount / 2000)}k</Text>
+                          <View className="h-[1px] w-full bg-outline-variant/20" />
+                          <Text className="text-[9px] text-primary font-bold">0</Text>
+                        </>
+                      );
+                    })()}
+                  </View>
+
+                  {/* Chart Area */}
+                  <View className="flex-1">
+                    <View className="flex-1 flex-row items-end gap-[1px] relative">
+                      {/* Zero Line */}
+                      <View className="absolute left-0 right-0 h-[1px] bg-outline-variant bottom-[10%] z-0" />
+
+                      {(() => {
+                        const daysInMonth = new Date(data.year, data.month, 0).getDate();
+                        const dailyAmounts = new Array(daysInMonth).fill(0);
+
+                        data.cashFlow.forEach(point => {
+                          const day = new Date(point.date).getDate();
+                          if (day >= 1 && day <= daysInMonth) {
+                            dailyAmounts[day - 1] += point.amount;
+                          }
+                        });
+
+                        const maxAbsAmount = Math.max(...dailyAmounts.map(Math.abs), 1);
+
+                        return dailyAmounts.map((amount, i) => {
+                          const heightPct = amount === 0 ? 5 : Math.max(10, (Math.abs(amount) / maxAbsAmount) * 85);
+                          const isIncome = amount >= 0;
+                          const opacity = amount === 0 ? '10' : 'E6';
+                          const borderColor = isIncome ? Colors.primary : Colors.error;
+
+                          return (
+                            <View key={i} className="flex-1 items-center justify-end h-full">
+                              <View
+                                className="w-full rounded-t-[1px] border-x-[0.5px] border-t-[0.5px]"
+                                style={{
+                                  height: `${heightPct}%`,
+                                  backgroundColor: amount === 0
+                                    ? `${Colors.onSurfaceVariant}${opacity}`
+                                    : (isIncome ? `${Colors.primary}${opacity}` : `${Colors.error}${opacity}`),
+                                  borderColor: amount === 0 ? 'transparent' : borderColor,
+                                }}
+                              />
+                            </View>
+                          );
+                        });
+                      })()}
+                    </View>
+
+                    {/* X-Axis (Days) */}
+                    <View className="flex-row justify-between mt-2 border-t border-outline-variant/20 pt-1">
+                      <Text className="text-[9px] text-on-surface-variant font-medium">Dia 01</Text>
+                      <Text className="text-[9px] text-on-surface-variant font-medium">Dia 15</Text>
+                      <Text className="text-[9px] text-on-surface-variant font-medium">Dia {new Date(data.year, data.month, 0).getDate()}</Text>
+                    </View>
+                  </View>
+                </View>
+              </View>
+
+              <View className="flex-row gap-4 justify-center">
+                <View className="flex-row items-center gap-1.5">
+                  <View className="w-2 h-2 rounded-full bg-primary" />
+                  <Text className="text-[10px] text-on-surface-variant">Saldo Positivo</Text>
+                </View>
+                <View className="flex-row items-center gap-1.5">
+                  <View className="w-2 h-2 rounded-full bg-error" />
+                  <Text className="text-[10px] text-on-surface-variant">Saldo Negativo</Text>
+                </View>
               </View>
             </View>
           )}
 
           {/* Insights de IA */}
-          {data && data.aiSummary && (
+          {(data?.aiAnalysis?.executiveSummary || data?.aiSummary) && (
             <View className="gap-3">
               <View className="flex-row items-center gap-2 border-b border-surface-variant pb-2">
                 <MaterialIcons name="auto-awesome" size={16} color={Colors.primary} />
@@ -203,7 +307,7 @@ export function ReportPreviewScreen({ navigation, route }: Props) {
                 <View className="flex-row items-start gap-3">
                   <MaterialIcons name="trending-up" size={18} color={Colors.tertiary} style={{ marginTop: 2 }} />
                   <Text className="text-[13px] leading-[18px] text-on-surface flex-1">
-                    {data.aiSummary}
+                    {data.aiAnalysis?.executiveSummary || data.aiSummary}
                   </Text>
                 </View>
               </View>
@@ -211,13 +315,13 @@ export function ReportPreviewScreen({ navigation, route }: Props) {
           )}
 
           {/* Recomendações */}
-          {data && data.recommendations.length > 0 && (
+          {((data?.aiAnalysis?.recommendations?.length ?? 0) > 0 || (data?.recommendations?.length ?? 0) > 0) && (
             <View className="gap-3">
               <Text className="text-[13px] text-on-surface-variant uppercase tracking-widest border-b border-surface-variant pb-2">
                 Recomendações
               </Text>
               <View className="bg-surface-container-low rounded-lg p-4 border border-surface-variant gap-3">
-                {data.recommendations.map((rec, i) => (
+                {(data.aiAnalysis?.recommendations || data.recommendations || []).map((rec, i) => (
                   <View key={i} className="flex-row items-start gap-3">
                     <MaterialIcons name="lightbulb" size={18} color={Colors.secondary} style={{ marginTop: 2 }} />
                     <Text className="text-[13px] leading-[18px] text-on-surface flex-1">{rec}</Text>
@@ -282,6 +386,45 @@ function SummaryCard({
   );
 }
 
+function VariationCard({
+  label,
+  variation,
+  isPositiveBetter,
+  isPercentagePoints = false,
+}: {
+  label: string;
+  variation: number;
+  isPositiveBetter: boolean;
+  isPercentagePoints?: boolean;
+}) {
+  const isNeutral = variation === 0;
+  const isGood = isPositiveBetter ? variation > 0 : variation < 0;
+
+  let color = Colors.onSurfaceVariant;
+  let icon = 'remove';
+
+  if (!isNeutral) {
+    color = isGood ? Colors.primary : Colors.error;
+    icon = variation > 0 ? 'trending-up' : 'trending-down';
+  }
+
+  const sign = variation > 0 ? '+' : '';
+  const unit = isPercentagePoints ? 'pp' : '%';
+  const formattedVariation = `${sign}${variation.toFixed(1)}${unit}`;
+
+  return (
+    <View className="flex-1 bg-surface-container-low rounded-lg p-3 border border-surface-variant">
+      <Text className="text-[10px] text-on-surface-variant uppercase tracking-wider mb-2">{label}</Text>
+      <View className="flex-row items-center gap-1">
+        <MaterialIcons name={icon as any} size={14} color={color} />
+        <Text className="text-[14px] font-bold" style={{ color }}>
+          {formattedVariation}
+        </Text>
+      </View>
+    </View>
+  );
+}
+
 function getFallbackData(): MonthlyReportData {
   return {
     month: new Date().getMonth() + 1,
@@ -302,6 +445,11 @@ function getFallbackData(): MonthlyReportData {
       date: `2026-05-${String(i + 1).padStart(2, '0')}`,
       amount: Math.random() * 1000 - 200,
     })),
+    comparison: {
+      incomeVariation: 5.2,
+      expenseVariation: -2.1,
+      savingsRateVariation: 1.5,
+    },
     aiSummary:
       'Os gastos com Alimentação subiram 12% em comparação a Abril. Considere rever assinaturas de delivery. Excelente taxa de poupança este mês (33% da renda líquida). Você está acima da sua meta de 20%.',
     recommendations: [

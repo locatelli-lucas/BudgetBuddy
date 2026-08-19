@@ -37,25 +37,25 @@ prompts:
     - Cartões de Crédito: {{creditCards}}
     - Investimentos: {{investments}}
     
-    Gere uma análise financeira profissional e concisa em formato JSON. 
-    REGRAS CRÍTICAS:
+    Gere uma análise financeira profissional em JSON.
+    REGRAS CRÍTICAS DE FORMATO:
+    - Retorne APENAS o objeto JSON.
+    - Cada objeto dentro de 'topInsights' DEVE ser fechado com '}'. 
+    - Exemplo de estrutura correta para topInsights: [{"title": "T1", "description": "D1"}, {"title": "T2", "description": "D2"}]
     - Não use frases motivacionais genéricas.
-    - O executiveSummary deve ter no máximo 4 linhas, focando no desempenho real.
-    - topInsights deve conter exatamente 3 observações cruciais sobre os dados.
-    - Use um tom profissional e direto.
     
-    Estrutura JSON:
+    Estrutura JSON esperada:
     {
-      "executiveSummary": "Resumo técnico e direto do mês.",
+      "executiveSummary": "Resumo técnico de até 4 linhas.",
       "topInsights": [
-        {"title": "Título curto", "description": "Descrição breve do insight"}
+        {"title": "Insight 1", "description": "Descrição 1"},
+        {"title": "Insight 2", "description": "Descrição 2"},
+        {"title": "Insight 3", "description": "Descrição 3"}
       ],
-      "strengths": ["Ponto positivo 1", "Ponto positivo 2"],
-      "attentionPoints": ["Alerta 1", "Alerta 2"],
-      "recommendations": ["Ação prática 1", "Ação prática 2", "Ação prática 3"]
+      "strengths": ["Força 1", "Força 2"],
+      "attentionPoints": ["Atenção 1", "Alerta 2"],
+      "recommendations": ["Ação 1", "Ação 2", "Ação 3"]
     }
-    
-    Responda APENAS o JSON. Use português do Brasil.
 
   portfolio-analysis: |
     Analise a seguinte carteira de investimentos e forneça observações sobre diversificação, concentração e riscos.

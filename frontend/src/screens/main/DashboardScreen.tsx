@@ -440,9 +440,9 @@ export function DashboardScreen({ navigation }: any) {
       <ExportReportSheet
         visible={showReportSheet}
         onClose={() => setShowReportSheet(false)}
-        onGenerated={(pdfUri) => {
+        onGenerated={(pdfUri, month, year) => {
           setShowReportSheet(false);
-          navigation.navigate('ReportPreview', { pdfUri });
+          navigation.navigate('ReportPreview', { pdfUri, month, year });
         }}
         onCustomDate={() => navigation.navigate('CustomDate')}
       />

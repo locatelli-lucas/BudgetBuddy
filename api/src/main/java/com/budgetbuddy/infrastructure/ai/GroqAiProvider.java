@@ -5,7 +5,6 @@ import com.budgetbuddy.infrastructure.ai.dto.ChatMessage;
 import com.budgetbuddy.infrastructure.ai.dto.UserFinancialSummary;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.cdimascio.dotenv.Dotenv;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,7 +39,7 @@ public class GroqAiProvider implements AiProvider {
             PromptLoader promptLoader,
             @Value("${ai.groq.base-url:https://api.groq.com/openai/v1}") String baseUrl,
             @Value("${ai.groq.api-key:}") String apiKey,
-            @Value("${ai.groq.model:llama-3.3-70b-versatile}") String model) {
+            @Value("${ai.groq.model:openai/gpt-oss-120b}") String model) {
         this.webClient = webClientBuilder.baseUrl(baseUrl).build();
         this.objectMapper = objectMapper;
         this.promptLoader = promptLoader;
@@ -134,11 +133,13 @@ public class GroqAiProvider implements AiProvider {
                 "investments", data.getInvestments() != null ? data.getInvestments().toString() : "[]"
         ));
         
+        String response = null;
         try {
-            String response = callGroq(null, prompt);
-            return objectMapper.readValue(cleanJsonResponse(response), com.budgetbuddy.infrastructure.ai.dto.AiReportAnalysis.class);
+            response = callGroq(null, prompt);
+            String cleaned = cleanJsonResponse(response);
+            return objectMapper.readValue(cleaned, com.budgetbuddy.infrastructure.ai.dto.AiReportAnalysis.class);
         } catch (Exception e) {
-            log.error("Error generating monthly report analysis with Groq", e);
+            log.error("Error generating monthly report analysis with Groq. Raw response: {}", response, e);
             return com.budgetbuddy.infrastructure.ai.dto.AiReportAnalysis.builder()
                     .executiveSummary("Não foi possível gerar a análise detalhada no momento.")
                     .strengths(List.of("Você manteve o controle de suas despesas."))
@@ -172,13 +173,14 @@ public class GroqAiProvider implements AiProvider {
     private String callGroqInternal(List<Map<String, String>> messages) {
         if (apiKey == null || apiKey.isBlank()) {
             log.error("GROQ_API_KEY is not set.");
-            throw new RuntimeException("AI Provider not configured: Missing Groq API Key");
+            throw new RuntimeException("AI Provider not configured: Missing GROQ_API_KEY environment variable");
         }
 
         Map<String, Object> requestBody = Map.of(
                 "model", model,
                 "messages", messages,
-                "temperature", 0.7
+                "temperature", 0.1,
+                "response_format", Map.of("type", "json_object")
         );
 
         return webClient.post()
@@ -206,7 +208,21 @@ public class GroqAiProvider implements AiProvider {
     }
 
     private String cleanJsonResponse(String response) {
-        return response.replaceAll("```json", "").replaceAll("```", "").trim();
+        if (response == null) return "{}";
+        String cleaned = response.trim();
+        
+        // Remove markdown code blocks if present
+        if (cleaned.contains("```json")) {
+            cleaned = cleaned.substring(cleaned.indexOf("```json") + 7);
+        } else if (cleaned.contains("```")) {
+            cleaned = cleaned.substring(cleaned.indexOf("```") + 3);
+        }
+        
+        if (cleaned.contains("```")) {
+            cleaned = cleaned.substring(0, cleaned.lastIndexOf("```"));
+        }
+        
+        return cleaned.trim();
     }
 
     private AiInsight mapJsonToInsight(JsonNode node) {

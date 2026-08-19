@@ -42,7 +42,7 @@ class GroqAiProviderTest {
                 promptLoader,
                 "https://api.groq.com/openai/v1",
                 "test-key",
-                "llama-3.3-70b-versatile"
+                "openai/gpt-oss-120b"
         );
     }
 

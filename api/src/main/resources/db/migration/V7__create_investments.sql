@@ -10,3 +10,11 @@ CREATE TABLE investments (
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL
 );
+
+-- Seed Investments for the test user
+INSERT INTO investments (id, user_id, ticker, name, type, quantity, avg_price, purchase_date, created_at, updated_at) VALUES
+(gen_random_uuid(), 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'PETR4', 'Petrobras PN', 'STOCK', 100, 35.50, CURRENT_DATE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(gen_random_uuid(), 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'VALE3', 'Vale ON', 'STOCK', 50, 72.20, CURRENT_DATE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(gen_random_uuid(), 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'IVVB11', 'iShares S&P 500 ETF', 'ETF', 20, 245.10, CURRENT_DATE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(gen_random_uuid(), 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'MXRF11', 'Maxi Renda FII', 'FII', 200, 10.50, CURRENT_DATE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(gen_random_uuid(), 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'BTC', 'Bitcoin', 'CRYPTO', 0.005, 345000.00, CURRENT_DATE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);

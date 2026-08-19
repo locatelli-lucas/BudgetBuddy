@@ -1,0 +1,70 @@
+prompts:
+  categorization: |
+    Categorize esta transação financeira: Descrição: '{{description}}', Valor: R$ {{amount}}. 
+    Responda apenas com o nome da categoria mais adequada (ex: Alimentação, Transporte, Lazer, Saúde, Educação, Moradia, Outros).
+
+  financial-insights: |
+    Atue como um consultor financeiro pessoal. Analise os seguintes dados do usuário {{userName}}: 
+    Renda mensal: R$ {{monthlyIncome}}, Gastos no mês: R$ {{monthlyExpense}}, Taxa de economia: {{savingsRate}}%. 
+    Gere 3 insights financeiros acionáveis em formato JSON. 
+    Cada insight deve ter: 'title', 'body', 'type' (TIPS, WARNING, PROGRESS), 
+    'icon' (material design icon name), 'severity' (INFO, WARNING, ERROR, SUCCESS).
+    Responda APENAS o JSON.
+
+  chat-system: |
+    Você é o BudgetBuddy AI, um assistente financeiro amigável e prestativo. Seu objetivo é ajudar usuários a organizar suas finanças, entender seus gastos e investir melhor. 
+    Responda de forma concisa e encorajadora. 
+    
+    CONTEXTO ATUAL DO USUÁRIO:
+    {{context}}
+    
+    Use esses dados apenas se o usuário perguntar algo relacionado. Não repita os dados se não for necessário.
+
+  news-summary: |
+    Resuma o seguinte conteúdo de notícias de forma objetiva, destacando os pontos principais que podem afetar investidores. Limite o resumo a no máximo 150 palavras.
+    
+    Conteúdo:
+    {{content}}
+
+  monthly-report: |
+    Atue como um consultor financeiro pessoal sênior. Analise os seguintes dados mensais do usuário {{userName}}:
+    - Renda: R$ {{monthlyIncome}}
+    - Despesas: R$ {{monthlyExpense}}
+    - Economia Líquida: R$ {{netSavings}}
+    - Taxa de Economia: {{savingsRate}}%
+    - Despesa Mês Anterior: R$ {{prevMonthExpense}}
+    - Gastos por Categoria: {{expensesByCategory}}
+    - Cartões de Crédito: {{creditCards}}
+    - Investimentos: {{investments}}
+    
+    Gere uma análise financeira profissional em JSON.
+    REGRAS CRÍTICAS DE FORMATO:
+    - Retorne APENAS o objeto JSON.
+    - Cada objeto dentro de 'topInsights' DEVE ser fechado com '}'. 
+    - Exemplo de estrutura correta para topInsights: [{"title": "T1", "description": "D1"}, {"title": "T2", "description": "D2"}]
+    - Não use frases motivacionais genéricas.
+    
+    Estrutura JSON esperada:
+    {
+      "executiveSummary": "Resumo técnico de até 4 linhas.",
+      "topInsights": [
+        {"title": "Insight 1", "description": "Descrição 1"},
+        {"title": "Insight 2", "description": "Descrição 2"},
+        {"title": "Insight 3", "description": "Descrição 3"}
+      ],
+      "strengths": ["Força 1", "Força 2"],
+      "attentionPoints": ["Atenção 1", "Alerta 2"],
+      "recommendations": ["Ação 1", "Ação 2", "Ação 3"]
+    }
+
+  portfolio-analysis: |
+    Analise a seguinte carteira de investimentos e forneça observações sobre diversificação, concentração e riscos.
+    
+    Dados da Carteira:
+    {{data}}
+
+  expense-analysis: |
+    Analise os seguintes gastos e identifique tendências, despesas incomuns e oportunidades de economia.
+    
+    Dados de Gastos:
+    {{data}}

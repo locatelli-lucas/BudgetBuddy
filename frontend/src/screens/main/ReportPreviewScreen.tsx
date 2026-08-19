@@ -23,20 +23,26 @@ interface Props {
 
 export function ReportPreviewScreen({ navigation, route }: Props) {
   const pdfUri = route.params?.pdfUri;
+  const targetMonth = route.params?.month;
+  const targetYear = route.params?.year;
+
   const [data, setData] = useState<MonthlyReportData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const now = new Date();
+    const month = targetMonth ?? (now.getMonth() + 1);
+    const year = targetYear ?? now.getFullYear();
+
     reportService
-      .getReportData(now.getMonth() + 1, now.getFullYear())
+      .getReportData(month, year)
       .then(setData)
       .catch(() => {
         // Use fallback mock data so the UI is visible even without backend
-        setData(getFallbackData());
+        setData({ ...getFallbackData(), month, year });
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [targetMonth, targetYear]);
 
   const handleShare = async () => {
     if (pdfUri) {
@@ -51,7 +57,10 @@ export function ReportPreviewScreen({ navigation, route }: Props) {
   const handleExportPdf = async () => {
     try {
       const now = new Date();
-      const uri = await reportService.downloadPdf(now.getMonth() + 1, now.getFullYear());
+      const month = targetMonth ?? (now.getMonth() + 1);
+      const year = targetYear ?? now.getFullYear();
+
+      const uri = await reportService.downloadPdf(month, year);
       await reportService.sharePdf(uri);
     } catch {
       Alert.alert('Erro', 'Falha ao exportar PDF.');

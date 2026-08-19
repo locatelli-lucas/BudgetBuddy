@@ -13,6 +13,8 @@ export function RegisterScreen({ navigation }: any) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
 
@@ -107,10 +109,17 @@ export function RegisterScreen({ navigation }: any) {
                 className="flex-1 text-on-surface font-body-md"
                 placeholder="Senha"
                 placeholderTextColor="#8d90a0"
-                secureTextEntry
+                secureTextEntry={!showPassword}
                 value={password}
                 onChangeText={setPassword}
               />
+              <TouchableOpacity onPress={() => setShowPassword(!showPassword)} className="p-1">
+                <MaterialIcons
+                  name={showPassword ? "visibility-off" : "visibility"}
+                  size={20}
+                  color="#8d90a0"
+                />
+              </TouchableOpacity>
             </View>
 
             <View className="bg-surface-container h-14 rounded-xl flex-row items-center px-4 border border-transparent focus-within:border-primary-container">
@@ -119,10 +128,17 @@ export function RegisterScreen({ navigation }: any) {
                 className="flex-1 text-on-surface font-body-md"
                 placeholder="Confirmar Senha"
                 placeholderTextColor="#8d90a0"
-                secureTextEntry
+                secureTextEntry={!showConfirmPassword}
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
               />
+              <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)} className="p-1">
+                <MaterialIcons
+                  name={showConfirmPassword ? "visibility-off" : "visibility"}
+                  size={20}
+                  color="#8d90a0"
+                />
+              </TouchableOpacity>
             </View>
           </View>
 

@@ -100,7 +100,7 @@ public class NewsService {
                   "marketImpact": "explicação do impacto no mercado para o ativo %s"
                 }
                 
-                Responda APENAS o JSON.
+                Responda APENAS o JSON válido, sem tags de markdown.
                 """, symbol, content, symbol);
 
         try {

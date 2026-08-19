@@ -17,6 +17,7 @@ const PAYMENT_LABELS: Record<string, string> = {
   PIX: 'Pix',
   CASH: 'Dinheiro',
   TRANSFER: 'Transferência',
+  BANK_TRANSFER: 'Transferência Bancária',
 };
 
 export function TransactionsScreen({ navigation }: any) {

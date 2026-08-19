@@ -7,9 +7,9 @@ spring:
       - optional:file:api/.env
 
   datasource:
-    url: ${DATABASE_URL:jdbc:h2:mem:budgetbuddy;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;NON_KEYWORDS=MONTH,YEAR;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE}
-    username: ${DATABASE_USER:sa}
-    password: ${DATABASE_PASSWORD:password}
+    url: ${DATABASE_URL:}
+    username: ${DATABASE_USER:}
+    password: ${DATABASE_PASSWORD:}
     driver-class-name: org.h2.Driver
     hikari:
       maximum-pool-size: 10
@@ -66,17 +66,18 @@ server:
 
 # ─── JWT ──────────────────────────────────────────────────────────────────────
 jwt:
-  secret: ${JWT_SECRET:averylongsecretkeyforlocaldevelopmentonlythatisatleast256bitslong1234567890}
+  secret: ${JWT_SECRET:}
   access-expiry-ms: 900000        # 15 minutes
   refresh-expiry-ms: 2592000000   # 30 days
 
 # ─── AI ───────────────────────────────────────────────────────────────────────
 ai:
-  gemini:
-    api-key: ${GEMINI_API_KEY:}
-    base-url: ${GEMINI_BASE_URL:https://generativelanguage.googleapis.com/v1beta}
-    model: gemini-2.0-flash
-    max-tokens: 2048
+  provider: ${AI_PROVIDER:}
+  groq:
+    api-key: ${GROQ_API_KEY:}
+    model: ${GROQ_MODEL:}
+    base-url: ${GROQ_BASE_URL:}
+  max-tokens: 2048
 
 # ─── Firebase ─────────────────────────────────────────────────────────────────
 firebase:
@@ -96,8 +97,8 @@ finance:
 
 # ─── App ──────────────────────────────────────────────────────────────────────
 app:
-  base-url: ${APP_BASE_URL:http://localhost:8080}
-  frontend-url: ${APP_FRONTEND_URL:http://localhost:3000}
+  base-url: ${APP_BASE_URL:}
+  frontend-url: ${APP_FRONTEND_URL:}
   mail-from: ${MAIL_FROM:noreply@budgetbuddy.app}
   google:
     client-id: ${GOOGLE_CLIENT_ID:YOUR_GOOGLE_CLIENT_ID}

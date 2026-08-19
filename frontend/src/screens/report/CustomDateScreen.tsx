@@ -22,13 +22,15 @@ export function CustomDateScreen({ navigation, route }: any) {
     }
     setLoading(true);
     try {
-      const pdfUri = await reportService.downloadPdf(
-        startDate.getMonth() + 1,
-        startDate.getFullYear()
-      );
+      const month = startDate.getMonth() + 1;
+      const year = startDate.getFullYear();
+      const pdfUri = await reportService.downloadPdf(month, year);
+
       // Pass the generated PDF URI back to the previous screen
       navigation.navigate('ReportPreview', {
         pdfUri,
+        month,
+        year,
         startDate: startDate.toISOString().split('T')[0],
         endDate: endDate.toISOString().split('T')[0],
       });

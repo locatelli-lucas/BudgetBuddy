@@ -21,7 +21,7 @@ const periods: { key: PeriodKey; label: string }[] = [
 interface Props {
   visible: boolean;
   onClose: () => void;
-  onGenerated: (pdfUri: string) => void;
+  onGenerated: (pdfUri: string, month: number, year: number) => void;
   onCustomDate?: () => void;
 }
 
@@ -41,7 +41,8 @@ export function ExportReportSheet({ visible, onClose, onGenerated, onCustomDate 
         return { month: d.getMonth() + 1, year: d.getFullYear() };
       }
       case 'thisYear':
-        return { month: 1, year: now.getFullYear() };
+        return { month: now.getMonth() + 1, year: now.getFullYear() };
+      case 'thisMonth':
       case '7days':
       default:
         return { month: now.getMonth() + 1, year: now.getFullYear() };
@@ -53,7 +54,7 @@ export function ExportReportSheet({ visible, onClose, onGenerated, onCustomDate 
     try {
       const { month, year } = getMonthYear();
       const pdfUri = await reportService.downloadPdf(month, year);
-      onGenerated(pdfUri);
+      onGenerated(pdfUri, month, year);
     } catch {
       Alert.alert('Erro', 'Falha ao gerar relatório. Verifique sua conexão.');
     } finally {

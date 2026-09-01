@@ -20,6 +20,13 @@ public interface NotificationRepository extends JpaRepository<Notification, UUID
     
     Optional<Notification> findByIdAndUserId(UUID id, UUID userId);
 
+    boolean existsByUserIdAndCategoryAndActionUrlAndCreatedAtAfter(
+            UUID userId, 
+            Notification.NotificationCategory category, 
+            String actionUrl, 
+            java.time.LocalDateTime after
+    );
+
     @Modifying
     @Query("UPDATE Notification n SET n.isRead = true, n.readAt = CURRENT_TIMESTAMP WHERE n.user.id = :userId AND n.isRead = false")
     void markAllAsReadForUser(UUID userId);

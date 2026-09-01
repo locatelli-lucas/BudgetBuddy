@@ -105,6 +105,13 @@ public class NotificationService {
         return mapToPreferenceResponse(prefs);
     }
 
+    @Transactional(readOnly = true)
+    public boolean hasRecentNotification(User user, Notification.NotificationCategory category, String actionUrl, int hours) {
+        LocalDateTime after = LocalDateTime.now().minusHours(hours);
+        return notificationRepository.existsByUserIdAndCategoryAndActionUrlAndCreatedAtAfter(
+                user.getId(), category, actionUrl, after);
+    }
+
     @Transactional
     public NotificationPreferenceResponse updatePreferences(String email, NotificationPreferenceRequest request) {
         User user = userService.getUserByEmail(email);

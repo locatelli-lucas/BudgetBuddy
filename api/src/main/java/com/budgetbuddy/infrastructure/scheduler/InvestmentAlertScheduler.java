@@ -65,6 +65,14 @@ public class InvestmentAlertScheduler {
                 for (Investment inv : holders) {
                     if (!notifiedUsers.add(inv.getUser().getId())) continue;
 
+                    String actionUrl = "/investments/" + ticker;
+                    
+                    // Check if user was already notified about this ticker in the last hour
+                    if (notificationService.hasRecentNotification(inv.getUser(), Notification.NotificationCategory.INVESTMENTS, actionUrl, 1)) {
+                        log.debug("InvestmentAlertScheduler: user {} already notified about {} recently, skipping", inv.getUser().getEmail(), ticker);
+                        continue;
+                    }
+
                     String direction = changePct > 0 ? "subiu" : "caiu";
                     String arrow     = changePct > 0 ? "📈" : "📉";
                     java.util.Locale ptBR = java.util.Locale.of("pt", "BR");
@@ -83,7 +91,7 @@ public class InvestmentAlertScheduler {
                             Math.abs(changePct) >= 10.0
                                     ? Notification.NotificationPriority.HIGH
                                     : Notification.NotificationPriority.MEDIUM,
-                            "/investments/" + ticker,
+                            actionUrl,
                             Map.of(
                                     "ticker", ticker,
                                     "changePercent", String.format("%.2f", changePct),

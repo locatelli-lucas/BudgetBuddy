@@ -32,7 +32,7 @@ public class YahooFinanceProvider implements MarketDataProvider {
     private final ObjectMapper objectMapper;
 
     public YahooFinanceProvider(
-            @Value("${finance.yahoo-base-url}") String baseUrl,
+            @Value("${finance.yahoo-base-url:https://query1.finance.yahoo.com}") String baseUrl,
             ObjectMapper objectMapper) {
         this.webClient = WebClient.builder()
                 .baseUrl(baseUrl)

@@ -8,42 +8,81 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../../constants/colors';
 import { reportService } from '../../services/report-service';
 
-type PeriodKey = '7days' | 'thisMonth' | 'lastMonth' | 'thisYear' | 'custom';
+type PeriodKey = '7days' | 'thisMonth' | 'lastMonth' | 'thisYear' | 'lastYear' | 'custom';
 
 const periods: { key: PeriodKey; label: string }[] = [
   { key: '7days', label: 'Últimos 7 dias' },
   { key: 'thisMonth', label: 'Este mês' },
   { key: 'lastMonth', label: 'Mês anterior' },
   { key: 'thisYear', label: 'Este ano' },
+  { key: 'lastYear', label: 'Ano passado' },
   { key: 'custom', label: 'Personalizado' },
 ];
 
 interface Props {
   visible: boolean;
   onClose: () => void;
-  onGenerated: (pdfUri: string, month: number, year: number) => void;
+  onGenerated: (pdfUri: string, month: number, year: number, startDate?: string, endDate?: string) => void;
   onCustomDate?: () => void;
+  customRange?: { startDate: string; endDate: string };
+  // Checkbox state lifted to parent to persist across navigation
+  includeCharts: boolean;
+  onIncludeChartsChange: (v: boolean) => void;
+  includeAi: boolean;
+  onIncludeAiChange: (v: boolean) => void;
+  includeCategories: boolean;
+  onIncludeCategoriesChange: (v: boolean) => void;
+  includeComparison: boolean;
+  onIncludeComparisonChange: (v: boolean) => void;
 }
 
-export function ExportReportSheet({ visible, onClose, onGenerated, onCustomDate }: Props) {
+export function ExportReportSheet({
+  visible, onClose, onGenerated, onCustomDate, customRange,
+  includeCharts, onIncludeChartsChange,
+  includeAi, onIncludeAiChange,
+  includeCategories, onIncludeCategoriesChange,
+  includeComparison, onIncludeComparisonChange,
+}: Props) {
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodKey>('thisMonth');
-  const [includeCharts, setIncludeCharts] = useState(true);
-  const [includeAi, setIncludeAi] = useState(true);
-  const [includeCategories, setIncludeCategories] = useState(true);
-  const [includeComparison, setIncludeComparison] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const getMonthYear = (): { month: number; year: number } => {
+  // Sync selected period if customRange is provided
+  React.useEffect(() => {
+    if (customRange) {
+      setSelectedPeriod('custom');
+    }
+  }, [customRange]);
+
+  const getReportParams = (): { month?: number; year?: number; startDate?: string; endDate?: string } => {
     const now = new Date();
+    const formatDate = (date: Date) => date.toISOString().split('T')[0];
+
     switch (selectedPeriod) {
       case 'lastMonth': {
         const d = new Date(now.getFullYear(), now.getMonth() - 1, 1);
         return { month: d.getMonth() + 1, year: d.getFullYear() };
       }
-      case 'thisYear':
-        return { month: now.getMonth() + 1, year: now.getFullYear() };
       case 'thisMonth':
-      case '7days':
+        return { month: now.getMonth() + 1, year: now.getFullYear() };
+      case '7days': {
+        const start = new Date();
+        start.setDate(now.getDate() - 7);
+        return { startDate: formatDate(start), endDate: formatDate(now) };
+      }
+      case 'thisYear': {
+        const start = new Date(now.getFullYear(), 0, 1);
+        return { startDate: formatDate(start), endDate: formatDate(now) };
+      }
+      case 'lastYear': {
+        const start = new Date(now.getFullYear() - 1, 0, 1);
+        const end = new Date(now.getFullYear() - 1, 11, 31);
+        return { startDate: formatDate(start), endDate: formatDate(end) };
+      }
+      case 'custom':
+        if (customRange) {
+          return { startDate: customRange.startDate, endDate: customRange.endDate };
+        }
+        return { month: now.getMonth() + 1, year: now.getFullYear() };
       default:
         return { month: now.getMonth() + 1, year: now.getFullYear() };
     }
@@ -52,9 +91,16 @@ export function ExportReportSheet({ visible, onClose, onGenerated, onCustomDate 
   const handleGenerate = async () => {
     setLoading(true);
     try {
-      const { month, year } = getMonthYear();
-      const pdfUri = await reportService.downloadPdf(month, year);
-      onGenerated(pdfUri, month, year);
+      const params = getReportParams();
+      const pdfUri = await reportService.downloadPdf(params.month, params.year, {
+        includeCharts,
+        includeAi,
+        includeCategories,
+        includeComparison,
+        startDate: params.startDate,
+        endDate: params.endDate
+      });
+      onGenerated(pdfUri, params.month || 0, params.year || 0, params.startDate, params.endDate);
     } catch {
       Alert.alert('Erro', 'Falha ao gerar relatório. Verifique sua conexão.');
     } finally {
@@ -108,15 +154,21 @@ export function ExportReportSheet({ visible, onClose, onGenerated, onCustomDate 
                       onPress={() => {
                         if (p.key === 'custom' && onCustomDate) {
                           onCustomDate();
-                          onClose();
                         } else {
                           setSelectedPeriod(p.key);
                         }
                       }}
                     >
-                      <Text className={`text-body-md ${isSelected ? 'text-on-surface font-medium' : 'text-on-surface'}`}>
-                        {p.label}
-                      </Text>
+                      <View>
+                        <Text className={`text-body-md ${isSelected ? 'text-on-surface font-medium' : 'text-on-surface'}`}>
+                          {p.label}
+                        </Text>
+                        {p.key === 'custom' && customRange && (
+                          <Text className="text-[11px] text-primary font-medium mt-0.5">
+                            {customRange.startDate.split('-').reverse().join('/')} - {customRange.endDate.split('-').reverse().join('/')}
+                          </Text>
+                        )}
+                      </View>
                       <MaterialIcons
                         name={p.key === 'custom' ? 'chevron-right' : isSelected ? 'radio-button-checked' : 'radio-button-unchecked'}
                         size={22}
@@ -137,24 +189,24 @@ export function ExportReportSheet({ visible, onClose, onGenerated, onCustomDate 
                 <CheckboxRow
                   label="Incluir gráficos"
                   checked={includeCharts}
-                  onToggle={() => setIncludeCharts(!includeCharts)}
+                  onToggle={() => onIncludeChartsChange(!includeCharts)}
                 />
                 <CheckboxRow
                   label="Incluir resumo da IA"
                   checked={includeAi}
-                  onToggle={() => setIncludeAi(!includeAi)}
+                  onToggle={() => onIncludeAiChange(!includeAi)}
                   trailingIcon="auto-awesome"
                   trailingIconColor={Colors.tertiary}
                 />
                 <CheckboxRow
                   label="Incluir categorias"
                   checked={includeCategories}
-                  onToggle={() => setIncludeCategories(!includeCategories)}
+                  onToggle={() => onIncludeCategoriesChange(!includeCategories)}
                 />
                 <CheckboxRow
                   label="Incluir comparativo com mês anterior"
                   checked={includeComparison}
-                  onToggle={() => setIncludeComparison(!includeComparison)}
+                  onToggle={() => onIncludeComparisonChange(!includeComparison)}
                 />
               </View>
             </View>

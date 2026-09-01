@@ -25,11 +25,20 @@ public class ReportController {
     public ResponseEntity<ApiResponse<MonthlyReportResponse>> getMonthlyReportData(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam(required = false) Integer month,
-            @RequestParam(required = false) Integer year) {
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate) {
             
+        if (startDate != null && endDate != null) {
+            LocalDate start = LocalDate.parse(startDate);
+            LocalDate end = LocalDate.parse(endDate);
+            return ResponseEntity.ok(ApiResponse.success(
+                    reportService.getReportForPeriod(userDetails.getUsername(), start, end, null, null)));
+        }
+
         LocalDate now = LocalDate.now();
-        int targetMonth = month != null ? month : now.getMonthValue();
-        int targetYear = year != null ? year : now.getYear();
+        int targetMonth = (month != null && month > 0) ? month : now.getMonthValue();
+        int targetYear = (year != null && year > 0) ? year : now.getYear();
         
         return ResponseEntity.ok(ApiResponse.success(
                 reportService.getMonthlyReport(userDetails.getUsername(), targetMonth, targetYear)));
@@ -39,16 +48,34 @@ public class ReportController {
     public ResponseEntity<byte[]> getMonthlyPdf(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam(required = false) Integer month,
-            @RequestParam(required = false) Integer year) {
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate,
+            @RequestParam(defaultValue = "true") boolean includeCharts,
+            @RequestParam(defaultValue = "true") boolean includeAi,
+            @RequestParam(defaultValue = "true") boolean includeCategories,
+            @RequestParam(defaultValue = "false") boolean includeComparison) {
             
-        LocalDate now = LocalDate.now();
-        int targetMonth = month != null ? month : now.getMonthValue();
-        int targetYear = year != null ? year : now.getYear();
+        byte[] pdfBytes;
+        if (startDate != null && !startDate.isBlank() && endDate != null && !endDate.isBlank()) {
+            LocalDate start = LocalDate.parse(startDate);
+            LocalDate end = LocalDate.parse(endDate);
+            pdfBytes = pdfReportGenerator.generateCustomPdfReport(
+                    userDetails.getUsername(), start, end, 
+                    includeCharts, includeAi, includeCategories, includeComparison);
+        } else {
+            LocalDate now = LocalDate.now();
+            int targetMonth = (month != null && month > 0) ? month : now.getMonthValue();
+            int targetYear = (year != null && year > 0) ? year : now.getYear();
+            pdfBytes = pdfReportGenerator.generateMonthlyPdfReport(
+                    userDetails.getUsername(), targetMonth, targetYear, 
+                    includeCharts, includeAi, includeCategories, includeComparison);
+        }
         
-        byte[] pdfBytes = pdfReportGenerator.generateMonthlyPdfReport(userDetails.getUsername(), targetMonth, targetYear);
+        String filename = "budgetbuddy-report-" + (startDate != null ? startDate : month + "-" + year) + ".pdf";
         
         return ResponseEntity.ok()
-                .header("Content-Disposition", "attachment; filename=budgetbuddy-report-" + targetMonth + "-" + targetYear + ".pdf")
+                .header("Content-Disposition", "attachment; filename=" + filename)
                 .body(pdfBytes);
     }
 }

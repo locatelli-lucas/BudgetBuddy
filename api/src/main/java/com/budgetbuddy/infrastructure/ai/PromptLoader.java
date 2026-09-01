@@ -20,16 +20,44 @@ public class PromptLoader {
     public void init() {
         try {
             Yaml yaml = new Yaml();
+            // Try loading from prompts.yaml first
             ClassPathResource resource = new ClassPathResource("prompts.yaml");
-            try (InputStream inputStream = resource.getInputStream()) {
-                Map<String, Object> obj = yaml.load(inputStream);
-                if (obj != null && obj.containsKey("prompts")) {
-                    this.prompts = (Map<String, String>) obj.get("prompts");
-                    log.info("Successfully loaded {} prompts from prompts.yaml", prompts.size());
+            if (resource.exists()) {
+                try (InputStream inputStream = resource.getInputStream()) {
+                    Map<String, Object> obj = yaml.load(inputStream);
+                    if (obj != null && obj.containsKey("prompts")) {
+                        this.prompts = (Map<String, String>) obj.get("prompts");
+                        log.info("Successfully loaded {} prompts from prompts.yaml", prompts.size());
+                        return;
+                    }
                 }
             }
+
+            // Fallback: search for individual .md files in prompts/ directory
+            log.warn("prompts.yaml not found or empty, falling back to individual .md files");
+            this.prompts = new java.util.HashMap<>();
+            String[] promptFiles = {
+                "categorization", "financial-insights", "chat-system", 
+                "news-summary", "monthly-report", "portfolio-analysis", "expense-analysis"
+            };
+
+            for (String name : promptFiles) {
+                try {
+                    ClassPathResource mdResource = new ClassPathResource("prompts/" + name + ".md");
+                    if (mdResource.exists()) {
+                        try (InputStream is = mdResource.getInputStream()) {
+                            String content = new String(is.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+                            this.prompts.put(name, content);
+                        }
+                    }
+                } catch (Exception e) {
+                    log.warn("Failed to load prompt file: prompts/{}.md", name);
+                }
+            }
+            log.info("Loaded {} prompts from individual files", prompts.size());
+
         } catch (Exception e) {
-            log.error("Failed to load prompts.yaml", e);
+            log.error("Critical failure loading prompts", e);
         }
     }
 

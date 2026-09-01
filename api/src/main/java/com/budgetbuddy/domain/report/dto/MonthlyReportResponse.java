@@ -14,8 +14,10 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MonthlyReportResponse {
-    private int month;
-    private int year;
+    private Integer month;
+    private Integer year;
+    private LocalDate startDate;
+    private LocalDate endDate;
     private String userName;
 
     private FinancialSummary summary;

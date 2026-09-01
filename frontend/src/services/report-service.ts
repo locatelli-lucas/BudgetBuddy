@@ -17,8 +17,10 @@ export interface CashFlowPoint {
 }
 
 export interface MonthlyReportData {
-  month: number;
-  year: number;
+  month?: number;
+  year?: number;
+  startDate?: string;
+  endDate?: string;
   userName: string;
   totalIncome: number;
   totalExpense: number;
@@ -37,23 +39,50 @@ export interface ApiResponseWrapper<T> {
 }
 
 export const reportService = {
-  getReportData: async (month?: number, year?: number): Promise<MonthlyReportData> => {
-    const now = new Date();
-    const params: Record<string, number> = {
-      month: month ?? now.getMonth() + 1,
-      year: year ?? now.getFullYear(),
-    };
+  getReportData: async (month?: number, year?: number, startDate?: string, endDate?: string): Promise<MonthlyReportData> => {
+    const params: Record<string, any> = {};
+    if (month) params.month = month;
+    if (year) params.year = year;
+    if (startDate) params.startDate = startDate;
+    if (endDate) params.endDate = endDate;
+
+    if (Object.keys(params).length === 0) {
+      const now = new Date();
+      params.month = now.getMonth() + 1;
+      params.year = now.getFullYear();
+    }
+
     const res = await api.get<ApiResponseWrapper<MonthlyReportData>>('/api/v1/reports/monthly', { params });
     return res.data.data;
   },
 
-  downloadPdf: async (month?: number, year?: number): Promise<string> => {
+  downloadPdf: async (
+    month?: number,
+    year?: number,
+    options: {
+      includeCharts: boolean;
+      includeAi: boolean;
+      includeCategories: boolean;
+      includeComparison: boolean;
+      startDate?: string;
+      endDate?: string;
+    } = {
+      includeCharts: true,
+      includeAi: true,
+      includeCategories: true,
+      includeComparison: false
+    }
+  ): Promise<string> => {
     const now = new Date();
     const targetMonth = month ?? now.getMonth() + 1;
     const targetYear = year ?? now.getFullYear();
 
     const token = await AsyncStorage.getItem('accessToken');
-    const url = `${api.defaults.baseURL}/api/v1/reports/monthly/pdf?month=${targetMonth}&year=${targetYear}`;
+    let url = `${api.defaults.baseURL}/api/v1/reports/monthly/pdf?month=${targetMonth}&year=${targetYear}&includeCharts=${options.includeCharts}&includeAi=${options.includeAi}&includeCategories=${options.includeCategories}&includeComparison=${options.includeComparison}`;
+
+    if (options.startDate && options.endDate) {
+      url += `&startDate=${options.startDate}&endDate=${options.endDate}`;
+    }
 
     // On web, fetch the PDF as a blob and create a download
     if (Platform.OS === 'web') {

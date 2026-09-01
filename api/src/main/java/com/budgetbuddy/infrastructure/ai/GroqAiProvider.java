@@ -121,17 +121,20 @@ public class GroqAiProvider implements AiProvider {
 
     @Override
     public com.budgetbuddy.infrastructure.ai.dto.AiReportAnalysis generateMonthlyReport(UserFinancialSummary data) {
-        String prompt = promptLoader.load("monthly-report", Map.of(
-                "userName", data.getUserName(),
-                "monthlyIncome", data.getMonthlyIncome(),
-                "monthlyExpense", data.getMonthlyExpense(),
-                "netSavings", data.getMonthlyIncome().subtract(data.getMonthlyExpense()),
-                "savingsRate", data.getSavingsRate(),
-                "prevMonthExpense", data.getPreviousMonthExpense() != null ? data.getPreviousMonthExpense() : "N/A",
-                "expensesByCategory", data.getExpensesByCategory() != null ? data.getExpensesByCategory().toString() : "{}",
-                "creditCards", data.getCreditCards() != null ? data.getCreditCards().toString() : "[]",
-                "investments", data.getInvestments() != null ? data.getInvestments().toString() : "[]"
-        ));
+        java.util.Map<String, Object> variables = new java.util.HashMap<>();
+        variables.put("userName", data.getUserName());
+        variables.put("startDate", data.getStartDate() != null ? data.getStartDate() : "N/A");
+        variables.put("endDate", data.getEndDate() != null ? data.getEndDate() : "N/A");
+        variables.put("totalIncome", data.getMonthlyIncome());
+        variables.put("totalExpense", data.getMonthlyExpense());
+        variables.put("netSavings", data.getMonthlyIncome().subtract(data.getMonthlyExpense()));
+        variables.put("savingsRate", data.getSavingsRate());
+        variables.put("prevPeriodExpense", data.getPreviousMonthExpense() != null ? data.getPreviousMonthExpense() : "N/A");
+        variables.put("expensesByCategory", data.getExpensesByCategory() != null ? data.getExpensesByCategory().toString() : "{}");
+        variables.put("creditCards", data.getCreditCards() != null ? data.getCreditCards().toString() : "[]");
+        variables.put("investments", data.getInvestments() != null ? data.getInvestments().toString() : "[]");
+
+        String prompt = promptLoader.load("monthly-report", variables);
         
         String response = null;
         try {

@@ -12,7 +12,7 @@ CREATE TABLE user_security (
 
 -- Migrate existing 2FA data from users table
 INSERT INTO user_security (id, user_id, two_factor_enabled, totp_secret, created_at, updated_at)
-SELECT gen_random_uuid(), id, two_factor_enabled, two_factor_secret, created_at, updated_at
+SELECT random_uuid(), id, two_factor_enabled, two_factor_secret, created_at, updated_at
 FROM users;
 
 -- Remove old columns from users table

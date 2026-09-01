@@ -20,25 +20,18 @@ export function CustomDateScreen({ navigation, route }: any) {
       showError(new Error('A data inicial não pode ser posterior à data final.'));
       return;
     }
-    setLoading(true);
-    try {
-      const month = startDate.getMonth() + 1;
-      const year = startDate.getFullYear();
-      const pdfUri = await reportService.downloadPdf(month, year);
 
-      // Pass the generated PDF URI back to the previous screen
-      navigation.navigate('ReportPreview', {
-        pdfUri,
-        month,
-        year,
-        startDate: startDate.toISOString().split('T')[0],
-        endDate: endDate.toISOString().split('T')[0],
-      });
-    } catch (err) {
-      showError(err, 'Falha ao gerar relatório.');
-    } finally {
-      setLoading(false);
-    }
+    // Return the selected dates back to the caller (ExportReportSheet)
+    // instead of generating the PDF immediately.
+    navigation.navigate({
+      name: 'Dashboard', // Navigation will go back to Dashboard where the sheet is
+      params: {
+        customStartDate: startDate.toISOString().split('T')[0],
+        customEndDate: endDate.toISOString().split('T')[0],
+        source: 'CustomDate'
+      },
+      merge: true,
+    });
   };
 
   return (

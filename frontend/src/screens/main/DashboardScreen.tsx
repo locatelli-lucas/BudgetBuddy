@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Image, RefreshControl, ActivityIndicator } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -24,11 +24,23 @@ import { financialResourceService } from '../../services/financialResourceServic
 import { FinancialResource } from '../../types/financialResource';
 import { AccountsAndCardsWidget } from '../../components/dashboard/AccountsAndCardsWidget';
 
-export function DashboardScreen({ navigation }: any) {
+export function DashboardScreen({ navigation, route }: any) {
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const { showError } = useErrorToast();
   const [showReportSheet, setShowReportSheet] = useState(false);
+  // Checkbox options elevated here so they persist across CustomDate navigation
+  const [includeCharts, setIncludeCharts] = useState(true);
+  const [includeAi, setIncludeAi] = useState(true);
+  const [includeCategories, setIncludeCategories] = useState(true);
+  const [includeComparison, setIncludeComparison] = useState(false);
+
+  useEffect(() => {
+    if (route.params?.source === 'CustomDate') {
+      setShowReportSheet(true);
+    }
+  }, [route.params]);
+
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -440,11 +452,26 @@ export function DashboardScreen({ navigation }: any) {
       <ExportReportSheet
         visible={showReportSheet}
         onClose={() => setShowReportSheet(false)}
-        onGenerated={(pdfUri, month, year) => {
+        onGenerated={(pdfUri, month, year, startDate, endDate) => {
           setShowReportSheet(false);
-          navigation.navigate('ReportPreview', { pdfUri, month, year });
+          navigation.navigate('ReportPreview', { pdfUri, month, year, startDate, endDate });
         }}
-        onCustomDate={() => navigation.navigate('CustomDate')}
+        onCustomDate={() => {
+          setShowReportSheet(false); // Close modal before navigating
+          navigation.navigate('CustomDate');
+        }}
+        customRange={route.params?.source === 'CustomDate' ? {
+          startDate: route.params.customStartDate,
+          endDate: route.params.customEndDate
+        } : undefined}
+        includeCharts={includeCharts}
+        onIncludeChartsChange={setIncludeCharts}
+        includeAi={includeAi}
+        onIncludeAiChange={setIncludeAi}
+        includeCategories={includeCategories}
+        onIncludeCategoriesChange={setIncludeCategories}
+        includeComparison={includeComparison}
+        onIncludeComparisonChange={setIncludeComparison}
       />
     </View>
   );

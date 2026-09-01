@@ -1,6 +1,6 @@
 -- V16: Create portfolio_snapshots table for daily portfolio value tracking
 CREATE TABLE IF NOT EXISTS portfolio_snapshots (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    id UUID DEFAULT random_uuid() PRIMARY KEY,
     user_id UUID NOT NULL,
     portfolio_value DECIMAL(15, 4) NOT NULL,
     invested_amount DECIMAL(15, 4) NOT NULL,

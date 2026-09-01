@@ -5,7 +5,7 @@ prompts:
 
   financial-insights: |
     Atue como um consultor financeiro pessoal. Analise os seguintes dados do usuário {{userName}}: 
-    Renda mensal: R$ {{monthlyIncome}}, Gastos no mês: R$ {{monthlyExpense}}, Taxa de economia: {{savingsRate}}%. 
+    Renda mensal: R$ {{monthlyIncome}}, Gastos no mês: R$ {{monthlyExpense}}, Taxa de economia: {{savingsRate}}%.
     Gere 3 insights financeiros acionáveis em formato JSON. 
     Cada insight deve ter: 'title', 'body', 'type' (TIPS, WARNING, PROGRESS), 
     'icon' (material design icon name), 'severity' (INFO, WARNING, ERROR, SUCCESS).
@@ -27,17 +27,36 @@ prompts:
     {{content}}
 
   monthly-report: |
-    Atue como um consultor financeiro pessoal sênior. Analise os seguintes dados mensais do usuário {{userName}}:
-    - Renda: R$ {{monthlyIncome}}
-    - Despesas: R$ {{monthlyExpense}}
+    Atue como um consultor financeiro pessoal sênior. Analise os seguintes dados financeiros do usuário {{userName}} referente ao período de {{startDate}} a {{endDate}}:
+    - Renda Total no Período: R$ {{totalIncome}}
+    - Despesas Totais no Período: R$ {{totalExpense}}
     - Economia Líquida: R$ {{netSavings}}
     - Taxa de Economia: {{savingsRate}}%
-    - Despesa Mês Anterior: R$ {{prevMonthExpense}}
+    - Despesas Período Anterior: R$ {{prevPeriodExpense}}
     - Gastos por Categoria: {{expensesByCategory}}
     - Cartões de Crédito: {{creditCards}}
     - Investimentos: {{investments}}
     
-    Gere uma análise financeira profissional em JSON.
+    INSTRUÇÕES CRÍTICAS DE LINGUAGEM:
+    - Se o período for superior a 31 dias (ex: um ano ou vários meses), você PROIBIDAMENTE não deve usar a palavra "mensal" ou "mês". Use "no período", "anual", "total acumulado" ou "neste intervalo".
+    - Exemplo: Em vez de "renda mensal", use "renda total no período".
+    - Gere uma análise financeira profissional em JSON.
+    REGRAS CRÍTICAS DE FORMATO:
+    - Retorne APENAS o objeto JSON.
+    - Cada objeto dentro de 'topInsights' DEVE ser fechado com '}'. 
+    - FORMATAÇÃO DE VALORES: Todos os valores monetários no texto devem usar obrigatoriamente o formato brasileiro: R$ X.XXX,XX.
+    
+    Estrutura JSON esperada:
+    {
+      "executiveSummary": "Resumo técnico de até 4 linhas.",
+      "topInsights": [
+        {"title": "Insight 1", "description": "Descrição 1"},
+        {"title": "Insight 2", "description": "Descrição 2"}
+      ],
+      "strengths": ["Força 1", "Força 2"],
+      "attentionPoints": ["Atenção 1", "Alerta 2"],
+      "recommendations": ["Ação 1", "Ação 2"]
+    }
     REGRAS CRÍTICAS DE FORMATO:
     - Retorne APENAS o objeto JSON.
     - Cada objeto dentro de 'topInsights' DEVE ser fechado com '}'. 

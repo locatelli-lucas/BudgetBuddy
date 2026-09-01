@@ -10,6 +10,7 @@ import com.budgetbuddy.domain.installment.dto.InstallmentPurchaseResponse;
 import com.budgetbuddy.domain.investment.InvestmentService;
 import com.budgetbuddy.domain.investment.dto.InvestmentResponse;
 import com.budgetbuddy.domain.report.dto.MonthlyReportResponse;
+import com.budgetbuddy.domain.transaction.Transaction;
 import com.budgetbuddy.domain.transaction.TransactionRepository;
 import com.budgetbuddy.domain.transaction.TransactionService;
 import com.budgetbuddy.domain.transaction.dto.TransactionSummaryResponse;
@@ -25,6 +26,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -45,20 +47,38 @@ public class ReportService {
     private final AiProvider aiProvider;
 
     public MonthlyReportResponse getMonthlyReport(String email, int month, int year) {
-        User user = userService.getUserByEmail(email);
         LocalDate start = LocalDate.of(year, month, 1);
         LocalDate end = start.withDayOfMonth(start.lengthOfMonth());
+        return getReportForPeriod(email, start, end, month, year);
+    }
+
+    public MonthlyReportResponse getReportForPeriod(String email, LocalDate start, LocalDate end, Integer month, Integer year) {
+        User user = userService.getUserByEmail(email);
         
         // 1. Summaries
-        TransactionSummaryResponse currentSummary = transactionService.getMonthlySummary(email, month, year);
+        BigDecimal totalIncome = transactionRepository.sumAmountByUserIdAndTypeAndDateBetween(
+                user.getId(), Transaction.TransactionType.INCOME, start, end);
+        BigDecimal totalExpense = transactionRepository.sumAmountByUserIdAndTypeAndDateBetween(
+                user.getId(), Transaction.TransactionType.EXPENSE, start, end);
+        BigDecimal netSavings = totalIncome.subtract(totalExpense);
+        BigDecimal savingsRate = BigDecimal.ZERO;
+        if (totalIncome.compareTo(BigDecimal.ZERO) > 0) {
+            savingsRate = netSavings.divide(totalIncome, 4, RoundingMode.HALF_UP).multiply(new BigDecimal("100"));
+        }
+
+        long days = ChronoUnit.DAYS.between(start, end) + 1;
+        LocalDate prevStart = start.minusDays(days);
+        LocalDate prevEnd = start.minusDays(1);
         
-        LocalDate prevMonthDate = start.minusMonths(1);
-        TransactionSummaryResponse prevSummary = transactionService.getMonthlySummary(email, prevMonthDate.getMonthValue(), prevMonthDate.getYear());
-        
-        // Debug logs to trace comparison issues
-        log.info("Report for {}/{} (Current: Income={}, Expense={}) vs Previous {}/{} (Income={}, Expense={})", 
-                month, year, currentSummary.getTotalIncome(), currentSummary.getTotalExpense(),
-                prevMonthDate.getMonthValue(), prevMonthDate.getYear(), prevSummary.getTotalIncome(), prevSummary.getTotalExpense());
+        BigDecimal prevIncome = transactionRepository.sumAmountByUserIdAndTypeAndDateBetween(
+                user.getId(), Transaction.TransactionType.INCOME, prevStart, prevEnd);
+        BigDecimal prevExpense = transactionRepository.sumAmountByUserIdAndTypeAndDateBetween(
+                user.getId(), Transaction.TransactionType.EXPENSE, prevStart, prevEnd);
+        BigDecimal prevNet = prevIncome.subtract(prevExpense);
+        BigDecimal prevSavingsRate = BigDecimal.ZERO;
+        if (prevIncome.compareTo(BigDecimal.ZERO) > 0) {
+            prevSavingsRate = prevNet.divide(prevIncome, 4, RoundingMode.HALF_UP).multiply(new BigDecimal("100"));
+        }
 
         // 2. Category Aggregation
         List<Object[]> categoryData = transactionRepository.aggregateExpensesByCategory(user.getId(), start, end);
@@ -66,7 +86,7 @@ public class ReportService {
                 .map(row -> MonthlyReportResponse.CategoryBreakdown.builder()
                         .name((String) row[0])
                         .amount((BigDecimal) row[1])
-                        .percentage(calculatePercentage((BigDecimal) row[1], currentSummary.getTotalExpense()))
+                        .percentage(calculatePercentage((BigDecimal) row[1], totalExpense))
                         .color((String) row[2])
                         .icon((String) row[3])
                         .build())
@@ -82,9 +102,8 @@ public class ReportService {
                         .build())
                 .collect(Collectors.toList());
 
-        // 4. Financial Resources (Grouped by Institution)
+        // 4. Financial Resources
         List<FinancialResourceResponse> allResources = financialResourceService.getFinancialResources(email);
-        
         Map<String, List<FinancialResourceResponse>> resourcesByInstitution = allResources.stream()
                 .collect(Collectors.groupingBy(r -> r.getFinancialInstitution() != null ? r.getFinancialInstitution().getName() : "Outros"));
 
@@ -147,11 +166,11 @@ public class ReportService {
                 .sorted((a, b) -> b.getTotalValue().compareTo(a.getTotalValue()))
                 .collect(Collectors.toList());
 
-        // 6. Installments
+        // 6. Installments (Active in this period)
         List<InstallmentPurchaseResponse> installmentPurchases = installmentService.getInstallmentPurchases(email);
         List<MonthlyReportResponse.InstallmentData> activeInstallments = installmentPurchases.stream()
                 .flatMap(p -> p.getInstallments().stream()
-                        .filter(i -> i.getDueDate().getMonthValue() == month && i.getDueDate().getYear() == year)
+                        .filter(i -> !i.getDueDate().isBefore(start) && !i.getDueDate().isAfter(end))
                         .map(i -> MonthlyReportResponse.InstallmentData.builder()
                                 .description(p.getDescription())
                                 .totalAmount(p.getTotalAmount())
@@ -162,7 +181,7 @@ public class ReportService {
                                 .build()))
                 .collect(Collectors.toList());
 
-        // 7. Future Commitments & Recurring
+        // 7. Future Commitments
         List<MonthlyReportResponse.FutureCommitment> futureCommitments = activeInstallments.stream()
                 .map(i -> MonthlyReportResponse.FutureCommitment.builder()
                         .description(i.getDescription() + " (" + i.getCurrentInstallment() + "/" + i.getTotalInstallments() + ")")
@@ -173,21 +192,17 @@ public class ReportService {
                         .build())
                 .collect(Collectors.toList());
 
-        // Simplified recurring detection: Expenses that repeat in similar amounts/descriptions could be detected.
-        // For now, we'll fetch transactions marked as isRecurring.
         List<MonthlyReportResponse.RecurringCommitment> recurringCommitments = new ArrayList<>();
-        // This would ideally come from a dedicated RecurringTransaction entity or logic.
-        // As a placeholder, we use transactions from the current month that are marked as recurring.
-        // In a real scenario, this would be a separate service.
 
-        // 8. Budget Status for AI
-        List<BudgetStatusResponse> budgets = budgetService.getBudgetStatus(email, month, year);
+        // 8. Budget Status (Use first month of period if multi-month)
+        List<BudgetStatusResponse> budgets = budgetService.getBudgetStatus(email, start.getMonthValue(), start.getYear());
         Map<String, BigDecimal> budgetStatusMap = budgets.stream()
                 .collect(Collectors.toMap(BudgetStatusResponse::getCategoryName, BudgetStatusResponse::getPercentUsed));
 
-        // 9. Historical Outlook (Last 6 months)
+        // 9. Historical Outlook
         List<MonthlyReportResponse.HistoricalOutlookPoint> historicalOutlook = new ArrayList<>();
-        for (int i = 5; i >= 0; i--) {
+        int monthsToLookBack = days > 31 ? 12 : 6;
+        for (int i = monthsToLookBack - 1; i >= 0; i--) {
             LocalDate date = start.minusMonths(i);
             TransactionSummaryResponse summary = transactionService.getMonthlySummary(email, date.getMonthValue(), date.getYear());
             historicalOutlook.add(MonthlyReportResponse.HistoricalOutlookPoint.builder()
@@ -201,10 +216,12 @@ public class ReportService {
         // 10. AI Analysis
         UserFinancialSummary aiData = UserFinancialSummary.builder()
                 .userName(user.getName())
-                .monthlyIncome(currentSummary.getTotalIncome())
-                .monthlyExpense(currentSummary.getTotalExpense())
-                .savingsRate(currentSummary.getSavingsRate())
-                .previousMonthExpense(prevSummary.getTotalExpense())
+                .startDate(start.toString())
+                .endDate(end.toString())
+                .monthlyIncome(totalIncome)
+                .monthlyExpense(totalExpense)
+                .savingsRate(savingsRate)
+                .previousMonthExpense(prevExpense)
                 .expensesByCategory(categories.stream().collect(Collectors.toMap(MonthlyReportResponse.CategoryBreakdown::getName, MonthlyReportResponse.CategoryBreakdown::getAmount)))
                 .budgetStatus(budgetStatusMap)
                 .creditCards(creditCards.stream().map(c -> UserFinancialSummary.CreditCardSummary.builder()
@@ -221,37 +238,33 @@ public class ReportService {
         AiReportAnalysis aiAnalysis = aiProvider.generateMonthlyReport(aiData);
 
         MonthlyReportResponse.ComparisonData comparison = null;
-        BigDecimal prevIncome = prevSummary.getTotalIncome();
-        BigDecimal prevExpense = prevSummary.getTotalExpense();
-        
-        // Use a small epsilon or just check if it's strictly greater than zero for both
-        if ((prevIncome != null && prevIncome.compareTo(BigDecimal.ZERO) != 0) || 
-            (prevExpense != null && prevExpense.compareTo(BigDecimal.ZERO) != 0)) {
-            
+        if (prevIncome.compareTo(BigDecimal.ZERO) != 0 || prevExpense.compareTo(BigDecimal.ZERO) != 0) {
             comparison = MonthlyReportResponse.ComparisonData.builder()
                     .prevMonthIncome(prevIncome)
                     .prevMonthExpense(prevExpense)
-                    .prevMonthSavingsRate(prevSummary.getSavingsRate())
-                    .incomeVariation(calculateVariation(currentSummary.getTotalIncome(), prevIncome))
-                    .expenseVariation(calculateVariation(currentSummary.getTotalExpense(), prevExpense))
-                    .savingsRateVariation(currentSummary.getSavingsRate().subtract(prevSummary.getSavingsRate()))
+                    .prevMonthSavingsRate(prevSavingsRate)
+                    .incomeVariation(calculateVariation(totalIncome, prevIncome))
+                    .expenseVariation(calculateVariation(totalExpense, prevExpense))
+                    .savingsRateVariation(savingsRate.subtract(prevSavingsRate))
                     .build();
         }
 
         return MonthlyReportResponse.builder()
                 .month(month)
                 .year(year)
+                .startDate(start)
+                .endDate(end)
                 .userName(user.getName())
                 .summary(MonthlyReportResponse.FinancialSummary.builder()
-                        .totalIncome(currentSummary.getTotalIncome())
-                        .totalExpense(currentSummary.getTotalExpense())
-                        .netSavings(currentSummary.getNetBalance())
-                        .savingsRate(currentSummary.getSavingsRate())
+                        .totalIncome(totalIncome)
+                        .totalExpense(totalExpense)
+                        .netSavings(netSavings)
+                        .savingsRate(savingsRate)
                         .build())
                 .comparison(comparison)
                 .health(MonthlyReportResponse.FinancialHealth.builder()
-                        .savingsRateStatus(getSavingsRateStatus(currentSummary.getSavingsRate()))
-                        .expenseToIncomeRatio(calculateRatio(currentSummary.getTotalExpense(), currentSummary.getTotalIncome()))
+                        .savingsRateStatus(getSavingsRateStatus(savingsRate))
+                        .expenseToIncomeRatio(calculateRatio(totalExpense, totalIncome))
                         .creditUtilizationRate(calculateTotalCreditUtilization(creditCards))
                         .build())
                 .categories(categories)

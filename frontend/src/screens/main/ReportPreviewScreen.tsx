@@ -32,19 +32,31 @@ export function ReportPreviewScreen({ navigation, route }: Props) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const now = new Date();
-    const month = targetMonth ?? (now.getMonth() + 1);
-    const year = targetYear ?? now.getFullYear();
+    const startDate = route.params?.startDate;
+    const endDate = route.params?.endDate;
+    const month = startDate ? undefined : targetMonth;
+    const year = startDate ? undefined : targetYear;
 
     reportService
-      .getReportData(month, year)
+      .getReportData(month, year, startDate, endDate)
       .then(setData)
       .catch(() => {
         // Use fallback mock data so the UI is visible even without backend
-        setData({ ...getFallbackData(), month, year });
+        const fallback = getFallbackData();
+        if (startDate && endDate) {
+          setData({
+            ...fallback,
+            startDate,
+            endDate,
+            month: undefined,
+            year: undefined
+          });
+        } else {
+          setData({ ...fallback, month: month || new Date().getMonth() + 1, year: year || new Date().getFullYear() });
+        }
       })
       .finally(() => setLoading(false));
-  }, [targetMonth, targetYear]);
+  }, [targetMonth, targetYear, route.params?.startDate, route.params?.endDate]);
 
   const handleShare = async () => {
     if (pdfUri) {
@@ -59,12 +71,24 @@ export function ReportPreviewScreen({ navigation, route }: Props) {
   const handleExportPdf = async () => {
     try {
       const now = new Date();
+
+      const startDate = route.params?.startDate;
+      const endDate = route.params?.endDate;
+
       const month = targetMonth ?? (now.getMonth() + 1);
       const year = targetYear ?? now.getFullYear();
 
-      const uri = await reportService.downloadPdf(month, year);
+      const uri = await reportService.downloadPdf(month, year, {
+        includeCharts: true,
+        includeAi: true,
+        includeCategories: true,
+        includeComparison: false,
+        startDate,
+        endDate
+      });
       await reportService.sharePdf(uri);
-    } catch {
+    } catch (e) {
+      console.error(e);
       Alert.alert('Erro', 'Falha ao exportar PDF.');
     }
   };
@@ -78,7 +102,20 @@ export function ReportPreviewScreen({ navigation, route }: Props) {
   }
 
   const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-  const monthLabel = data ? `${monthNames[data.month - 1]} ${data.year}` : '';
+
+  let monthLabel = '';
+  if (data) {
+    if (data.month && data.year) {
+      monthLabel = `${monthNames[data.month - 1]} ${data.year}`;
+    } else if (data.startDate && data.endDate) {
+      const [sY, sM, sD] = data.startDate.split('-').map(Number);
+      const [eY, eM, eD] = data.endDate.split('-').map(Number);
+      const start = new Date(sY, sM - 1, sD);
+      const end = new Date(eY, eM - 1, eD);
+      const format = (d: Date) => `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+      monthLabel = `${format(start)} - ${format(end)}`;
+    }
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']} style={{ flex: 1, backgroundColor: Colors.background }}>
@@ -91,7 +128,11 @@ export function ReportPreviewScreen({ navigation, route }: Props) {
           <MaterialIcons name="arrow-back" size={24} color={Colors.onSurfaceVariant} />
         </TouchableOpacity>
         <View className="items-center">
-          <Text className="text-[18px] leading-6 font-bold text-on-surface">Relatório mensal</Text>
+          <Text className="text-[18px] leading-6 font-bold text-on-surface">
+            {data?.startDate && data?.endDate && Math.ceil((new Date(data.endDate).getTime() - new Date(data.startDate).getTime()) / (1000 * 60 * 60 * 24)) > 35
+              ? 'Relatório do período'
+              : 'Relatório mensal'}
+          </Text>
           <Text className="text-label-sm text-primary uppercase tracking-widest mt-0.5">{monthLabel}</Text>
         </View>
         <View className="w-10" />
@@ -198,85 +239,169 @@ export function ReportPreviewScreen({ navigation, route }: Props) {
             <View className="gap-4">
               <View>
                 <Text className="text-[13px] text-on-surface-variant uppercase tracking-widest border-b border-surface-variant pb-2">
-                  Fluxo de Caixa Diário
+                  {data.startDate && data.endDate && Math.ceil((new Date(data.endDate).getTime() - new Date(data.startDate).getTime()) / (1000 * 60 * 60 * 24)) > 35
+                    ? 'Fluxo de Caixa Mensal'
+                    : 'Fluxo de Caixa Diário'}
                 </Text>
                 <Text className="text-[11px] text-on-surface-variant mt-2 italic">
-                  Mostra o saldo líquido (Entradas - Saídas) em cada dia do mês.
+                  {data.startDate && data.endDate && Math.ceil((new Date(data.endDate).getTime() - new Date(data.startDate).getTime()) / (1000 * 60 * 60 * 24)) > 35
+                    ? 'Mostra o saldo líquido (Entradas - Saídas) em cada mês do período.'
+                    : 'Mostra o saldo líquido (Entradas - Saídas) em cada dia do período.'}
                 </Text>
               </View>
 
               <View className="bg-surface-container-low rounded-lg border border-surface-variant p-4">
                 <View className="flex-row h-40">
                   {/* Y-Axis Labels */}
-                  <View className="w-10 justify-between items-end pr-2 pb-6">
+                  <View style={{ width: 45, justifyContent: 'space-between', itemsAlign: 'flex-end', paddingRight: 8, paddingBottom: 24 }}>
                     {(() => {
-                      const daysInMonth = new Date(data.year, data.month, 0).getDate();
-                      const dailyAmounts = new Array(daysInMonth).fill(0);
-                      data.cashFlow.forEach(point => {
-                        const day = new Date(point.date).getDate();
-                        if (day >= 1 && day <= daysInMonth) dailyAmounts[day - 1] += point.amount;
-                      });
-                      const maxAbsAmount = Math.max(...dailyAmounts.map(Math.abs), 1);
+                      const maxAbsAmount = data.cashFlow.length > 0
+                        ? Math.max(...data.cashFlow.map(p => Math.abs(p.amount)), 1)
+                        : 1000;
                       return (
                         <>
-                          <Text className="text-[8px] text-on-surface-variant font-bold">R$ {Math.round(maxAbsAmount / 1000)}k</Text>
-                          <Text className="text-[8px] text-on-surface-variant/60">R$ {Math.round(maxAbsAmount / 2000)}k</Text>
-                          <View className="h-[1px] w-full bg-outline-variant/20" />
-                          <Text className="text-[9px] text-primary font-bold">0</Text>
+                          <Text style={{ fontSize: 9, color: Colors.onSurfaceVariant, fontWeight: '600', textAlign: 'right' }}>
+                            {formatCurrency(maxAbsAmount)}
+                          </Text>
+                          <Text style={{ fontSize: 9, color: Colors.onSurfaceVariant, opacity: 0.7, textAlign: 'right' }}>
+                            {formatCurrency(maxAbsAmount / 2)}
+                          </Text>
+                          <View style={{ height: 1, width: '100%', backgroundColor: Colors.outlineVariant, opacity: 0.2 }} />
+                          <Text style={{ fontSize: 9, color: Colors.primary, fontWeight: '700', textAlign: 'right' }}>
+                            R$ 0
+                          </Text>
                         </>
                       );
                     })()}
                   </View>
 
                   {/* Chart Area */}
-                  <View className="flex-1">
-                    <View className="flex-1 flex-row items-end gap-[1px] relative">
+                  <View style={{ flex: 1 }}>
+                    <View style={{ flex: 1, flexDirection: 'row', alignItems: 'flex-end', gap: 2, position: 'relative' }}>
                       {/* Zero Line */}
-                      <View className="absolute left-0 right-0 h-[1px] bg-outline-variant bottom-[10%] z-0" />
+                      <View style={{ position: 'absolute', left: 0, right: 0, h: 1, backgroundColor: Colors.outlineVariant, bottom: '10%', zIndex: 0, opacity: 0.5 }} />
 
                       {(() => {
-                        const daysInMonth = new Date(data.year, data.month, 0).getDate();
-                        const dailyAmounts = new Array(daysInMonth).fill(0);
+                        let dataPoints: { label: string, amount: number }[] = [];
+                        let isMonthlyAggregation = false;
 
-                        data.cashFlow.forEach(point => {
-                          const day = new Date(point.date).getDate();
-                          if (day >= 1 && day <= daysInMonth) {
-                            dailyAmounts[day - 1] += point.amount;
+                        if (data.startDate && data.endDate) {
+                          const [sY, sM, sD] = data.startDate.split('-').map(Number);
+                          const [eY, eM, eD] = data.endDate.split('-').map(Number);
+                          const start = new Date(sY, sM - 1, sD);
+                          const end = new Date(eY, eM - 1, eD);
+                          const daysInPeriod = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+
+                          if (daysInPeriod > 35) {
+                            isMonthlyAggregation = true;
+                            // Aggregate by Month/Year
+                            const monthlyMap = new Map<string, number>();
+                            data.cashFlow.forEach(point => {
+                              const [pY, pM] = point.date.split('-').map(Number);
+                              const key = `${pY}-${pM}`;
+                              monthlyMap.set(key, (monthlyMap.get(key) || 0) + point.amount);
+                            });
+
+                            // Create sorted list of months in range
+                            let curr = new Date(sY, sM - 1, 1);
+                            while (curr <= end) {
+                              const key = `${curr.getFullYear()}-${curr.getMonth() + 1}`;
+                              dataPoints.push({
+                                label: monthNames[curr.getMonth()],
+                                amount: monthlyMap.get(key) || 0
+                              });
+                              curr.setMonth(curr.getMonth() + 1);
+                            }
+                          } else {
+                            // Daily aggregation for short periods
+                            const dailyMap = new Map<string, number>();
+                            data.cashFlow.forEach(point => dailyMap.set(point.date, (dailyMap.get(point.date) || 0) + point.amount));
+
+                            let curr = new Date(start);
+                            while (curr <= end) {
+                              const dateStr = `${curr.getFullYear()}-${String(curr.getMonth() + 1).padStart(2, '0')}-${String(curr.getDate()).padStart(2, '0')}`;
+                              dataPoints.push({
+                                label: String(curr.getDate()),
+                                amount: dailyMap.get(dateStr) || 0
+                              });
+                              curr.setDate(curr.getDate() + 1);
+                            }
                           }
-                        });
+                        } else if (data.month && data.year) {
+                          // Standard Monthly Report (Daily bars)
+                          const daysInMonth = new Date(data.year, data.month, 0).getDate();
+                          const dailyMap = new Map<number, number>();
+                          data.cashFlow.forEach(point => {
+                            const day = new Date(point.date + 'T12:00:00').getDate();
+                            dailyMap.set(day, (dailyMap.get(day) || 0) + point.amount);
+                          });
 
-                        const maxAbsAmount = Math.max(...dailyAmounts.map(Math.abs), 1);
+                          for (let d = 1; d <= daysInMonth; d++) {
+                            dataPoints.push({
+                              label: String(d).padStart(2, '0'),
+                              amount: dailyMap.get(d) || 0
+                            });
+                          }
+                        }
 
-                        return dailyAmounts.map((amount, i) => {
-                          const heightPct = amount === 0 ? 5 : Math.max(10, (Math.abs(amount) / maxAbsAmount) * 85);
-                          const isIncome = amount >= 0;
-                          const opacity = amount === 0 ? '10' : 'E6';
-                          const borderColor = isIncome ? Colors.primary : Colors.error;
+                        if (dataPoints.length === 0) return null;
+                        const maxAbsAmount = Math.max(...dataPoints.map(p => Math.abs(p.amount)), 1);
+
+                        return dataPoints.map((point, i) => {
+                          const heightPct = point.amount === 0 ? 2 : Math.max(5, (Math.abs(point.amount) / maxAbsAmount) * 85);
+                          const isIncome = point.amount >= 0;
+
+                          // For monthly reports, show 01, 15, and last day
+                          const isSpecialDay = !isMonthlyAggregation && (
+                            point.label === '01' ||
+                            point.label === '15' ||
+                            i === dataPoints.length - 1
+                          );
 
                           return (
-                            <View key={i} className="flex-1 items-center justify-end h-full">
+                            <View key={i} style={{
+                              flex: 1,
+                              minWidth: isMonthlyAggregation ? 20 : 4,
+                              marginHorizontal: 1,
+                              height: '100%',
+                              justifyContent: 'flex-end',
+                              alignItems: 'center'
+                            }}>
                               <View
-                                className="w-full rounded-t-[1px] border-x-[0.5px] border-t-[0.5px]"
                                 style={{
+                                  width: '100%',
                                   height: `${heightPct}%`,
-                                  backgroundColor: amount === 0
-                                    ? `${Colors.onSurfaceVariant}${opacity}`
-                                    : (isIncome ? `${Colors.primary}${opacity}` : `${Colors.error}${opacity}`),
-                                  borderColor: amount === 0 ? 'transparent' : borderColor,
+                                  backgroundColor: point.amount === 0
+                                    ? Colors.outlineVariant
+                                    : (isIncome ? Colors.primary : Colors.error),
+                                  borderRadius: 2,
+                                  opacity: point.amount === 0 ? 0.2 : 0.9,
                                 }}
                               />
+                              {(isMonthlyAggregation || isSpecialDay) && (
+                                <Text
+                                  numberOfLines={1}
+                                  style={{
+                                    fontSize: 8,
+                                    color: Colors.onSurfaceVariant,
+                                    marginTop: 4,
+                                    position: 'absolute',
+                                    bottom: -16,
+                                    width: 30,
+                                    textAlign: 'center'
+                                  }}
+                                >
+                                  {isMonthlyAggregation ? point.label.substring(0, 3) : point.label}
+                                </Text>
+                              )}
                             </View>
                           );
                         });
                       })()}
                     </View>
 
-                    {/* X-Axis (Days) */}
-                    <View className="flex-row justify-between mt-2 border-t border-outline-variant/20 pt-1">
-                      <Text className="text-[9px] text-on-surface-variant font-medium">Dia 01</Text>
-                      <Text className="text-[9px] text-on-surface-variant font-medium">Dia 15</Text>
-                      <Text className="text-[9px] text-on-surface-variant font-medium">Dia {new Date(data.year, data.month, 0).getDate()}</Text>
-                    </View>
+                    {/* X-Axis Labels (Removed spacer as labels are now absolute positioned) */}
+                    <View style={{ marginTop: 16 }} />
                   </View>
                 </View>
               </View>

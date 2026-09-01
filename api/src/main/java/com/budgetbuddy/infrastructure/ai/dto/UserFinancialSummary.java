@@ -15,6 +15,8 @@ import java.util.Map;
 @AllArgsConstructor
 public class UserFinancialSummary {
     private String userName;
+    private String startDate;
+    private String endDate;
     private BigDecimal monthlyIncome;
     private BigDecimal monthlyExpense;
     private BigDecimal savingsRate;

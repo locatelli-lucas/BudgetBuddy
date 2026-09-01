@@ -21,9 +21,24 @@ public class PdfReportGenerator {
 
     private final ReportService reportService;
 
-    public byte[] generateMonthlyPdfReport(String email, int month, int year) {
+    public byte[] generateMonthlyPdfReport(String email, int month, int year, 
+                                          boolean includeCharts, boolean includeAi, 
+                                          boolean includeCategories, boolean includeComparison) {
         MonthlyReportResponse reportData = reportService.getMonthlyReport(email, month, year);
-        String htmlContent = buildHtmlForPdf(reportData);
+        return generatePdfFromData(reportData, includeCharts, includeAi, includeCategories, includeComparison);
+    }
+
+    public byte[] generateCustomPdfReport(String email, LocalDate start, LocalDate end,
+                                         boolean includeCharts, boolean includeAi,
+                                         boolean includeCategories, boolean includeComparison) {
+        MonthlyReportResponse reportData = reportService.getReportForPeriod(email, start, end, null, null);
+        return generatePdfFromData(reportData, includeCharts, includeAi, includeCategories, includeComparison);
+    }
+
+    private byte[] generatePdfFromData(MonthlyReportResponse reportData, 
+                                      boolean includeCharts, boolean includeAi, 
+                                      boolean includeCategories, boolean includeComparison) {
+        String htmlContent = buildHtmlForPdf(reportData, includeCharts, includeAi, includeCategories, includeComparison);
         
         try (ByteArrayOutputStream target = new ByteArrayOutputStream()) {
             HtmlConverter.convertToPdf(htmlContent, target);
@@ -34,7 +49,9 @@ public class PdfReportGenerator {
         }
     }
 
-    private String buildHtmlForPdf(MonthlyReportResponse data) {
+    private String buildHtmlForPdf(MonthlyReportResponse data, 
+                                   boolean includeCharts, boolean includeAi, 
+                                   boolean includeCategories, boolean includeComparison) {
         StringBuilder html = new StringBuilder();
         html.append("<!DOCTYPE html><html><head>");
         html.append("<meta charset='UTF-8'>");
@@ -44,18 +61,27 @@ public class PdfReportGenerator {
         int pageNum = 1;
 
         // --- PAGE 1: EXECUTIVE SUMMARY ---
-        ReportComponents.startPage(html, "Sumário Executivo", getMonthName(data.getMonth()) + " " + data.getYear());
+        String periodLabel = data.getMonth() != null 
+            ? getMonthName(data.getMonth()) + " " + data.getYear()
+            : data.getStartDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) + " - " + 
+              data.getEndDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+              
+        ReportComponents.startPage(html, "Sumário Executivo", periodLabel);
         
-        // Main Metrics
+        // Main Metrics — extract comparison values safely to avoid NPE
+        BigDecimal incomeVariation = (includeComparison && data.getComparison() != null) ? data.getComparison().getIncomeVariation() : null;
+        BigDecimal expenseVariation = (includeComparison && data.getComparison() != null) ? data.getComparison().getExpenseVariation() : null;
+        BigDecimal savingsRateVariation = (includeComparison && data.getComparison() != null) ? data.getComparison().getSavingsRateVariation() : null;
+
         html.append("<div style='display: flex; gap: 20pt; margin-bottom: 30pt; border-bottom: 1px solid ").append(PdfTheme.COLOR_BORDER).append("; padding-bottom: 20pt;'>");
-        ReportComponents.appendMetric(html, "Receita Total", data.getSummary().getTotalIncome(), data.getComparison().getIncomeVariation(), true);
-        ReportComponents.appendMetric(html, "Despesa Total", data.getSummary().getTotalExpense(), data.getComparison().getExpenseVariation(), false);
+        ReportComponents.appendMetric(html, "Receita Total", data.getSummary().getTotalIncome(), incomeVariation, true);
+        ReportComponents.appendMetric(html, "Despesa Total", data.getSummary().getTotalExpense(), expenseVariation, false);
         ReportComponents.appendMetric(html, "Resultado Líquido", data.getSummary().getNetSavings(), null, true);
-        ReportComponents.appendMetric(html, "Taxa de Economia", data.getSummary().getSavingsRate(), data.getComparison().getSavingsRateVariation(), true);
+        ReportComponents.appendMetric(html, "Taxa de Economia", data.getSummary().getSavingsRate(), savingsRateVariation, true);
         html.append("</div>");
 
         // AI Insights
-        if (data.getAiAnalysis() != null) {
+        if (includeAi && data.getAiAnalysis() != null) {
             html.append("<div class='card bg-light'>");
             html.append("<h3 class='text-accent' style='margin-top: 0;'>Análise do Consultor AI</h3>");
             html.append("<p style='font-size: 11pt; margin-bottom: 20pt;'>").append(data.getAiAnalysis().getExecutiveSummary()).append("</p>");
@@ -74,43 +100,54 @@ public class PdfReportGenerator {
         }
 
         // Strengths & Attention Points
-        html.append("<div style='display: flex; gap: 20pt; margin-top: 20pt;'>");
-        html.append("<div style='flex: 1;'><h3>Pontos Fortes</h3><ul>");
-        for (String s : data.getAiAnalysis().getStrengths()) html.append("<li style='margin-bottom: 5pt;'>").append(s).append("</li>");
-        html.append("</ul></div>");
-        html.append("<div style='flex: 1;'><h3>Pontos de Atenção</h3><ul>");
-        for (String a : data.getAiAnalysis().getAttentionPoints()) html.append("<li style='margin-bottom: 5pt;'>").append(a).append("</li>");
-        html.append("</ul></div>");
-        html.append("</div>");
+        if (includeAi && data.getAiAnalysis() != null) {
+            html.append("<div style='display: flex; gap: 20pt; margin-top: 20pt;'>");
+            html.append("<div style='flex: 1;'><h3>Pontos Fortes</h3><ul>");
+            for (String s : data.getAiAnalysis().getStrengths()) html.append("<li style='margin-bottom: 5pt;'>").append(s).append("</li>");
+            html.append("</ul></div>");
+            html.append("<div style='flex: 1;'><h3>Pontos de Atenção</h3><ul>");
+            for (String a : data.getAiAnalysis().getAttentionPoints()) html.append("<li style='margin-bottom: 5pt;'>").append(a).append("</li>");
+            html.append("</ul></div>");
+            html.append("</div>");
+        }
 
         ReportComponents.endPage(html, pageNum++);
 
         // --- PAGE 2: CASH FLOW & CATEGORIES ---
-        ReportComponents.startPage(html, "Fluxo de Caixa & Despesas", null);
-        
-        html.append("<h2>Distribuição por Categoria</h2>");
-        html.append("<div style='display: flex; gap: 40pt;'>");
-        
-        // Left column: Progress bars
-        html.append("<div style='flex: 1.5;'>");
-        for (MonthlyReportResponse.CategoryBreakdown cat : data.getCategories().stream().limit(10).toList()) {
-            ReportComponents.appendProgressBar(html, cat.getName(), cat.getPercentage(), 
-                cat.getColor() != null ? cat.getColor() : PdfTheme.COLOR_ACCENT, 
-                ReportComponents.formatCurrency(cat.getAmount()) + " (" + cat.getPercentage() + "%)");
-        }
-        html.append("</div>");
-        
-        // Right column: Table
-        html.append("<div style='flex: 1;'>");
-        html.append("<table><thead><tr><th>Categoria</th><th style='text-align: right;'>Valor</th></tr></thead><tbody>");
-        for (MonthlyReportResponse.CategoryBreakdown cat : data.getCategories().stream().limit(10).toList()) {
-            html.append("<tr><td>").append(cat.getName()).append("</td><td style='text-align: right;'>")
-                .append(ReportComponents.formatCurrency(cat.getAmount())).append("</td></tr>");
-        }
-        html.append("</tbody></table>");
-        html.append("</div></div>");
+        if (includeCharts || includeCategories) {
+            ReportComponents.startPage(html, "Fluxo de Caixa & Despesas", null);
 
-        ReportComponents.endPage(html, pageNum++);
+            // Daily Cash Flow Chart
+            if (includeCharts) {
+                ReportComponents.appendDailyCashFlowChart(html, data.getCashFlow(), data.getMonth(), data.getYear());
+            }
+            
+            if (includeCategories) {
+                html.append("<h2 style='margin-top: 30pt;'>Distribuição por Categoria</h2>");
+                html.append("<div style='display: flex; gap: 40pt;'>");
+                
+                // Left column: Progress bars
+                html.append("<div style='flex: 1.5;'>");
+                for (MonthlyReportResponse.CategoryBreakdown cat : data.getCategories().stream().limit(10).toList()) {
+                    ReportComponents.appendProgressBar(html, cat.getName(), cat.getPercentage(), 
+                        cat.getColor() != null ? cat.getColor() : PdfTheme.COLOR_ACCENT, 
+                        ReportComponents.formatCurrency(cat.getAmount()) + " (" + cat.getPercentage() + "%)");
+                }
+                html.append("</div>");
+                
+                // Right column: Table
+                html.append("<div style='flex: 1;'>");
+                html.append("<table><thead><tr><th>Categoria</th><th style='text-align: right;'>Valor</th></tr></thead><tbody>");
+                for (MonthlyReportResponse.CategoryBreakdown cat : data.getCategories().stream().limit(10).toList()) {
+                    html.append("<tr><td>").append(cat.getName()).append("</td><td style='text-align: right;'>")
+                        .append(ReportComponents.formatCurrency(cat.getAmount())).append("</td></tr>");
+                }
+                html.append("</tbody></table>");
+                html.append("</div></div>");
+            }
+
+            ReportComponents.endPage(html, pageNum++);
+        }
 
         // --- PAGE 3: INSTITUTIONS & ACCOUNTS ---
         if (data.getInstitutions() != null && !data.getInstitutions().isEmpty()) {
@@ -206,23 +243,27 @@ public class PdfReportGenerator {
         }
 
         // --- PAGE 6: HISTORICAL OUTLOOK ---
-        if (data.getHistoricalOutlook() != null && !data.getHistoricalOutlook().isEmpty()) {
+        // Only render this page if the user requested comparison data or AI recommendations
+        boolean hasHistoricalContent = includeComparison || includeAi;
+        if (hasHistoricalContent && data.getHistoricalOutlook() != null && !data.getHistoricalOutlook().isEmpty()) {
             ReportComponents.startPage(html, "Perspectiva Histórica", "Últimos 6 meses");
-            
-            html.append("<h2>Evolução Mensal</h2>");
-            html.append("<table><thead><tr><th>Mês</th><th>Receita</th><th>Despesa</th><th style='text-align: right;'>Taxa Econ.</th></tr></thead><tbody>");
-            for (MonthlyReportResponse.HistoricalOutlookPoint point : data.getHistoricalOutlook()) {
-                html.append("<tr>")
-                    .append("<td>").append(point.getLabel()).append("</td>")
-                    .append("<td>").append(ReportComponents.formatCurrency(point.getIncome())).append("</td>")
-                    .append("<td>").append(ReportComponents.formatCurrency(point.getExpense())).append("</td>")
-                    .append("<td style='text-align: right;'>").append(point.getSavingsRate()).append("%</td>")
-                    .append("</tr>");
+
+            if (includeComparison) {
+                html.append("<h2>Evolução Mensal</h2>");
+                html.append("<table><thead><tr><th>Mês</th><th>Receita</th><th>Despesa</th><th style='text-align: right;'>Taxa Econ.</th></tr></thead><tbody>");
+                for (MonthlyReportResponse.HistoricalOutlookPoint point : data.getHistoricalOutlook()) {
+                    html.append("<tr>")
+                        .append("<td>").append(point.getLabel()).append("</td>")
+                        .append("<td>").append(ReportComponents.formatCurrency(point.getIncome())).append("</td>")
+                        .append("<td>").append(ReportComponents.formatCurrency(point.getExpense())).append("</td>")
+                        .append("<td style='text-align: right;'>").append(point.getSavingsRate()).append("%</td>")
+                        .append("</tr>");
+                }
+                html.append("</tbody></table>");
             }
-            html.append("</tbody></table>");
 
             // Recommendations
-            if (data.getAiAnalysis() != null && data.getAiAnalysis().getRecommendations() != null) {
+            if (includeAi && data.getAiAnalysis() != null && data.getAiAnalysis().getRecommendations() != null) {
                 html.append("<div class='card' style='margin-top: 30pt;'>");
                 html.append("<h3 class='text-accent'>Recomendações Práticas</h3>");
                 html.append("<ul style='padding-left: 20pt;'>");
@@ -232,7 +273,7 @@ public class PdfReportGenerator {
                 html.append("</ul>");
                 html.append("</div>");
             }
-            
+
             ReportComponents.endPage(html, pageNum++);
         }
 

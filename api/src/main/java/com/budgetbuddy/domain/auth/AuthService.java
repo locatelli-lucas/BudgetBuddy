@@ -43,7 +43,7 @@ public class AuthService {
     private final TwoFactorService twoFactorService;
     private final GoogleAuthService googleAuthService;
 
-    @Value("${jwt.refresh-expiry-ms}")
+    @Value("${jwt.refresh-expiry-ms:2592000000}")
     private long refreshTokenDurationMs;
 
     // Temporary storage for 2FA tokens. In production, use Redis.

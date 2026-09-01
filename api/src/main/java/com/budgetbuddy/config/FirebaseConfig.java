@@ -17,10 +17,10 @@ import java.io.IOException;
 @Configuration
 public class FirebaseConfig {
 
-    @Value("${firebase.credentials-path}")
+    @Value("${firebase.credentials-path:firebase-credentials.json}")
     private String credentialsPath;
 
-    @Value("${firebase.project-id}")
+    @Value("${firebase.project-id:budgetbuddy-app}")
     private String projectId;
 
     @Bean

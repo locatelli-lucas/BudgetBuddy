@@ -96,4 +96,11 @@ public class TransactionController {
         return ResponseEntity.ok(ApiResponse.success(
                 transactionService.getMonthlySummary(userDetails.getUsername(), targetMonth, targetYear)));
     }
+
+    @GetMapping("/flow")
+    public ResponseEntity<ApiResponse<List<com.budgetbuddy.domain.transaction.dto.MonthlyFlowResponse>>> getMonthlyFlow(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam(defaultValue = "6") int months) {
+        return ResponseEntity.ok(ApiResponse.success(transactionService.getMonthlyFlow(userDetails.getUsername(), months)));
+    }
 }

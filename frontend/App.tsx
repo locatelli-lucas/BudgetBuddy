@@ -8,10 +8,21 @@ import { RootNavigator } from './src/navigation/RootNavigator';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useTheme } from './src/contexts/ThemeContext';
 import { Colors } from './src/constants/colors';
+import { usePushNotifications } from './src/hooks/usePushNotifications';
 
 function ThemedStatusBar() {
   const { theme } = useTheme();
   return <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />;
+}
+
+function AppContent() {
+  usePushNotifications();
+  return (
+    <>
+      <ThemedStatusBar />
+      <RootNavigator />
+    </>
+  );
 }
 
 export default function App() {
@@ -21,8 +32,7 @@ export default function App() {
         <ThemeProvider>
           <ErrorToastProvider>
             <AuthProvider>
-              <ThemedStatusBar />
-              <RootNavigator />
+              <AppContent />
             </AuthProvider>
           </ErrorToastProvider>
         </ThemeProvider>

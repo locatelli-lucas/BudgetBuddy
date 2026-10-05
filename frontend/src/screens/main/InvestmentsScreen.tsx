@@ -95,28 +95,57 @@ export function InvestmentsScreen({ navigation }: any) {
     setRefreshing(false);
   }, [loadData]);
 
-  // Build chart data from real performance points
-  const chartData = React.useMemo(() => {
-    if (performance.length === 0) return [{ value: 0, label: '' }];
+  // Calculate stats for selected period
+  const periodStats = React.useMemo(() => {
+    if (performance.length < 2) return { diff: 0, percent: 0, isPositive: true };
+    const startVal = performance[0].value;
+    const endVal = performance[performance.length - 1].value;
+    const diff = endVal - startVal;
+    const percent = startVal > 0 ? (diff / startVal) * 100 : 0;
+    return { diff, percent, isPositive: diff >= 0 };
+  }, [performance]);
 
-    const points = performance.map((p) => {
-      const [, m, d] = p.date.split('-');
+  // Calculate chart scaling limits
+  const { yAxisOffset } = React.useMemo(() => {
+    if (performance.length === 0) return { minVal: 0, maxVal: 0, yAxisOffset: 0 };
+    const vals = performance.map((p) => p.value);
+    const min = Math.min(...vals);
+    const max = Math.max(...vals);
+    const range = max - min;
+    const padding = range === 0 ? (min > 0 ? min * 0.05 : 100) : range * 0.15;
+    return {
+      minVal: min,
+      maxVal: max,
+      yAxisOffset: Math.max(0, min - padding),
+    };
+  }, [performance]);
+
+  // Build chart data from real performance points with selective labels
+  const chartData = React.useMemo(() => {
+    if (performance.length === 0) return [];
+
+    const count = performance.length;
+    const step = Math.max(1, Math.floor(count / 4));
+
+    return performance.map((p, idx) => {
+      const parts = p.date ? p.date.split('-') : [];
+      const dateStr = parts.length >= 3 ? `${parts[2]}/${parts[1]}` : p.date;
+      const isFirst = idx === 0;
+      const isLast = idx === count - 1;
+      const isMid = idx % step === 0 && !isFirst && !isLast;
+      const showLabel = isFirst || isLast || isMid;
+
       return {
         value: p.value,
-        label: `${d}/${m}`,
+        label: showLabel ? dateStr : '',
+        labelTextStyle: { color: Colors.onSurfaceVariant, fontSize: 10 },
+        date: dateStr,
+        fullDate: p.date,
       };
     });
-
-    // If only one point exists (e.g., first day), duplicate it to show a flat line
-    if (points.length === 1) {
-      return [
-        { value: points[0].value, label: '' },
-        { ...points[0] }
-      ];
-    }
-
-    return points;
   }, [performance]);
+
+  const lineColor = periodStats.isPositive ? '#4ade80' : '#f87171';
 
   return (
     <View className="flex-1 bg-background" style={{ flex: 1, backgroundColor: Colors.background }}>
@@ -160,6 +189,16 @@ export function InvestmentsScreen({ navigation }: any) {
             >
               <MaterialIcons name="newspaper" size={20} color={Colors.onSurface} />
               <Text className="text-body-md text-on-surface">Notícias do Mercado</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              className="flex-row items-center gap-3 px-4 py-3 border-b border-outline-variant/20"
+              onPress={() => {
+                setMenuVisible(false);
+                navigation.navigate('PriceAlerts', { symbol: '' });
+              }}
+            >
+              <MaterialIcons name="notifications-active" size={20} color={Colors.onSurface} />
+              <Text className="text-body-md text-on-surface">Alertas de Preço</Text>
             </TouchableOpacity>
             <TouchableOpacity
               className="flex-row items-center gap-3 px-4 py-3"
@@ -254,7 +293,28 @@ export function InvestmentsScreen({ navigation }: any) {
               ))}
             </View>
 
-            <View className="bg-[#1E293B] rounded-xl p-4 items-center">
+            <View className="bg-[#1E293B] rounded-xl p-4">
+              {performance.length > 0 && (
+                <View className="flex-row justify-between items-center mb-3 px-1">
+                  <View>
+                    <Text className="text-label-sm text-on-surface-variant font-medium">
+                      Variação no período ({PERIOD_LABELS[selectedPeriod]})
+                    </Text>
+                    <View className="flex-row items-center gap-1 mt-0.5">
+                      <MaterialIcons
+                        name={periodStats.isPositive ? 'trending-up' : 'trending-down'}
+                        size={18}
+                        color={lineColor}
+                      />
+                      <Text className="text-body-md font-bold" style={{ color: lineColor }}>
+                        {formatMoney(periodStats.diff)} ({periodStats.isPositive ? '+' : ''}
+                        {periodStats.percent.toFixed(2)}%)
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+              )}
+
               {performance.length === 0 ? (
                 <View className="py-8 items-center">
                   <MaterialIcons name="show-chart" size={40} color={Colors.outline} />
@@ -266,21 +326,59 @@ export function InvestmentsScreen({ navigation }: any) {
                   </Text>
                 </View>
               ) : (
-                <LineChart
-                  data={chartData}
-                  width={280}
-                  height={120}
-                  thickness={3}
-                  color={Colors.primary}
-                  hideDataPoints
-                  hideYAxisText
-                  hideRules
-                  hideAxesAndRules
-                  initialSpacing={20}
-                  endSpacing={20}
-                  curved
-                  xAxisLabelTextStyle={{ color: Colors.onSurfaceVariant, fontSize: 10 }}
-                />
+                <View className="items-center">
+                  <LineChart
+                    areaChart
+                    data={chartData}
+                    width={280}
+                    height={130}
+                    thickness={2.5}
+                    color={lineColor}
+                    startFillColor={lineColor}
+                    endFillColor={lineColor}
+                    startOpacity={0.25}
+                    endOpacity={0.01}
+                    hideDataPoints
+                    hideYAxisText
+                    hideRules
+                    hideAxesAndRules
+                    yAxisOffset={yAxisOffset}
+                    initialSpacing={10}
+                    endSpacing={10}
+                    curved
+                    xAxisLabelTextStyle={{ color: Colors.onSurfaceVariant, fontSize: 10 }}
+                    pointerConfig={{
+                      pointerStripHeight: 130,
+                      pointerStripColor: 'rgba(255, 255, 255, 0.25)',
+                      pointerStripWidth: 2,
+                      pointerColor: lineColor,
+                      radius: 5,
+                      pointerLabelComponent: (items: any) => {
+                        const item = items[0];
+                        if (!item) return null;
+                        return (
+                          <View style={{
+                            backgroundColor: '#0F172A',
+                            paddingHorizontal: 8,
+                            paddingVertical: 4,
+                            borderRadius: 6,
+                            borderWidth: 1,
+                            borderColor: 'rgba(255,255,255,0.15)',
+                            marginLeft: -35,
+                            marginTop: -25,
+                          }}>
+                            <Text style={{ color: Colors.onSurfaceVariant, fontSize: 10, fontWeight: '600' }}>
+                              {item.fullDate || item.date}
+                            </Text>
+                            <Text style={{ color: lineColor, fontSize: 11, fontWeight: '700' }}>
+                              {formatMoney(item.value)}
+                            </Text>
+                          </View>
+                        );
+                      },
+                    }}
+                  />
+                </View>
               )}
             </View>
           </View>
@@ -310,7 +408,7 @@ export function InvestmentsScreen({ navigation }: any) {
                   <TouchableOpacity
                     key={inv.id}
                     className="bg-[#1E293B] rounded-xl p-4 border border-outline-variant/10 flex-col gap-3 mb-3"
-                    onPress={() => navigation.navigate('AddAsset', { investmentId: inv.id, asset: inv })}
+                    onPress={() => navigation.navigate('AssetDetails', { assetId: inv.id })}
                   >
                     <View className="flex-row justify-between items-center">
                       <View className="flex-row items-center gap-3">

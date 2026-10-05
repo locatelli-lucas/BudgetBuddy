@@ -50,7 +50,7 @@ export const newsService = {
   },
 
   getAssetSummary: async (symbol: string): Promise<NewsAiSummary> => {
-    const response = await api.post<ApiResponse<NewsAiSummary>>(`/api/v1/news/asset/${symbol}/summary`);
+    const response = await api.get<ApiResponse<NewsAiSummary>>(`/api/v1/news/asset/${symbol}/summary`);
     return response.data.data;
   },
 
@@ -68,7 +68,7 @@ export const newsService = {
   },
 
   getAssetOverview: async (symbol: string): Promise<AssetNewsOverview> => {
-    const response = await api.post<ApiResponse<AssetNewsOverview>>(`/api/v1/news/asset/${symbol}/overview`);
+    const response = await api.get<ApiResponse<AssetNewsOverview>>(`/api/v1/news/asset/${symbol}/overview`);
     return response.data.data;
   },
 };

@@ -29,5 +29,12 @@ export const financialResourceService = {
 
   delete: async (id: string) => {
     await api.delete(`/api/v1/financial-resources/${id}`);
+  },
+
+  getInvoice: async (id: string, month?: number, year?: number) => {
+    const { data } = await api.get(`/api/v1/financial-resources/${id}/invoice`, {
+      params: { month, year }
+    });
+    return data.data;
   }
 };

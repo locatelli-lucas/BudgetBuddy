@@ -30,6 +30,7 @@ import { InvestmentOptionsScreen } from '../screens/main/investments/InvestmentO
 import { AssetNewsScreen } from '../screens/main/investments/AssetNewsScreen';
 import { NewsDetailsScreen } from '../screens/main/investments/NewsDetailsScreen';
 import { PriceAlertsScreen } from '../screens/main/investments/PriceAlertsScreen';
+import { AssetDetailsScreen } from '../screens/main/investments/AssetDetailsScreen';
 
 // Profile sub-screens
 import { PersonalDataScreen } from '../screens/profile/PersonalDataScreen';
@@ -53,6 +54,9 @@ import { CustomDateScreen } from '../screens/report/CustomDateScreen';
 import { FinancialResourceFormScreen } from '../screens/main/payment-methods/FinancialResourceFormScreen';
 import { InstallmentPurchaseDetailScreen } from '../screens/main/installments/InstallmentPurchaseDetailScreen';
 import { FinancialAccountsScreen } from '../screens/main/financial-accounts/FinancialAccountsScreen';
+import { CreditCardInvoiceScreen } from '../screens/main/cards/CreditCardInvoiceScreen';
+import { GoalsScreen } from '../screens/main/goals/GoalsScreen';
+import { GoalFormScreen } from '../screens/main/goals/GoalFormScreen';
 
 import { Colors } from '../constants/colors';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -158,6 +162,7 @@ export function MainNavigator() {
       <Stack.Screen name="AssetNews" component={AssetNewsScreen} />
       <Stack.Screen name="NewsDetails" component={NewsDetailsScreen} />
       <Stack.Screen name="PriceAlerts" component={PriceAlertsScreen} />
+      <Stack.Screen name="AssetDetails" component={AssetDetailsScreen} />
 
       {/* Profile */}
       <Stack.Screen name="PersonalData" component={PersonalDataScreen} />
@@ -178,6 +183,9 @@ export function MainNavigator() {
       <Stack.Screen name="FinancialResourceForm" component={FinancialResourceFormScreen} />
       <Stack.Screen name="InstallmentPurchaseDetail" component={InstallmentPurchaseDetailScreen} />
       <Stack.Screen name="FinancialAccounts" component={FinancialAccountsScreen} />
+      <Stack.Screen name="CreditCardInvoice" component={CreditCardInvoiceScreen} />
+      <Stack.Screen name="Goals" component={GoalsScreen} />
+      <Stack.Screen name="GoalForm" component={GoalFormScreen} />
     </Stack.Navigator>
   );
 }

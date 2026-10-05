@@ -12,7 +12,7 @@ import { ExportReportSheet } from './ExportReportSheet';
 import { useAuth } from '../../contexts/AuthContext';
 import { transactionService } from '../../services/transaction.service';
 import { budgetService } from '../../services/budget.service';
-import { Transaction, TransactionSummary } from '../../types/transaction';
+import { Transaction, TransactionSummary, MonthlyFlow } from '../../types/transaction';
 import { BudgetStatusResponse } from '../../types/budget';
 import { getErrorMessage, isNetworkError } from '../../utils/errors';
 import { useErrorToast } from '../../contexts/ErrorToastContext';
@@ -23,6 +23,8 @@ import { Notification } from '../../types/notification';
 import { financialResourceService } from '../../services/financialResourceService';
 import { FinancialResource } from '../../types/financialResource';
 import { AccountsAndCardsWidget } from '../../components/dashboard/AccountsAndCardsWidget';
+import { goalService } from '../../services/goal.service';
+import { Goal } from '../../types/goal';
 
 export function DashboardScreen({ navigation, route }: any) {
   const insets = useSafeAreaInsets();
@@ -50,17 +52,21 @@ export function DashboardScreen({ navigation, route }: any) {
   const [recentNotifications, setRecentNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [financialResources, setFinancialResources] = useState<FinancialResource[]>([]);
+  const [recentGoals, setRecentGoals] = useState<Goal[]>([]);
+  const [monthlyFlow, setMonthlyFlow] = useState<MonthlyFlow[]>([]);
 
   const loadDashboardData = useCallback(async () => {
     try {
       setError(null);
-      const [summaryData, recentData, budgetData, notificationsData, count, pmData] = await Promise.all([
+      const [summaryData, recentData, budgetData, notificationsData, count, pmData, goalsData, flowData] = await Promise.all([
         transactionService.getSummary(),
         transactionService.getRecentTransactions(5),
         budgetService.getBudgetStatus(),
         notificationService.getNotifications(undefined, false, 0, 3),
         notificationService.getUnreadCount(),
         financialResourceService.getAll(),
+        goalService.getGoals(),
+        transactionService.getMonthlyFlow(12),
       ]);
       setSummary(summaryData);
       setRecentTransactions(recentData);
@@ -68,6 +74,8 @@ export function DashboardScreen({ navigation, route }: any) {
       setRecentNotifications(notificationsData.content);
       setUnreadCount(count);
       setFinancialResources(pmData);
+      setRecentGoals(goalsData.slice(0, 2));
+      setMonthlyFlow(flowData);
     } catch (err) {
       const msg = getErrorMessage(err, 'Falha ao carregar dados do dashboard.');
       setError(msg);
@@ -99,15 +107,22 @@ export function DashboardScreen({ navigation, route }: any) {
     setRefreshing(false);
   }, [loadDashboardData]);
 
-  // Chart data — income vs expense for current month
-  const monthLabels = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'];
-  const barData = monthLabels.map((label, i) => ({
-    value: i === new Date().getMonth() ? (summary?.totalExpense || 0) : 0,
-    label,
+  // Build chart data from monthly flow (strict Jan to Dec calendar year)
+  const monthNames = ['jan.', 'fev.', 'mar.', 'abr.', 'mai.', 'jun.', 'jul.', 'ago.', 'set.', 'out.', 'nov.', 'dez.'];
+  const fullFlow = monthNames.map((mName) => {
+    const existing = monthlyFlow?.find(
+      (item) => item.month.toLowerCase().replace('.', '') === mName.toLowerCase().replace('.', '')
+    );
+    return existing || { month: mName, income: 0, expense: 0 };
+  });
+
+  const barData = fullFlow.map((item) => ({
+    value: item.expense,
+    label: item.month,
   }));
-  const lineChartData = monthLabels.map((label, i) => ({
-    value: i === new Date().getMonth() ? (summary?.totalIncome || 0) : 0,
-    label,
+  const lineChartData = fullFlow.map((item) => ({
+    value: item.income,
+    label: item.month,
   }));
 
   if (loading) {
@@ -340,22 +355,74 @@ export function DashboardScreen({ navigation, route }: any) {
           <MaterialIcons name="chevron-right" size={24} color={Colors.primary} />
         </TouchableOpacity>
 
+        {/* Financial Goals Widget */}
+        <View className="mb-8">
+          <View className="flex-row justify-between items-end mb-4">
+            <Text className="text-headline-md font-semibold text-on-surface">Minhas Metas</Text>
+            <TouchableOpacity onPress={() => navigation.navigate('Goals')}>
+              <Text className="text-label-md text-primary">Ver todas</Text>
+            </TouchableOpacity>
+          </View>
+          <View className="bg-surface-variant rounded-xl p-4 shadow-sm">
+            {recentGoals.length === 0 ? (
+              <TouchableOpacity
+                className="items-center py-4"
+                onPress={() => navigation.navigate('GoalForm')}
+              >
+                <MaterialIcons name="flag" size={32} color={Colors.outline} />
+                <Text className="text-on-surface-variant text-label-md mt-2">Nenhuma meta. Vamos criar uma?</Text>
+              </TouchableOpacity>
+            ) : (
+              recentGoals.map((g) => (
+                <TouchableOpacity
+                  key={g.id}
+                  className="mb-4 last:mb-0"
+                  onPress={() => navigation.navigate('Goals')}
+                >
+                  <View className="flex-row justify-between items-center mb-2">
+                    <View className="flex-row items-center gap-2">
+                      <MaterialIcons name={(g.icon || 'star') as any} size={16} color={g.color || Colors.primary} />
+                      <Text className="text-body-sm font-semibold text-on-surface">{g.name}</Text>
+                    </View>
+                    <Text className="text-[10px] font-bold text-on-surface-variant">{g.progressPercent.toFixed(0)}%</Text>
+                  </View>
+                  <View className="h-1.5 bg-surface-container rounded-full overflow-hidden">
+                    <View
+                      className="h-full rounded-full"
+                      style={{ width: `${Math.min(g.progressPercent, 100)}%`, backgroundColor: g.color || Colors.primary }}
+                    />
+                  </View>
+                </TouchableOpacity>
+              ))
+            )}
+          </View>
+        </View>
+
         {/* Charts Section */}
         <View className="mb-8 rounded-xl p-5 shadow-sm" style={{ backgroundColor: 'rgb(50, 52, 61)' }}>
           <Text className="text-label-md text-on-surface-variant mb-4">Fluxo Mensal</Text>
           <View className="items-center">
             <BarChart
-              data={barData.map((d) => ({ ...d, frontColor: Colors.primary + '60' }))}
+              data={barData.map((d) => ({ ...d, frontColor: Colors.primary + '80' }))}
               lineData={lineChartData.map((d) => ({ ...d, dataPointColor: '#4ade80' }))}
-              width={250}
-              height={120}
-              barWidth={18}
-              spacing={20}
-              initialSpacing={10}
-              hideYAxisText
-              hideRules
-              hideAxesAndRules
-              xAxisLabelTextStyle={{ color: Colors.onSurfaceVariant, fontSize: 10 }}
+              width={260}
+              height={130}
+              barWidth={10}
+              spacing={10}
+              initialSpacing={8}
+              noOfSections={4}
+              yAxisTextStyle={{ color: Colors.onSurfaceVariant, fontSize: 9 }}
+              yAxisColor={Colors.onSurfaceVariant + '40'}
+              xAxisColor={Colors.onSurfaceVariant + '40'}
+              rulesColor={Colors.onSurfaceVariant + '15'}
+              rulesType="solid"
+              formatYLabel={(val) => {
+                const num = Number(val);
+                if (isNaN(num) || num === 0) return '0';
+                if (num >= 1000) return `${(num / 1000).toFixed(num % 1000 === 0 ? 0 : 1)}k`;
+                return `${num}`;
+              }}
+              xAxisLabelTextStyle={{ color: Colors.onSurfaceVariant, fontSize: 8 }}
               lineBehindBars={false}
               lineConfig={{
                 color: '#4ade80',

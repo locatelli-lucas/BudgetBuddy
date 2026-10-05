@@ -150,6 +150,7 @@ export function FinancialAccountsScreen({ navigation }: any) {
                   isExpanded={expanded[inst.institutionName]}
                   onToggle={() => toggleExpand(inst.institutionName)}
                   onPressPM={(pm) => navigation.navigate('FinancialResourceForm', { item: pm })}
+                  navigation={navigation}
                 />
               ))
             )}
@@ -194,7 +195,7 @@ function FilterChip({ label, active, onPress }: any) {
   );
 }
 
-function InstitutionCard({ inst, isExpanded, onToggle, onPressPM }: { inst: FinancialInstitutionGroup, isExpanded: boolean, onToggle: () => void, onPressPM: (pm: FinancialResource) => void }) {
+function InstitutionCard({ inst, isExpanded, onToggle, onPressPM, navigation }: { inst: FinancialInstitutionGroup, isExpanded: boolean, onToggle: () => void, onPressPM: (pm: FinancialResource) => void, navigation: any }) {
   return (
     <View className="bg-surface-variant rounded-3xl overflow-hidden border border-outline-variant/20 shadow-sm">
       <TouchableOpacity
@@ -224,26 +225,36 @@ function InstitutionCard({ inst, isExpanded, onToggle, onPressPM }: { inst: Fina
               onPress={() => onPressPM(pm)}
               className="flex-row items-center justify-between bg-surface-container/50 p-4 rounded-2xl border border-outline-variant/10"
             >
-              <View className="flex-row items-center gap-3">
+              <View className="flex-row items-center gap-3 flex-1 mr-2">
                  <MaterialIcons
                     name={pm.type === 'CREDIT_CARD' ? 'credit-card' : 'account-balance'}
                     size={20}
                     color={pm.type === 'CREDIT_CARD' ? Colors.primary : Colors.onSurfaceVariant}
                  />
-                 <View>
-                    <Text className="text-body-md font-semibold text-on-surface">{pm.name}</Text>
+                 <View className="flex-1">
+                    <Text className="text-body-md font-semibold text-on-surface" numberOfLines={1}>{pm.name}</Text>
                     <Text className="text-[10px] text-on-surface-variant uppercase font-bold tracking-widest">{pm.type.replace('_', ' ')}</Text>
                  </View>
               </View>
-              <View className="items-end">
-                 {pm.type === 'CREDIT_CARD' ? (
-                   <>
-                     <Text className="text-body-md font-bold text-primary">{formatCurrency(pm.creditLimit || 0)}</Text>
-                     <Text className="text-[9px] text-on-surface-variant uppercase font-bold">Limite</Text>
-                   </>
-                 ) : (
-                   <Text className="text-body-md font-bold text-on-surface">{formatCurrency(pm.currentBalance || 0)}</Text>
+
+              <View className="flex-row items-center gap-4">
+                 {pm.type === 'CREDIT_CARD' && (
+                   <TouchableOpacity
+                     style={{ backgroundColor: 'transparent' }}
+                     className="w-9 h-9 items-center justify-center"
+                     onPress={() => navigation.navigate('CreditCardInvoice', { resourceId: pm.id })}
+                   >
+                      <MaterialIcons name="description" size={18} color={Colors.primary} />
+                   </TouchableOpacity>
                  )}
+                 <View className="items-end">
+                    <Text className={`text-body-md font-bold ${pm.type === 'CREDIT_CARD' ? 'text-primary' : 'text-on-surface'}`}>
+                      {formatCurrency(pm.type === 'CREDIT_CARD' ? (pm.creditLimit || 0) : (pm.currentBalance || 0))}
+                    </Text>
+                    <Text className="text-[9px] text-on-surface-variant uppercase font-bold tracking-tighter">
+                      {pm.type === 'CREDIT_CARD' ? 'Limite' : 'Saldo'}
+                    </Text>
+                 </View>
               </View>
             </TouchableOpacity>
           ))}

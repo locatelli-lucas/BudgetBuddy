@@ -89,4 +89,19 @@ export const investmentService = {
     const response = await api.get<ApiResponse<any>>(`/api/v1/market/quote/${symbol}`);
     return response.data.data;
   },
+
+  getAssetNews: async (symbol: string, name?: string, page: number = 1, size: number = 10): Promise<any[]> => {
+    // If it's fixed income or has no ticker, search by name
+    const query = symbol && !symbol.includes('RENDA_FIXA') ? symbol : name;
+    const response = await api.get<ApiResponse<any[]>>(`/api/v1/news/asset/${query}`, {
+      params: { page, size }
+    });
+    return response.data.data;
+  },
+
+  generateAiNewsSummary: async (symbol: string, name?: string): Promise<{ summary: string }> => {
+    const query = symbol && !symbol.includes('RENDA_FIXA') ? symbol : name;
+    const response = await api.get<ApiResponse<any>>(`/api/v1/news/asset/${query}/summary`);
+    return response.data.data;
+  },
 };

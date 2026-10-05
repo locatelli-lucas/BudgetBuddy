@@ -11,4 +11,5 @@ import java.util.UUID;
 public interface InstallmentEntryRepository extends JpaRepository<InstallmentEntry, UUID> {
     List<InstallmentEntry> findAllByPurchaseIdOrderByInstallmentNumberAsc(UUID purchaseId);
     List<InstallmentEntry> findAllByPurchaseUserIdAndDueDateBetween(UUID userId, LocalDate startDate, LocalDate endDate);
+    List<InstallmentEntry> findAllByPurchaseFinancialResourceIdAndDueDate(UUID resourceId, LocalDate dueDate);
 }

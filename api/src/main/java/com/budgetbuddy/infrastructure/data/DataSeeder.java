@@ -39,6 +39,7 @@ public class DataSeeder {
     public void seedData() {
         seedTestUser("test1@test.com", "Test User 1", new BigDecimal("-5000.00"));
         seedTestUser("test2@test.com", "Test User 2", new BigDecimal("10000.00"));
+        seedTestUser("test@test.com", "Lucas Teste", new BigDecimal("15000.00"));
     }
 
     private void seedTestUser(String email, String name, BigDecimal initialBalance) {
@@ -97,27 +98,20 @@ public class DataSeeder {
                 .stream().findFirst().orElse(null);
 
         if (category != null) {
-            // April 2026
-            createTransaction(user, category, TransactionType.INCOME, new BigDecimal("5000.00"), "Salary April", LocalDate.of(2026, 4, 1));
-            createTransaction(user, category, TransactionType.EXPENSE, new BigDecimal("1200.00"), "Rent April", LocalDate.of(2026, 4, 5));
-            
-            // May 2026
-            createTransaction(user, category, TransactionType.INCOME, new BigDecimal("5200.00"), "Salary May", LocalDate.of(2026, 5, 1));
-            createTransaction(user, category, TransactionType.EXPENSE, new BigDecimal("1500.00"), "Rent May", LocalDate.of(2026, 5, 5));
-            createTransaction(user, category, TransactionType.EXPENSE, new BigDecimal("300.00"), "Eating Out May", LocalDate.of(2026, 5, 15));
+            LocalDate now = LocalDate.now();
+            int currentYear = now.getYear();
 
-            // June 2026
-            createTransaction(user, category, TransactionType.INCOME, new BigDecimal("5500.00"), "Salary June", LocalDate.of(2026, 6, 1));
-            createTransaction(user, category, TransactionType.EXPENSE, new BigDecimal("1600.00"), "Rent June", LocalDate.of(2026, 6, 5));
-            createTransaction(user, category, TransactionType.EXPENSE, new BigDecimal("200.00"), "Luxury June", LocalDate.of(2026, 6, 10));
+            for (int month = 1; month <= now.getMonthValue(); month++) {
+                BigDecimal incomeAmount = new BigDecimal("4000").add(new BigDecimal(month * 100));
+                BigDecimal expenseAmount = new BigDecimal("2000").add(new BigDecimal(month * 150));
 
-            // July 2026
-            createTransaction(user, category, TransactionType.INCOME, new BigDecimal("6000.00"), "Salary July", LocalDate.of(2026, 7, 1));
-            createTransaction(user, category, TransactionType.EXPENSE, new BigDecimal("1800.00"), "Rent July", LocalDate.of(2026, 7, 5));
-
-            // August 2026
-            createTransaction(user, category, TransactionType.INCOME, new BigDecimal("6300.00"), "Salary August", LocalDate.of(2026, 8, 1));
-            createTransaction(user, category, TransactionType.EXPENSE, new BigDecimal("1850.00"), "Rent August", LocalDate.of(2026, 8, 5));
+                createTransaction(user, category, TransactionType.INCOME, incomeAmount, "Salary Month " + month, LocalDate.of(currentYear, month, 1));
+                createTransaction(user, category, TransactionType.EXPENSE, expenseAmount, "Rent Month " + month, LocalDate.of(currentYear, month, 5));
+                
+                if (month % 2 == 0) {
+                    createTransaction(user, category, TransactionType.EXPENSE, new BigDecimal("300.00"), "Extra Month " + month, LocalDate.of(currentYear, month, 15));
+                }
+            }
         }
     }
 

@@ -185,10 +185,11 @@ public class YahooFinanceProvider implements MarketDataProvider {
                     .onStatus(HttpStatus.TOO_MANY_REQUESTS::equals,
                             resp -> { throw new MarketDataException("Rate limited by Yahoo Finance"); })
                     .bodyToMono(JsonNode.class)
+                    .onErrorResume(WebClientResponseException.NotFound.class, e -> reactor.core.publisher.Mono.empty())
                     .retryWhen(Retry.backoff(3, Duration.ofSeconds(2)))
                     .block();
-        } catch (WebClientResponseException.NotFound e) {
-            log.warn("Symbol not found on Yahoo Finance: {}", symbol);
+        } catch (Exception e) {
+            log.warn("Error fetching chart from Yahoo Finance for symbol: {}", symbol, e);
             return null;
         }
     }
@@ -197,8 +198,8 @@ public class YahooFinanceProvider implements MarketDataProvider {
     private String normalizeSymbol(String symbol) {
         String upper = symbol.toUpperCase().trim();
         if (upper.contains(".")) return upper;
-        // Common Brazilian tickers: 4 letters + number, or 5 letters
-        if (upper.matches("[A-Z]{4}\\d") || (upper.matches("[A-Z]{5,6}") && !upper.startsWith("^"))) {
+        // Common Brazilian tickers: 4 letters + 1 or 2 numbers, or 5-6 letters
+        if (upper.matches("[A-Z]{4}\\d{1,2}") || (upper.matches("[A-Z]{5,6}") && !upper.startsWith("^"))) {
             return upper + ".SA";
         }
         return upper;

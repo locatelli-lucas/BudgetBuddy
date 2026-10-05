@@ -19,6 +19,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID>,
     
     Page<Transaction> findByUserId(UUID userId, Pageable pageable);
     
+    List<Transaction> findAllByFinancialResourceIdAndDateBetween(UUID resourceId, LocalDate startDate, LocalDate endDate);
+    
     List<Transaction> findTop5ByUserIdOrderByDateDescCreatedAtDesc(UUID userId);
     
     @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t " +

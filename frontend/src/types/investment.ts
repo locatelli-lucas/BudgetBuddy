@@ -71,3 +71,13 @@ export interface AssetTypeConfig {
   showFixedIncomeFields: boolean;
   fractionalQuantity: boolean;
 }
+
+export interface NewsArticle {
+  id: string;
+  title: string;
+  summary: string;
+  source: string;
+  url: string;
+  publishedAt: string;
+  imageUrl?: string;
+}

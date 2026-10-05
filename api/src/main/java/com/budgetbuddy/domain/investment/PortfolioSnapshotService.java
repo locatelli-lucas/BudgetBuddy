@@ -134,6 +134,7 @@ public class PortfolioSnapshotService {
 
     /**
      * Returns portfolio performance history from snapshots for a given period.
+     * Fills missing dates continuously using baseline snapshot value carrying forward.
      */
     @Transactional(readOnly = true)
     public List<PortfolioSnapshot> getPerformance(UUID userId, String period) {
@@ -147,7 +148,55 @@ public class PortfolioSnapshotService {
             default -> end.minusMonths(1);
         };
 
-        return snapshotRepository.findByUserIdAndSnapshotDateBetweenOrderBySnapshotDateAsc(
-                userId, start, end);
+        List<PortfolioSnapshot> rawSnapshots = snapshotRepository
+                .findByUserIdAndSnapshotDateBetweenOrderBySnapshotDateAsc(userId, start, end);
+
+        java.util.Map<LocalDate, PortfolioSnapshot> snapshotMap = rawSnapshots.stream()
+                .collect(java.util.stream.Collectors.toMap(PortfolioSnapshot::getSnapshotDate, s -> s, (s1, s2) -> s1));
+
+        // Determine initial value at start
+        BigDecimal lastKnownValue;
+        List<PortfolioSnapshot> beforeList = snapshotRepository.findBeforeDate(userId, start);
+        if (!beforeList.isEmpty()) {
+            lastKnownValue = beforeList.get(0).getPortfolioValue();
+        } else if (!rawSnapshots.isEmpty()) {
+            lastKnownValue = rawSnapshots.get(0).getPortfolioValue();
+        } else {
+            // Calculate value at start date from investments
+            List<Investment> investments = investmentRepository.findByUserId(userId);
+            lastKnownValue = investments.stream()
+                    .filter(i -> i.getPurchaseDate() != null && !i.getPurchaseDate().isAfter(start))
+                    .map(i -> i.getAvgPrice().multiply(i.getQuantity()))
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+        }
+
+        // If user has no investments or snapshots at all
+        if (lastKnownValue.compareTo(BigDecimal.ZERO) == 0 && rawSnapshots.isEmpty()) {
+            List<Investment> investments = investmentRepository.findByUserId(userId);
+            if (investments.isEmpty()) {
+                return List.of();
+            }
+        }
+
+        List<PortfolioSnapshot> result = new java.util.ArrayList<>();
+        LocalDate current = start;
+
+        while (!current.isAfter(end)) {
+            if (snapshotMap.containsKey(current)) {
+                PortfolioSnapshot existing = snapshotMap.get(current);
+                if (existing != null && existing.getPortfolioValue() != null) {
+                    lastKnownValue = existing.getPortfolioValue();
+                }
+                result.add(existing);
+            } else {
+                result.add(PortfolioSnapshot.builder()
+                        .portfolioValue(lastKnownValue)
+                        .snapshotDate(current)
+                        .build());
+            }
+            current = current.plusDays(1);
+        }
+
+        return result;
     }
 }

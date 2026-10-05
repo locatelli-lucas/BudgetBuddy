@@ -36,6 +36,14 @@ public class InvestmentService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public InvestmentResponse getInvestmentById(String email, UUID id) {
+        User user = userService.getUserByEmail(email);
+        Investment investment = investmentRepository.findByIdAndUserId(id, user.getId())
+                .orElseThrow(() -> new EntityNotFoundException("Investment", id.toString()));
+        return mapToResponseWithMarketData(investment);
+    }
+
     @Transactional
     public InvestmentResponse addInvestment(String email, InvestmentRequest request) {
         User user = userService.getUserByEmail(email);

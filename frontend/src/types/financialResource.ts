@@ -85,3 +85,28 @@ export interface FinancialInstitutionGroup {
   resourceCount: number;
   financialResources: FinancialResource[];
 }
+
+export interface CreditCardInvoice {
+  financialResourceId: string;
+  cardName: string;
+  month: number;
+  year: number;
+  dueDate: string;
+  closingDate: string;
+  totalAmount: number;
+  isPaid: boolean;
+  transactions: {
+    id: string;
+    description: string;
+    amount: number;
+    date: string;
+    type: string;
+  }[];
+  installments: {
+    description: string;
+    currentInstallment: number;
+    totalInstallments: number;
+    amount: number;
+    purchaseDate: string;
+  }[];
+}

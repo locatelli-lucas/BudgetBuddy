@@ -3,9 +3,16 @@ package com.budgetbuddy.domain.financialresource;
 import com.budgetbuddy.domain.financialinstitution.FinancialInstitution;
 import com.budgetbuddy.domain.financialinstitution.FinancialInstitutionRepository;
 import com.budgetbuddy.domain.financialinstitution.dto.FinancialInstitutionResponse;
+import com.budgetbuddy.domain.financialresource.dto.CreditCardInvoiceResponse;
 import com.budgetbuddy.domain.financialresource.dto.FinancialResourceRequest;
 import com.budgetbuddy.domain.financialresource.dto.FinancialResourceResponse;
 import com.budgetbuddy.domain.financialresource.dto.GroupedFinancialResourcesResponse;
+import com.budgetbuddy.domain.installment.InstallmentEntry;
+import com.budgetbuddy.domain.installment.InstallmentEntryRepository;
+import com.budgetbuddy.domain.installment.InstallmentStatus;
+import com.budgetbuddy.domain.transaction.Transaction;
+import com.budgetbuddy.domain.transaction.TransactionRepository;
+import com.budgetbuddy.domain.transaction.dto.TransactionResponse;
 import com.budgetbuddy.domain.user.User;
 import com.budgetbuddy.domain.user.UserService;
 import com.budgetbuddy.shared.exception.EntityNotFoundException;
@@ -14,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -25,6 +33,8 @@ public class FinancialResourceService {
     private final FinancialResourceRepository financialResourceRepository;
     private final UserService userService;
     private final FinancialInstitutionRepository financialInstitutionRepository;
+    private final TransactionRepository transactionRepository;
+    private final InstallmentEntryRepository installmentEntryRepository;
 
     @Transactional(readOnly = true)
     public List<FinancialResourceResponse> getFinancialResources(String email) {
@@ -152,6 +162,71 @@ public class FinancialResourceService {
         return GroupedFinancialResourcesResponse.builder()
                 .netWorth(netWorth)
                 .institutions(institutionGroups)
+                .build();
+    }
+
+    @Transactional(readOnly = true)
+    public CreditCardInvoiceResponse getInvoice(String email, UUID resourceId, int month, int year) {
+        User user = userService.getUserByEmail(email);
+        FinancialResource fr = financialResourceRepository.findByIdAndUserId(resourceId, user.getId())
+                .orElseThrow(() -> new EntityNotFoundException("FinancialResource", resourceId.toString()));
+
+        if (fr.getType() != FinancialResourceType.CREDIT_CARD) {
+            throw new IllegalArgumentException("Resource is not a credit card");
+        }
+
+        Integer closingDay = fr.getInvoiceClosingDay();
+        Integer dueDay = fr.getInvoiceDueDay();
+
+        if (closingDay == null || dueDay == null) {
+            throw new IllegalArgumentException("Card closing and due days must be configured");
+        }
+
+        // Calculate dates
+        LocalDate dueDate = LocalDate.of(year, month, Math.min(dueDay, LocalDate.of(year, month, 1).lengthOfMonth()));
+        
+        // Billing cycle: ClosingDay(Month-1) to ClosingDay(Month)-1
+        LocalDate cycleEnd = LocalDate.of(year, month, Math.min(closingDay, LocalDate.of(year, month, 1).lengthOfMonth())).minusDays(1);
+        LocalDate cycleStart = cycleEnd.minusMonths(1).plusDays(1);
+
+        // 1. Transactions in cycle
+        List<Transaction> transactions = transactionRepository.findAllByFinancialResourceIdAndDateBetween(resourceId, cycleStart, cycleEnd);
+
+        // 2. Installments with due date in this invoice
+        List<InstallmentEntry> installments = installmentEntryRepository.findAllByPurchaseFinancialResourceIdAndDueDate(resourceId, dueDate);
+
+        BigDecimal totalAmount = transactions.stream().map(Transaction::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add)
+                .add(installments.stream().map(InstallmentEntry::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add));
+
+        boolean isPaid = installments.isEmpty() || installments.stream().allMatch(i -> i.getStatus() == InstallmentStatus.PAID);
+
+        return CreditCardInvoiceResponse.builder()
+                .financialResourceId(resourceId)
+                .cardName(fr.getName())
+                .month(month)
+                .year(year)
+                .dueDate(dueDate)
+                .closingDate(cycleEnd.plusDays(1)) // The closing day itself
+                .totalAmount(totalAmount)
+                .isPaid(isPaid)
+                .transactions(transactions.stream().map(this::mapTransactionToResponse).collect(Collectors.toList()))
+                .installments(installments.stream().map(i -> CreditCardInvoiceResponse.InstallmentInvoiceItem.builder()
+                        .description(i.getPurchase().getDescription())
+                        .currentInstallment(i.getInstallmentNumber())
+                        .totalInstallments(i.getPurchase().getInstallmentsCount())
+                        .amount(i.getAmount())
+                        .purchaseDate(i.getPurchase().getPurchaseDate())
+                        .build()).collect(Collectors.toList()))
+                .build();
+    }
+
+    private TransactionResponse mapTransactionToResponse(Transaction t) {
+        return TransactionResponse.builder()
+                .id(t.getId())
+                .amount(t.getAmount())
+                .description(t.getDescription())
+                .date(t.getDate())
+                .type(t.getType())
                 .build();
     }
 

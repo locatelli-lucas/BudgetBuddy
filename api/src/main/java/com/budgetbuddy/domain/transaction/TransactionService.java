@@ -7,6 +7,7 @@ import com.budgetbuddy.domain.financialresource.FinancialResource;
 import com.budgetbuddy.domain.financialresource.FinancialResourceRepository;
 import com.budgetbuddy.domain.financialresource.FinancialResourceService;
 import com.budgetbuddy.domain.financialresource.FinancialResourceType;
+import com.budgetbuddy.domain.transaction.dto.MonthlyFlowResponse;
 import com.budgetbuddy.domain.transaction.dto.TransactionFilter;
 import com.budgetbuddy.domain.transaction.dto.TransactionRequest;
 import com.budgetbuddy.domain.transaction.dto.TransactionResponse;
@@ -29,7 +30,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.format.TextStyle;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -224,6 +229,28 @@ public class TransactionService {
                 .netBalance(netBalance)
                 .savingsRate(savingsRate)
                 .build();
+    }
+
+    @Transactional(readOnly = true)
+    public List<MonthlyFlowResponse> getMonthlyFlow(String email, int months) {
+        User user = userService.getUserByEmail(email);
+        List<MonthlyFlowResponse> flow = new ArrayList<>();
+        int year = LocalDate.now().getYear();
+
+        for (int m = 1; m <= 12; m++) {
+            LocalDate startDate = LocalDate.of(year, m, 1);
+            LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+
+            BigDecimal income = transactionRepository.sumAmountByUserIdAndTypeAndDateBetween(
+                    user.getId(), Transaction.TransactionType.INCOME, startDate, endDate);
+            BigDecimal expense = transactionRepository.sumAmountByUserIdAndTypeAndDateBetween(
+                    user.getId(), Transaction.TransactionType.EXPENSE, startDate, endDate);
+
+            String monthLabel = startDate.getMonth().getDisplayName(TextStyle.SHORT, new Locale("pt", "BR"));
+            flow.add(new MonthlyFlowResponse(monthLabel, income, expense));
+        }
+
+        return flow;
     }
 
     private TransactionResponse mapToResponse(Transaction transaction) {

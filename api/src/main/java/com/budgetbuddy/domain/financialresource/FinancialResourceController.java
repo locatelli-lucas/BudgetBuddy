@@ -1,5 +1,6 @@
 package com.budgetbuddy.domain.financialresource;
 
+import com.budgetbuddy.domain.financialresource.dto.CreditCardInvoiceResponse;
 import com.budgetbuddy.domain.financialresource.dto.FinancialResourceRequest;
 import com.budgetbuddy.domain.financialresource.dto.FinancialResourceResponse;
 import com.budgetbuddy.domain.financialresource.dto.GroupedFinancialResourcesResponse;
@@ -17,8 +18,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -49,6 +52,21 @@ public class FinancialResourceController {
             @PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.success(
                 financialResourceService.getFinancialResource(userDetails.getUsername(), id)));
+    }
+
+    @GetMapping("/{id}/invoice")
+    public ResponseEntity<ApiResponse<CreditCardInvoiceResponse>> getInvoice(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable UUID id,
+            @RequestParam(required = false) Integer month,
+            @RequestParam(required = false) Integer year) {
+        
+        LocalDate now = LocalDate.now();
+        int targetMonth = month != null ? month : now.getMonthValue();
+        int targetYear = year != null ? year : now.getYear();
+        
+        return ResponseEntity.ok(ApiResponse.success(
+                financialResourceService.getInvoice(userDetails.getUsername(), id, targetMonth, targetYear)));
     }
 
     @PostMapping

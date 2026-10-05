@@ -35,6 +35,13 @@ public class InvestmentController {
         return ResponseEntity.ok(ApiResponse.success(investmentService.getInvestments(userDetails.getUsername())));
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<InvestmentResponse>> getInvestmentById(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable UUID id) {
+        return ResponseEntity.ok(ApiResponse.success(investmentService.getInvestmentById(userDetails.getUsername(), id)));
+    }
+
     @PostMapping
     public ResponseEntity<ApiResponse<InvestmentResponse>> addInvestment(
             @AuthenticationPrincipal UserDetails userDetails,

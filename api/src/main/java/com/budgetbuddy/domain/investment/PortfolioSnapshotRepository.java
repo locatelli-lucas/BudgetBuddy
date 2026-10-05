@@ -15,6 +15,9 @@ public interface PortfolioSnapshotRepository extends JpaRepository<PortfolioSnap
 
     Optional<PortfolioSnapshot> findByUserIdAndSnapshotDate(UUID userId, LocalDate date);
 
+    @Query("SELECT p FROM PortfolioSnapshot p WHERE p.user.id = :userId AND p.snapshotDate <= :date ORDER BY p.snapshotDate DESC")
+    List<PortfolioSnapshot> findBeforeDate(UUID userId, LocalDate date);
+
     @Query("SELECT p FROM PortfolioSnapshot p WHERE p.user.id = :userId ORDER BY p.snapshotDate DESC")
     List<PortfolioSnapshot> findLatestByUserId(UUID userId);
 

@@ -31,7 +31,7 @@ public class NewsController {
         return ResponseEntity.ok(ApiResponse.success(news));
     }
 
-    @PostMapping("/asset/{symbol}/summary")
+    @GetMapping("/asset/{symbol}/summary")
     public ResponseEntity<ApiResponse<NewsAiSummaryResponse>> getAssetSummary(@PathVariable String symbol) {
         return ResponseEntity.ok(ApiResponse.success(newsService.generateAiSummary(symbol)));
     }
@@ -51,7 +51,7 @@ public class NewsController {
         return ResponseEntity.ok(ApiResponse.success(analysis));
     }
 
-    @PostMapping("/asset/{symbol}/overview")
+    @GetMapping("/asset/{symbol}/overview")
     public ResponseEntity<ApiResponse<AssetNewsOverviewResponse>> getAssetOverview(@PathVariable String symbol) {
         return ResponseEntity.ok(ApiResponse.success(newsService.getAssetOverview(symbol)));
     }

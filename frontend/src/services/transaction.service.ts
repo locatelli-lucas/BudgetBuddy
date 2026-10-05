@@ -7,6 +7,7 @@ import {
   TransactionFilter,
   TransactionSummary,
   Category,
+  MonthlyFlow,
 } from '../types/transaction';
 
 export const transactionService = {
@@ -56,6 +57,13 @@ export const transactionService = {
     const params = { month, year };
     const response = await api.get<ApiResponse<TransactionSummary>>('/api/v1/transactions/summary', {
       params,
+    });
+    return response.data.data;
+  },
+
+  getMonthlyFlow: async (months = 12): Promise<MonthlyFlow[]> => {
+    const response = await api.get<ApiResponse<MonthlyFlow[]>>('/api/v1/transactions/flow', {
+      params: { months },
     });
     return response.data.data;
   },

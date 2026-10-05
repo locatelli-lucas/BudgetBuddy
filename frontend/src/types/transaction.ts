@@ -61,3 +61,9 @@ export interface TransactionSummary {
   netBalance: number;
   savingsRate: number;
 }
+
+export interface MonthlyFlow {
+  month: string;
+  income: number;
+  expense: number;
+}
